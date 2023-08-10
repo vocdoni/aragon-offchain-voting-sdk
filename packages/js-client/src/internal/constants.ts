@@ -1,0 +1,5 @@
+export const DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+export const DEFAULT_OFFCHAIN_VOTING_BACKEND_URL =
+  "https://example.otg/offchain-voting/rpc";
+

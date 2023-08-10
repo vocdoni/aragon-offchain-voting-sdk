@@ -1,13 +1,14 @@
-import { MyPluginContext } from '../context';
+import { OffchainVotingContext } from '../context';
 import { ClientCore } from '@aragon/sdk-client-common';
 
-export class MyPluginClientCore extends ClientCore {
-  public myPluginPluginAddress: string;
-  public myPluginRepoAddress: string;
-
-  constructor(pluginContext: MyPluginContext) {
+export class OffchainVotingClientCore extends ClientCore {
+  public offchainVotingContext: string;
+  public offchainVotingRepoAddress: string;
+  
+  constructor(pluginContext: OffchainVotingContext) {
     super(pluginContext);
-    this.myPluginPluginAddress = pluginContext.myPluginPluginAddress;
-    this.myPluginRepoAddress = pluginContext.myPluginRepoAddress;
+    this.offchainVotingContext = pluginContext.offchainVotingBackendUrl;
+    this.offchainVotingRepoAddress = pluginContext.offchainVotingRepoAddress;
   }
 }
+

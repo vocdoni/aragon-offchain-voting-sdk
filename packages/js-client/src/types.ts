@@ -2,13 +2,13 @@ import {
   ContextParams,
   Pagination,
   VersionTag,
-} from '@aragon/sdk-client-common';
+} from "@aragon/sdk-client-common";
 
-export type MyPluginContextParams = ContextParams & {
-  // optional so we can set default values for the parameter
-  myPluginPluginAddress?: string;
-  myPluginRepoAddress?: string;
-  // add custom params
+// extend the ContextParams interface with the params that you need
+export type OffchainVotingContextParams = ContextParams & {
+  // add any parameter that you need
+  offchainVotingRepoAddress?: string;
+  offchainVotingBackendUrl?: string;
 };
 
 export type PrepareInstallationParams = {
@@ -25,8 +25,8 @@ export type NumbersQueryParams = Pagination & {
 };
 
 export enum NumbersSortBy {
-  NUMBER = 'number',
-  CREATED_AT = 'createdAt',
+  NUMBER = "number",
+  CREATED_AT = "createdAt",
 }
 
 export type NumberListItem = {

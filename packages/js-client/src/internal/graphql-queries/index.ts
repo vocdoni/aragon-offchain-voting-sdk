@@ -1,1 +1,1 @@
-export * from './numbers';
+// add your grapql queries here and export them with this file

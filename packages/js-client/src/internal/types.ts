@@ -1,26 +1,13 @@
-import { ContextState, OverriddenState } from '@aragon/sdk-client-common';
+import { ContextState, OverriddenState, ProposalBase, ProposalStatus } from "@aragon/sdk-client-common";
 
-export type SubgraphNumberListItem = {
-  id: string;
-  subdomain: string;
-  number: {
-    value: string;
+// extend the state of the client with the properties that you need
+export type OffchainVotingContextState = ContextState & {
+  offchainVotingRepoAddress: string;
+  offchainVotingBackendUrl: string;
+};
+
+export type OffchainVotingOverriddenState =
+  & OverriddenState
+  & {
+    [key in keyof OffchainVotingContextState]: boolean;
   };
-};
-
-export type SubgraphNumber = {
-  number: {
-    value: string;
-  };
-};
-
-export type MyPluginContextState = ContextState & {
-  // extend the Context state with a new state for storing
-  // the new parameters
-  myPluginPluginAddress: string;
-  myPluginRepoAddress: string;
-};
-
-export type MyPluginOverriddenState = OverriddenState & {
-  [key in keyof MyPluginContextState]: boolean;
-};

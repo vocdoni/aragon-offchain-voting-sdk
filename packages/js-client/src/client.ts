@@ -1,31 +1,31 @@
-import { MyPluginContext } from './context';
+import { OffchainVotingContext } from './context';
 import {
-  IMyPluginClient,
-  IMyPluginClientDecoding,
-  IMyPluginClientEncoding,
-  IMyPluginClientEstimation,
-  IMyPluginClientMethods,
+  IOffchainVotingClient,
+  IOffchainVotingClientDecoding,
+  IOffchainVotingClientEncoding,
+  IOffchainVotingClientEstimation,
+  IOffchainVotingClientMethods,
   SimpleStoragClientEstimation,
-  MyPluginClientDecoding,
-  MyPluginClientEncoding,
-  MyPluginClientMethods,
+  OffchainVotingClientDecoding,
+  OffchainVotingClientEncoding,
+  OffchainVotingClientMethods,
 } from './internal';
-import { MyPluginClientCore } from './internal/core';
+import { OffchainVotingClientCore } from './internal/core';
 
-export class MyPluginClient
-  extends MyPluginClientCore
-  implements IMyPluginClient
+export class OffchainVotingClient
+  extends OffchainVotingClientCore
+  implements IOffchainVotingClient
 {
-  public methods: IMyPluginClientMethods;
-  public estimation: IMyPluginClientEstimation;
-  public encoding: IMyPluginClientEncoding;
-  public decoding: IMyPluginClientDecoding;
+  public methods: IOffchainVotingClientMethods;
+  public estimation: IOffchainVotingClientEstimation;
+  public encoding: IOffchainVotingClientEncoding;
+  public decoding: IOffchainVotingClientDecoding;
 
-  constructor(pluginContext: MyPluginContext) {
+  constructor(pluginContext: OffchainVotingContext) {
     super(pluginContext);
-    this.methods = new MyPluginClientMethods(pluginContext);
+    this.methods = new OffchainVotingClientMethods(pluginContext);
     this.estimation = new SimpleStoragClientEstimation(pluginContext);
-    this.encoding = new MyPluginClientEncoding(pluginContext);
-    this.decoding = new MyPluginClientDecoding(pluginContext);
+    this.encoding = new OffchainVotingClientEncoding(pluginContext);
+    this.decoding = new OffchainVotingClientDecoding(pluginContext);
   }
 }

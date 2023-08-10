@@ -1,78 +1,75 @@
+import { DEFAULT_OFFCHAIN_VOTING_BACKEND_URL, DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS } from "./internal";
 import {
-  MyPluginContextState,
-  MyPluginOverriddenState,
-} from './internal/types';
-import { MyPluginContextParams } from './types';
-import { Context, ContextCore } from '@aragon/sdk-client-common';
-
-// set your defaults here or import them from a package
-const DEFAULT_SIMPLE_STORAGE_PLUGIN_ADDRESS =
-  '0x1234567890123456789012345678901234567890';
-const DEFAULT_SIMPLE_STORAGE_Repo_ADDRESS =
-  '0x2345678901234567890123456789012345678901';
-
-export class MyPluginContext extends ContextCore {
-  // super is called before the properties are initialized
-  // so we initialize them to the value of the parent class
-  protected state: MyPluginContextState = this.state;
-  // TODO
-  // fix typo in the overridden property name
-  protected overriden: MyPluginOverriddenState = this.overriden;
+  OffchainVotingContextState,
+  OffchainVotingOverriddenState,
+} from "./internal/types";
+import { OffchainVotingContextParams } from "./types";
+import { Context, ContextCore } from "@aragon/sdk-client-common";
+export class OffchainVotingContext extends ContextCore {
+  // This variable keeps track of the state of the context and is an extension of the Base Context State
+  protected state: OffchainVotingContextState = this.state;
+  // This variable keeps track of the properties that were manually overriden by the user
+  protected overriden: OffchainVotingOverriddenState = this.overriden;
   constructor(
-    contextParams?: Partial<MyPluginContextParams>,
-    aragonContext?: Context
+    contextParams?: Partial<OffchainVotingContextParams>,
+    aragonContext?: Context,
   ) {
-    // call the parent constructor
-    // so it does not complain and we
-    // can use this
+    // call the parent constructor to be able to have access to this
+    // and set the default values
     super();
-    // set the context params inherited from the context
+    // if the user alredy provides an aragon context that we can use
     if (aragonContext) {
-      // copy the context properties to this
+      // override the default values with the ones from the aragon context
       Object.assign(this, aragonContext);
     }
     // contextParams have priority over the aragonContext
     if (contextParams) {
-      // overide the context params with the ones passed to the constructor
+      // overide the aragonContext and default values with the ones from the contextParams
       this.set(contextParams);
     }
   }
 
-  public set(contextParams: MyPluginContextParams) {
-    // the super function will call this set
+  public set(contextParams: OffchainVotingContextParams) {
     // so we need to call the parent set first
     super.set(contextParams);
+
     // set the default values for the new params
     this.setDefaults();
-    // override default params if specified in the context
-    if (contextParams.myPluginPluginAddress) {
-      // override the myPluginPluginAddress value
-      this.state.myPluginPluginAddress = contextParams.myPluginPluginAddress;
+
+    // override default params if specified in the contexcParams
+    if (contextParams.offchainVotingBackendUrl) {
+      // override the offchainVotingBackendUrl value
+      this.state.offchainVotingBackendUrl =
+        contextParams.offchainVotingBackendUrl;
       // set the overriden flag to true in case set is called again
-      this.overriden.myPluginPluginAddress = true;
+      this.overriden.offchainVotingBackendUrl = true;
     }
 
-    if (contextParams.myPluginRepoAddress) {
-      this.state.myPluginRepoAddress = contextParams.myPluginRepoAddress;
-      this.overriden.myPluginRepoAddress = true;
+    if(contextParams.offchainVotingRepoAddress) {
+      this.state.offchainVotingRepoAddress = contextParams.offchainVotingRepoAddress;
+      this.overriden.offchainVotingRepoAddress = true;
     }
   }
 
+  // Use this space to set the default values for the properties that you need
+  // in the context
   private setDefaults() {
-    if (!this.overriden.myPluginPluginAddress) {
-      // set the default value for myPluginPluginAddress
-      this.state.myPluginPluginAddress = DEFAULT_SIMPLE_STORAGE_PLUGIN_ADDRESS;
+    if (!this.overriden.offchainVotingRepoAddress) {
+      this.state.offchainVotingRepoAddress = DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS;
     }
-    if (!this.overriden.myPluginPluginAddress) {
-      this.state.myPluginPluginAddress = DEFAULT_SIMPLE_STORAGE_Repo_ADDRESS;
+    if (!this.overriden.offchainVotingBackendUrl) {
+      this.state.offchainVotingBackendUrl = DEFAULT_OFFCHAIN_VOTING_BACKEND_URL;
     }
   }
 
-  get myPluginPluginAddress(): string {
-    return this.state.myPluginPluginAddress;
+  // here add getters for the properies that you need the user to pass in the context
+  // This can be used to specify a contract addres or and endpoint to a service
+  get offchainVotingRepoAddress(): string {
+    return this.state.offchainVotingRepoAddress;
   }
-
-  get myPluginRepoAddress(): string {
-    return this.state.myPluginRepoAddress;
+  // here add getters for the properies that you need the user to pass in the context
+  // This can be used to specify a contract addres or and endpoint to a service
+  get offchainVotingBackendUrl(): string {
+    return this.state.offchainVotingBackendUrl;
   }
 }
