@@ -1,5 +1,8 @@
 import {PLUGIN_SETUP_CONTRACT_NAME} from '../../plugin-settings';
-import {MyPluginSetup__factory, MyPlugin__factory} from '../../typechain';
+import {
+  VocdoniVoting__factory,
+  VocdoniVotingSetup__factory,
+} from '../../typechain';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {setTimeout} from 'timers/promises';
@@ -11,11 +14,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, network} = hre;
 
   const setupDeployment = await deployments.get(PLUGIN_SETUP_CONTRACT_NAME);
-  const setup = MyPluginSetup__factory.connect(
+  const setup = VocdoniVotingSetup__factory.connect(
     setupDeployment.address,
     deployer
   );
-  const implementation = MyPlugin__factory.connect(
+  const implementation = VocdoniVoting__factory.connect(
     await setup.implementation(),
     deployer
   );

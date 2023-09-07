@@ -30,6 +30,13 @@ import {DataSourceContext, log} from '@graphprotocol/graph-ts';
 export function handleInstallationPrepared(event: InstallationPrepared): void {
   const pluginRepo = event.params.pluginSetupRepo.toHexString();
 
+  if (pluginRepo === PLUGIN_REPO_ADDRESS) {
+    log.warning(
+      '========== FOUND Comparing pluginRepo {} == PLUGIN_REPO_ADDRESS {}',
+      [pluginRepo, PLUGIN_REPO_ADDRESS]
+    );
+  }
+
   // Check if the prepared plugin is our plugin.
   const isThisPlugin = pluginRepo === PLUGIN_REPO_ADDRESS;
 
@@ -37,14 +44,20 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
     return;
   }
 
+  log.warning('==========handleInstallationPrepared passed the repo check', []);
+
   //////////////////////////////////////////////////////////////
   // Index DAO
   //////////////////////////////////////////////////////////////
   const dao = event.params.dao;
   const daoId = getDaoId(dao);
+
+  log.warning('==========found a dao {}', [daoId]);
+
   let doaEntity = Dao.load(daoId);
   if (!doaEntity) {
     doaEntity = new Dao(daoId);
+
     doaEntity.save();
   }
 

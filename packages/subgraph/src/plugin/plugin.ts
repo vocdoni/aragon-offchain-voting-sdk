@@ -1,9 +1,9 @@
 import {getPluginInstallationId} from '../../commons/ids';
 import {Plugin} from '../../generated/schema';
-import {NumberStored} from '../../generated/templates/Plugin/Plugin';
+import {ProposalCreated} from '../../generated/templates/Plugin/VocdoniVoting';
 import {Address, dataSource} from '@graphprotocol/graph-ts';
 
-export function handleNumberStored(event: NumberStored): void {
+export function handleProposalCreated(event: ProposalCreated): void {
   const pluginAddress = event.address;
 
   const context = dataSource.context();
@@ -15,9 +15,10 @@ export function handleNumberStored(event: NumberStored): void {
   );
 
   if (installationId) {
-    const pluginEntity = Plugin.load(installationId.toHexString());
-    if (pluginEntity) {
-      pluginEntity.number = event.params.number;
+    let pluginEntity = Plugin.load(installationId.toHexString());
+    if (!pluginEntity) {
+      pluginEntity = new Plugin(installationId.toHexString());
+      pluginEntity.dao = daoId;
       pluginEntity.save();
     }
   }

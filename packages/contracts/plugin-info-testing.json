@@ -1,28 +1,28 @@
 {
-  "goerli": {
+  "hardhat": {
     "repo": "vocdoni-offchain-voting",
     "address": "0xA4d97d64BCe2ab128Be10F5604D1f82C6D2781F5",
     "args": [],
-    "blockNumberOfDeployment": 9652931,
+    "blockNumberOfDeployment": 9652922,
     "releases": {
       "1": {
         "builds": {
           "1": {
             "setup": {
               "name": "VocdoniVotingSetup",
-              "address": "0x8dCb538Bf27CCED7A3498c45e9D51CBfa479bacF",
+              "address": "0x9dDd7eb20ff6B2E4bF2af2D7576abA89d9b01c4A",
               "args": [],
-              "blockNumberOfDeployment": 9652932
+              "blockNumberOfDeployment": 9652923
             },
             "implementation": {
               "name": "VocdoniVoting",
-              "address": "0xd741c7eE3fc1766897d94d62FB1cf483f08680a4",
+              "address": "0x0A47eDa6cce35601F75b3132FEbcB010D6c1C9ac",
               "args": [],
-              "blockNumberOfDeployment": 9652932
+              "blockNumberOfDeployment": 9652923
             },
             "helpers": [],
             "buildMetadataURI": "ipfs://QmTf7LAs3g7S5Hf4jYjQYUkd8j9fk2JoWU6z4SQ3EjHt5Z",
-            "blockNumberOfPublication": 9652933
+            "blockNumberOfPublication": 9652924
           }
         },
         "releaseMetadataURI": "ipfs://QmR9r1GLfsPoET8Mya1rr6AXjwpAvrCGZJ13oMEFFTYCsE"

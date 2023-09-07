@@ -5,7 +5,7 @@ then
   export $(cat .env | sed 's/#.*//g' | xargs)
 fi
 
-if [ -z "$NETWORK_NAME" ] || [ -z "$SUBGRAPH_NAME" ] || [ -z "$GRAPH_KEY" ] || [ -z "$SUBGRAPH_VERSION" ]
+if [ -z "$SUBGRAPH_NETWORK_NAME" ] || [ -z "$SUBGRAPH_NAME" ] || [ -z "$GRAPH_KEY" ] || [ -z "$SUBGRAPH_VERSION" ]
 then
     echo "env variables are not set properly, exiting..."
     exit -1

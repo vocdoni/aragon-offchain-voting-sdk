@@ -11,7 +11,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy(PLUGIN_SETUP_CONTRACT_NAME, {
     from: deployer,
-    args: [],
+    args: [
+      '0xf868169bde323f45005e476287f4c76411a610f8',
+      '0x073b8528bcfbb2454c8fa792558aa4a1e64c613b',
+    ],
     log: true,
   });
 };
