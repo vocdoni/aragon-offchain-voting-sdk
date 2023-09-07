@@ -11,6 +11,13 @@ import {
   OffchainVotingClientMethods,
 } from './internal';
 import { OffchainVotingClientCore } from './internal/core';
+import { TokenVotingPluginInstall } from '@aragon/sdk-client';
+import {
+  ClientCore,
+  Context,
+  PluginInstallItem,
+} from '@aragon/sdk-client-common';
+import { Networkish } from '@ethersproject/providers';
 
 export class OffchainVotingClient
   extends OffchainVotingClientCore
@@ -28,4 +35,21 @@ export class OffchainVotingClient
     this.encoding = new OffchainVotingClientEncoding(pluginContext);
     this.decoding = new OffchainVotingClientDecoding(pluginContext);
   }
+
+  static encoding = {
+    /**
+     * Computes the parameters to be given when creating the DAO,
+     * so that the plugin is configured
+     *
+     * @param {TokenVotingPluginInstall} params
+     * @param {Networkish} [network="mainnet"]
+     * @return {*}  {PluginInstallItem}
+     * @memberof OffchainVotingClient
+     */
+    getPluginInstallItem: (
+      params: TokenVotingPluginInstall,
+      network: Networkish
+    ): PluginInstallItem =>
+      OffchainVotingClientEncoding.getPluginInstallItem(params, network),
+  };
 }

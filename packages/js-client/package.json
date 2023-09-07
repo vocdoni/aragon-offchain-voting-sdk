@@ -64,7 +64,6 @@
     "@aragon/osx-ethers": "1.3.0-rc0",
     "@aragon/sdk-client-common": "1.2.0-rc0",
     "@aragon/sdk-common": "1.5.0",
-    "@aragon/simple-storage-ethers": "1.0.0",
     "@ethersproject/abstract-signer": "^5.7.0",
     "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/constants": "^5.7.0",
@@ -72,7 +71,8 @@
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/wallet": "^5.7.0",
     "graphql": "^16.6.0",
-    "graphql-request": "4.3.0"
+    "graphql-request": "4.3.0",
+    "@vocdoni/offhcain-voting-ethers": "*"
   },
   "jest": {
     "testEnvironment": "./test-environment.js",

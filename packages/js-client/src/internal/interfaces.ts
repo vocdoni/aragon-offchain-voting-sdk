@@ -1,8 +1,14 @@
-import { PrepareInstallationParams } from "../types";
+import { PrepareInstallationParams } from '../types';
+import {
+  VotingSettings,
+  MintTokenParams,
+  TokenVotingPluginPrepareInstallationParams,
+} from '@aragon/sdk-client';
 import {
   GasFeeEstimation,
   PrepareInstallationStepValue,
-} from "@aragon/sdk-client-common";
+  DaoAction,
+} from '@aragon/sdk-client-common';
 
 export interface IOffchainVotingClient {
   methods: IOffchainVotingClientMethods;
@@ -18,13 +24,13 @@ export interface IOffchainVotingClientMethods {
   // the version of the plugin, the dao address and the plugin
   // repo if its not specified in the state of the client
   prepareInstallation(
-    params: PrepareInstallationParams,
+    params: TokenVotingPluginPrepareInstallationParams
   ): AsyncGenerator<PrepareInstallationStepValue>;
   // Add any methods that you need
 }
 export interface IOffchainVotingClientEstimation {
   prepareInstallation(
-    params: PrepareInstallationParams,
+    params: PrepareInstallationParams
   ): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }
@@ -35,4 +41,15 @@ export interface IOffchainVotingClientEncoding {
 export interface IOffchainVotingClientDecoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(data: Uint8Array): params;
+}
+
+export interface ITokenVotingClientEncoding {
+  updatePluginSettingsAction: (
+    pluginAddress: string,
+    params: VotingSettings
+  ) => DaoAction;
+  mintTokenAction: (
+    minterAddress: string,
+    params: MintTokenParams
+  ) => DaoAction;
 }
