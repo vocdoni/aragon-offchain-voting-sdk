@@ -55,8 +55,7 @@ export function votingSettingsToContract(
   ];
 }
 
-//TODO adjust to vocdoni contract
-export function tokenVotingInitParamsToContract(
+export function initParamsToContract(
   params: OffchainVotingPluginInstall,
 ) {
   let token: [string, string, string] = ["", "", ""];

@@ -4,7 +4,7 @@ import { ITokenVotingClientEncoding } from '../interfaces';
 import { OffchainVotingPluginInstall } from '../types';
 import {
   mintTokenParamsToContract,
-  tokenVotingInitParamsToContract,
+  initParamsToContract,
 } from '../utils';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import {
@@ -57,7 +57,7 @@ export class OffchainVotingClientEncoding
     if (!SupportedNetworksArray.includes(networkName)) {
       throw new UnsupportedNetworkError(networkName);
     }
-    const args = tokenVotingInitParamsToContract(params);
+    const args = initParamsToContract(params);
     const hexBytes = defaultAbiCoder.encode(prepareInstallationDataTypes,
       args
     );

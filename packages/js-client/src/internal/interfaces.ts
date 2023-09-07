@@ -1,8 +1,7 @@
-import { PrepareInstallationParams } from '../types';
+import { PrepareInstallationParams } from './types';
 import {
   VotingSettings,
   MintTokenParams,
-  TokenVotingPluginPrepareInstallationParams,
 } from '@aragon/sdk-client';
 import {
   GasFeeEstimation,
@@ -24,8 +23,8 @@ export interface IOffchainVotingClientMethods {
   // the version of the plugin, the dao address and the plugin
   // repo if its not specified in the state of the client
   prepareInstallation(
-    params: TokenVotingPluginPrepareInstallationParams
-  ): AsyncGenerator<PrepareInstallationStepValue>;
+    params: PrepareInstallationParams
+  ): AsyncGenerator<PrepareInstallationStepValue> 
   // Add any methods that you need
 }
 export interface IOffchainVotingClientEstimation {

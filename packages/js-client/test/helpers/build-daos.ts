@@ -43,11 +43,11 @@ export async function createDao(
   };
 }
 
-export async function buildMyPluginDao(deployment: Deployment) {
+export async function buildVocdoniVotingDao(deployment: Deployment) {
   try {
-    const latestVersion = await deployment.myPluginRepo[
+    const latestVersion = await deployment.vocdoniVotingRepo[
       'getLatestVersion(address)'
-    ](deployment.myPluginSetup.address);
+    ](deployment.vocdoniVotingSetup.address);
     return await createDao(
       deployment.daoFactory,
       {
@@ -59,7 +59,7 @@ export async function buildMyPluginDao(deployment: Deployment) {
       [
         {
           pluginSetupRef: {
-            pluginSetupRepo: deployment.myPluginRepo.address,
+            pluginSetupRepo: deployment.vocdoniVotingRepo.address,
             versionTag: latestVersion.tag,
           },
           data: defaultAbiCoder.encode(['uint256'], [1]),

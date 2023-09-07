@@ -1,6 +1,7 @@
 import {
   ContextState,
   OverriddenState,
+  VersionTag,
 } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -27,6 +28,13 @@ export type OffchainVotingPluginInstall = {
   newToken?: NewTokenParams;
   useToken?: ExistingTokenParams;
 };
+
+export type PrepareInstallationParams = {
+  settings: OffchainVotingPluginInstall;
+  daoAddressOrEns: string;
+  versionTag?: VersionTag;
+};
+
 
 // extend the state of the client with the properties that you need
 export type OffchainVotingContextState = ContextState & {
@@ -149,8 +157,6 @@ export type AragonPluginRepos = {
   [index: string]: string;
 };
 
-// release, build
-export type VersionTag = [number, number];
 
 export type UpdateInfo = {
   tags: string | string[];

@@ -1,18 +1,15 @@
-import * as BUILD_METADATA from '../../../../contracts/src/build-metadata.json';
-import { PrepareInstallationParams } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientMethods } from '../interfaces';
-import { tokenVotingInitParamsToContract } from '../utils';
-import { TokenVotingPluginPrepareInstallationParams } from '@aragon/sdk-client';
 import {
-  LIVE_CONTRACTS,
   prepareGenericInstallation,
   PrepareInstallationStepValue,
   SupportedNetwork,
   SupportedNetworksArray,
 } from '@aragon/sdk-client-common';
 import { UnsupportedNetworkError } from '@aragon/sdk-common';
+import { PrepareInstallationParams } from '../types';
+import { initParamsToContract } from '../utils';
 
 export class OffchainVotingClientMethods
   extends OffchainVotingClientCore
@@ -21,12 +18,12 @@ export class OffchainVotingClientMethods
   /**
    * Prepares the installation of a token voting plugin in a given dao
    *
-   * @param {TokenVotingPluginPrepareInstallationParams} params
+   * @param {PrepareInstallationParams} params
    * @return {*}  {AsyncGenerator<PrepareInstallationStepValue>}
    * @memberof TokenVotingClientMethods
    */
   public async *prepareInstallation(
-    params: TokenVotingPluginPrepareInstallationParams
+    params: PrepareInstallationParams
   ): AsyncGenerator<PrepareInstallationStepValue> {
     const network = await this.web3.getProvider().getNetwork();
     const networkName = network.name as SupportedNetwork;
@@ -35,10 +32,10 @@ export class OffchainVotingClientMethods
     }
     yield* prepareGenericInstallation(this.web3, {
       daoAddressOrEns: params.daoAddressOrEns,
-      pluginRepo: this.offchainVotingContext,
+      pluginRepo: this.offchainVotingRepoAddress,
       version: params.versionTag,
       installationAbi: INSTALLATION_ABI,
-      installationParams: tokenVotingInitParamsToContract(params.settings),
+      installationParams: initParamsToContract(params.settings),
     });
   }
 

@@ -1,25 +1,25 @@
-import { ERC1967ABI, ERC1967Bytecode } from '../abi';
-import * as aragonContracts from '@aragon/osx-ethers';
+import { ERC1967ABI, ERC1967Bytecode } from "../abi";
+import * as aragonContracts from "@aragon/osx-ethers";
+import ENSRegistry from "@ensdomains/ens-contracts/artifacts/contracts/registry/ENSRegistry.sol/ENSRegistry.json";
+import PublicResolver from "@ensdomains/ens-contracts/artifacts/contracts/resolvers/PublicResolver.sol/PublicResolver.json";
+import { Signer } from "@ethersproject/abstract-signer";
+import { hexlify } from "@ethersproject/bytes";
+import { AddressZero, HashZero } from "@ethersproject/constants";
+import { Contract, ContractFactory } from "@ethersproject/contracts";
+import { id, namehash } from "@ethersproject/hash";
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { toUtf8Bytes } from "@ethersproject/strings";
+import { parseEther } from "@ethersproject/units";
 import {
-  MyPluginSetup,
-  MyPluginSetup__factory,
-} from '@aragon/simple-storage-ethers';
-import ENSRegistry from '@ensdomains/ens-contracts/artifacts/contracts/registry/ENSRegistry.sol/ENSRegistry.json';
-import PublicResolver from '@ensdomains/ens-contracts/artifacts/contracts/resolvers/PublicResolver.sol/PublicResolver.json';
-import { Signer } from '@ethersproject/abstract-signer';
-import { hexlify } from '@ethersproject/bytes';
-import { AddressZero, HashZero } from '@ethersproject/constants';
-import { Contract, ContractFactory } from '@ethersproject/contracts';
-import { id, namehash } from '@ethersproject/hash';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { toUtf8Bytes } from '@ethersproject/strings';
-import { parseEther } from '@ethersproject/units';
+  VocdoniVotingSetup,
+  VocdoniVotingSetup__factory,
+} from "@vocdoni/offchain-voting-ethers";
 
-export type Deployment = OsxDeployment & MyPluginDeployment & EnsDeployment;
+export type Deployment = OsxDeployment & VocdoniVotingDeployment & EnsDeployment;
 
-export type MyPluginDeployment = {
-  myPluginRepo: aragonContracts.PluginRepo;
-  myPluginSetup: MyPluginSetup;
+export type VocdoniVotingDeployment = {
+  vocdoniVotingRepo: aragonContracts.PluginRepo;
+  vocdoniVotingSetup: VocdoniVotingSetup;
 };
 
 export type OsxDeployment = {
@@ -35,49 +35,66 @@ export type EnsDeployment = {
   ensResolver: Contract;
 };
 
-const WALLET_ADDRESS = '0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199';
+const WALLET_ADDRESS = "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199";
 
 export async function deploy(): Promise<Deployment> {
-  const provider = new JsonRpcProvider('http://127.0.0.1:8545');
+  const provider = new JsonRpcProvider("http://127.0.0.1:8545");
   const deployOwnerWallet = provider.getSigner();
   const ens = await deployEnsContracts(deployOwnerWallet);
   const osx = await deployOsxContracts(deployOwnerWallet, ens);
-  const simpleSotrage = await deployMyPluginContracts(deployOwnerWallet, osx);
+  const offchainVoting = await deployvocdoniVotingContracts(deployOwnerWallet, osx);
 
   // send ETH to hardcoded wallet in tests
   await deployOwnerWallet.sendTransaction({
     to: WALLET_ADDRESS,
-    value: parseEther('50.0'),
+    value: parseEther("50.0"),
   });
   return {
     ...osx,
-    ...simpleSotrage,
+    ...offchainVoting,
     ...ens,
   };
 }
 
-export async function deployMyPluginContracts(
+export async function deployvocdoniVotingContracts(
   deployer: Signer,
-  osx: OsxDeployment
-): Promise<MyPluginDeployment> {
-  const myPluginFactory = new MyPluginSetup__factory();
-  const myPluginPluginSetup = await myPluginFactory.connect(deployer).deploy();
+  osx: OsxDeployment,
+): Promise<VocdoniVotingDeployment> {
+  // Deploying the base contracts for the Token Voting Plugin
+  const governanceErc20Factory = new aragonContracts
+    .GovernanceERC20__factory();
+  const governanceWrappedErc20Factory = new aragonContracts
+    .GovernanceWrappedERC20__factory();
+  const governanceErc20Instance = await governanceErc20Factory.connect(
+    deployer,
+  ).deploy(AddressZero, "Test Token", "TTK", { amounts: [], receivers: [] });
+  const governanceErc20WrappedInstance = await governanceWrappedErc20Factory
+    .connect(
+      deployer,
+    ).deploy(AddressZero, "Wrapped Test Token", "wTTK");
 
-  const myPluginRepoAddress = await deployPlugin(
-    'simple-storage',
-    myPluginPluginSetup.address,
+  const vocdoniVotingFactory = new VocdoniVotingSetup__factory();
+  const vocdoniVortingPluginSetup = await vocdoniVotingFactory.connect(deployer)
+    .deploy(
+      governanceErc20Instance.address,
+      governanceErc20WrappedInstance.address,
+    );
+
+  const vocdoniVotingRepoAddress = await deployPlugin(
+    "simple-storage",
+    vocdoniVortingPluginSetup.address,
     await deployer.getAddress(),
-    osx.pluginRepoFactory
+    osx.pluginRepoFactory,
   );
 
-  const myPluginRepo = aragonContracts.PluginRepo__factory.connect(
-    myPluginRepoAddress,
-    deployer
+  const vocdoniVotingRepo = aragonContracts.PluginRepo__factory.connect(
+    vocdoniVotingRepoAddress,
+    deployer,
   );
 
   return {
-    myPluginRepo,
-    myPluginSetup: myPluginPluginSetup,
+    vocdoniVotingRepo,
+    vocdoniVotingSetup: vocdoniVortingPluginSetup,
   };
 }
 
@@ -86,23 +103,25 @@ async function deployPlugin(
   setupAddress: string,
   maintainer: string,
   pluginRepoFactory: aragonContracts.PluginRepoFactory,
-  releaseMetadata: string = 'ipfs://QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR',
-  buildMetadata: string = 'ipfs://QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR'
+  releaseMetadata: string =
+    "ipfs://QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR",
+  buildMetadata: string =
+    "ipfs://QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR",
 ) {
-  const address =
-    await pluginRepoFactory.callStatic.createPluginRepoWithFirstVersion(
+  const address = await pluginRepoFactory.callStatic
+    .createPluginRepoWithFirstVersion(
       name,
       setupAddress,
       maintainer,
       hexlify(toUtf8Bytes(releaseMetadata)),
-      hexlify(toUtf8Bytes(buildMetadata))
+      hexlify(toUtf8Bytes(buildMetadata)),
     );
   const tx = await pluginRepoFactory.createPluginRepoWithFirstVersion(
     name,
     setupAddress,
     maintainer,
     hexlify(toUtf8Bytes(releaseMetadata)),
-    hexlify(toUtf8Bytes(buildMetadata))
+    hexlify(toUtf8Bytes(buildMetadata)),
   );
   await tx.wait();
   return address;
@@ -110,39 +129,39 @@ async function deployPlugin(
 
 export async function deployOsxContracts(
   signer: Signer,
-  ens: EnsDeployment
+  ens: EnsDeployment,
 ): Promise<OsxDeployment> {
   try {
     const { ensRegistry, ensResolver } = ens;
     const proxyFactory = new ContractFactory(
       ERC1967ABI,
       ERC1967Bytecode,
-      signer
+      signer,
     );
     const managingDaoFactory = new aragonContracts.DAO__factory();
 
     const managingDao = await managingDaoFactory.connect(signer).deploy();
 
-    const initializeManagingDaoData =
-      managingDaoFactory.interface.encodeFunctionData('initialize', [
-        '0x',
+    const initializeManagingDaoData = managingDaoFactory.interface
+      .encodeFunctionData("initialize", [
+        "0x",
         await signer.getAddress(),
         AddressZero,
-        '0x',
+        "0x",
       ]);
 
     const managingDaoProxy = await proxyFactory.deploy(
       managingDao.address,
-      initializeManagingDaoData
+      initializeManagingDaoData,
     );
 
     const managingDaoInstance = aragonContracts.DAO__factory.connect(
       managingDaoProxy.address,
-      signer
+      signer,
     );
 
-    const ensSubdomainRegistrarFactory =
-      new aragonContracts.ENSSubdomainRegistrar__factory();
+    const ensSubdomainRegistrarFactory = new aragonContracts
+      .ENSSubdomainRegistrar__factory();
 
     // DAO Registrar
     const daoRegistrar = await ensSubdomainRegistrarFactory
@@ -154,98 +173,98 @@ export async function deployOsxContracts(
 
     const daoRegsitrarProxy = await proxyFactory.deploy(
       daoRegistrar.address,
-      '0x'
+      "0x",
     );
     const pluginRegistrarProxy = await proxyFactory.deploy(
       pluginRegistrar.address,
-      '0x'
+      "0x",
     );
-    const daoRegistrarInstance =
-      aragonContracts.ENSSubdomainRegistrar__factory.connect(
+    const daoRegistrarInstance = aragonContracts.ENSSubdomainRegistrar__factory
+      .connect(
         daoRegsitrarProxy.address,
-        signer
+        signer,
       );
-    const pluginRegistrarInstance =
-      aragonContracts.ENSSubdomainRegistrar__factory.connect(
+    const pluginRegistrarInstance = aragonContracts
+      .ENSSubdomainRegistrar__factory.connect(
         pluginRegistrarProxy.address,
-        signer
+        signer,
       );
 
     await registerEnsName(
-      'eth',
-      'dao',
+      "eth",
+      "dao",
       ensRegistry,
       daoRegistrarInstance.address,
-      ensResolver.address
+      ensResolver.address,
     );
 
     await registerEnsName(
-      'eth',
-      'plugin',
+      "eth",
+      "plugin",
       ensRegistry,
       pluginRegistrarInstance.address,
-      ensResolver.address
+      ensResolver.address,
     );
 
     await daoRegistrarInstance.initialize(
       managingDaoInstance.address,
       ensRegistry.address,
-      namehash('dao.eth')
+      namehash("dao.eth"),
     );
 
     await pluginRegistrarInstance.initialize(
       managingDaoInstance.address,
       ensRegistry.address,
-      namehash('plugin.eth')
+      namehash("plugin.eth"),
     );
     // Dao Registry
     const daoRegistryFactory = new aragonContracts.DAORegistry__factory();
     const daoRegistry = await daoRegistryFactory.connect(signer).deploy();
     const daoRegistryProxy = await proxyFactory.deploy(
       daoRegistry.address,
-      '0x'
+      "0x",
     );
     const daoRegistryInstance = aragonContracts.DAORegistry__factory.connect(
       daoRegistryProxy.address,
-      signer
+      signer,
     );
 
     await daoRegistryInstance.initialize(
       managingDaoInstance.address,
-      daoRegistrarInstance.address
+      daoRegistrarInstance.address,
     );
 
     // Plugin Repo Registry
-    const pluginRepoRegistryFactory =
-      new aragonContracts.PluginRepoRegistry__factory();
+    const pluginRepoRegistryFactory = new aragonContracts
+      .PluginRepoRegistry__factory();
     const pluginRepoRegistry = await pluginRepoRegistryFactory
       .connect(signer)
       .deploy();
     const pluginRepoRegistryProxy = await proxyFactory.deploy(
       pluginRepoRegistry.address,
-      '0x'
+      "0x",
     );
-    const pluginRepoRegistryInstance =
-      aragonContracts.PluginRepoRegistry__factory.connect(
+    const pluginRepoRegistryInstance = aragonContracts
+      .PluginRepoRegistry__factory.connect(
         pluginRepoRegistryProxy.address,
-        signer
+        signer,
       );
 
     await pluginRepoRegistryInstance.initialize(
       managingDaoInstance.address,
-      pluginRegistrarInstance.address
+      pluginRegistrarInstance.address,
     );
 
     // Plugin Repo Factory
-    const pluginRepoFactoryFactory =
-      new aragonContracts.PluginRepoFactory__factory();
+    const pluginRepoFactoryFactory = new aragonContracts
+      .PluginRepoFactory__factory();
     const pluginRepoFactory = await pluginRepoFactoryFactory
       .connect(signer)
       .deploy(pluginRepoRegistryInstance.address);
 
     // Plugin Setup Prcessor
-    const pluginSetupProcessorFacotry =
-      new aragonContracts.PluginSetupProcessor__factory();
+    const pluginSetupProcessorFacotry = new aragonContracts
+      .PluginSetupProcessor__factory();
     const pluginSetupProcessor = await pluginSetupProcessorFacotry
       .connect(signer)
       .deploy(pluginRepoRegistryInstance.address);
@@ -261,25 +280,25 @@ export async function deployOsxContracts(
     await managingDaoInstance.grant(
       daoRegistrarInstance.address,
       daoRegistryInstance.address,
-      id('REGISTER_ENS_SUBDOMAIN_PERMISSION')
+      id("REGISTER_ENS_SUBDOMAIN_PERMISSION"),
     );
     // ENS Plugin
     await managingDaoInstance.grant(
       pluginRegistrarInstance.address,
       pluginRepoRegistryInstance.address,
-      id('REGISTER_ENS_SUBDOMAIN_PERMISSION')
+      id("REGISTER_ENS_SUBDOMAIN_PERMISSION"),
     );
     // DAO Registry
     await managingDaoInstance.grant(
       daoRegistryInstance.address,
       daoFactory.address,
-      id('REGISTER_DAO_PERMISSION')
+      id("REGISTER_DAO_PERMISSION"),
     );
     // Plugin Registry
     await managingDaoInstance.grant(
       pluginRepoRegistryInstance.address,
       pluginRepoFactory.address,
-      id('REGISTER_PLUGIN_REPO_PERMISSION')
+      id("REGISTER_PLUGIN_REPO_PERMISSION"),
     );
     return {
       managingDaoAddress: managingDaoInstance.address,
@@ -297,11 +316,11 @@ async function deployEnsContracts(signer: Signer) {
   try {
     const registryFactory = new ContractFactory(
       ENSRegistry.abi,
-      ENSRegistry.bytecode
+      ENSRegistry.bytecode,
     );
     const publicResolverFactory = new ContractFactory(
       PublicResolver.abi,
-      PublicResolver.bytecode
+      PublicResolver.bytecode,
     );
 
     const registry = await registryFactory.connect(signer).deploy();
@@ -313,11 +332,11 @@ async function deployEnsContracts(signer: Signer) {
     await publicResolver.deployed();
 
     await registerEnsName(
-      '',
-      'eth',
+      "",
+      "eth",
       registry,
       await signer.getAddress(),
-      publicResolver.address
+      publicResolver.address,
     );
     return { ensRegistry: registry, ensResolver: publicResolver };
   } catch (e) {
@@ -330,15 +349,15 @@ async function registerEnsName(
   name: string,
   registry: Contract,
   owner: string,
-  resolver: string
+  resolver: string,
 ) {
   try {
     await registry.setSubnodeRecord(
-      tld !== '' ? namehash(tld) : HashZero,
+      tld !== "" ? namehash(tld) : HashZero,
       id(name),
       owner,
       resolver,
-      0
+      0,
     );
   } catch (e) {
     throw e;

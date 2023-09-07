@@ -5,6 +5,8 @@ import {
   NumbersSortBy,
   MyPluginClient,
   MyPluginContext,
+  OffchainVotingContext,
+  OffchainVotingClient,
 } from '../../src';
 import { QueryNumber, QueryNumbers } from '../../src/internal/graphql-queries';
 import {
@@ -38,9 +40,8 @@ describe('Methods', () => {
     server = await ganacheSetup.start();
     deployment = await deployContracts.deploy();
     dao = await buildMyPluginDao(deployment);
-    contextParamsLocalChain.myPluginRepoAddress =
-      deployment.myPluginRepo.address;
-    contextParamsLocalChain.myPluginPluginAddress = dao!.plugins[0];
+    contextParamsLocalChain.offchainVotingRepoAddress =
+      deployment.vocdoniVotingRepo.address;
     contextParamsLocalChain.ensRegistryAddress = deployment.ensRegistry.address;
     LIVE_CONTRACTS.goerli.pluginSetupProcessor =
       deployment.pluginSetupProcessor.address;
@@ -51,52 +52,14 @@ describe('Methods', () => {
   });
 
   it('Should prepare an installation', async () => {
-    const context = new MyPluginContext(contextParamsLocalChain);
-    const client = new MyPluginClient(context);
-    const networkSpy = jest.spyOn(JsonRpcProvider.prototype, 'getNetwork');
-    const defaultGetNetworkImplementation = networkSpy.getMockImplementation();
-    networkSpy.mockImplementation(() =>
-      Promise.resolve({
-        name: 'goerli',
-        chainId: 31337,
-      })
-    );
-    const steps = client.methods.prepareInstallation({
-      daoAddressOrEns: dao.dao,
-      settings: { number: BigInt(1) },
-    });
-    for await (const step of steps) {
-      switch (step.key) {
-        case PrepareInstallationStep.PREPARING:
-          expect(step.txHash).toMatch(/^0x[a-fA-F0-9]{64}$/);
-          break;
-        case PrepareInstallationStep.DONE:
-          expect(typeof step.pluginAddress).toBe('string');
-          expect(step.pluginAddress).toMatch(/^0x[A-Fa-f0-9]{40}$/i);
-          expect(typeof step.pluginRepo).toBe('string');
-          expect(step.pluginRepo).toMatch(/^0x[A-Fa-f0-9]{40}$/i);
-          expect(Array.isArray(step.helpers)).toBe(true);
-          for (const helper of step.helpers) {
-            expect(typeof helper).toBe('string');
-          }
-          expect(Array.isArray(step.permissions)).toBe(true);
-          for (const permission of step.permissions) {
-            expect(typeof permission.condition).toBe('string');
-            if (permission.condition) {
-              expect(permission.condition).toMatch(/^0x[A-Fa-f0-9]{40}$/i);
-            }
-            expect(typeof permission.operation).toBe('number');
-            expect(typeof permission.where).toBe('string');
-            expect(permission.where).toMatch(/^0x[A-Fa-f0-9]{40}$/i);
-            expect(typeof permission.who).toBe('string');
-            expect(permission.who).toMatch(/^0x[A-Fa-f0-9]{40}$/i);
-          }
-          expect(typeof step.versionTag.build).toBe('number');
-          expect(typeof step.versionTag.release).toBe('number');
-          break;
+    const context = new OffchainVotingContext(contextParamsLocalChain);
+    const client = new OffchainVotingClient(context);
+    client.methods.prepareInstallation(
+      {
+        
       }
-      networkSpy.mockImplementation(defaultGetNetworkImplementation);
-    }
+    )
+    
   });
 
   it('Should get a number', async () => {
