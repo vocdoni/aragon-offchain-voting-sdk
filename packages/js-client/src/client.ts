@@ -11,13 +11,11 @@ import {
   OffchainVotingClientMethods,
 } from './internal';
 import { OffchainVotingClientCore } from './internal/core';
-import { TokenVotingPluginInstall } from '@aragon/sdk-client';
 import {
-  ClientCore,
-  Context,
   PluginInstallItem,
 } from '@aragon/sdk-client-common';
 import { Networkish } from '@ethersproject/providers';
+import { OffchainVotingPluginInstall } from './internal/types';
 
 export class OffchainVotingClient
   extends OffchainVotingClientCore
@@ -47,7 +45,7 @@ export class OffchainVotingClient
      * @memberof OffchainVotingClient
      */
     getPluginInstallItem: (
-      params: TokenVotingPluginInstall,
+      params: OffchainVotingPluginInstall,
       network: Networkish
     ): PluginInstallItem =>
       OffchainVotingClientEncoding.getPluginInstallItem(params, network),

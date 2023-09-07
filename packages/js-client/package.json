@@ -72,7 +72,7 @@
     "@ethersproject/wallet": "^5.7.0",
     "graphql": "^16.6.0",
     "graphql-request": "4.3.0",
-    "@vocdoni/offhcain-voting-ethers": "*"
+    "@vocdoni/offchain-voting-ethers": "*"
   },
   "jest": {
     "testEnvironment": "./test-environment.js",

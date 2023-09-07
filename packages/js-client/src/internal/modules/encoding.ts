@@ -1,5 +1,5 @@
 import metadata from '../../../../contracts/src/build-metadata.json';
-import { INSTALLATION_ABI } from '../constants';
+import { DEFAULT_ADDRESSES } from '../constants';
 import { ITokenVotingClientEncoding } from '../interfaces';
 import { OffchainVotingPluginInstall } from '../types';
 import {
@@ -9,7 +9,6 @@ import {
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import {
   MintTokenParams,
-  TokenVotingPluginInstall,
   encodeUpdateVotingSettingsAction,
   VotingSettings,
 } from '@aragon/sdk-client';
@@ -17,7 +16,6 @@ import {
   ClientCore,
   DaoAction,
   getNamedTypesFromMetadata,
-  LIVE_CONTRACTS,
   PluginInstallItem,
   SupportedNetwork,
   SupportedNetworksArray,
@@ -62,15 +60,9 @@ export class OffchainVotingClientEncoding
     const args = tokenVotingInitParamsToContract(params);
     const hexBytes = defaultAbiCoder.encode(prepareInstallationDataTypes,
       args
-      //[
-      // Object.values([params.daoAddress]),
-      // Object.values(params.votingSettings),
-      // [params.useToken?.tokenAddress, '', ''],
-      // Object.values(params.newToken?.),
-    ]
-    //);
+    );
     return {
-      id: LIVE_CONTRACTS[networkName].tokenVotingRepo,
+      id: DEFAULT_ADDRESSES[networkName].repoAddress,
       data: hexToBytes(hexBytes),
     };
   }

@@ -1,22 +1,18 @@
 // add internal utils
 import {
   ContractMintTokenParams,
-  ContractTokenVotingInitParams,
   OffchainVotingPluginInstall,
   VocdoniVotingSettings,
   VoteOption,
-} from './types';
+} from "./types";
 import {
-  TokenVotingPluginInstall,
   MintTokenParams,
-  ContractVotingSettings,
-} from '@aragon/sdk-client';
-import { encodeRatio } from '@aragon/sdk-common';
-import { Result } from '@ethersproject/abi';
-import { BigNumber } from '@ethersproject/bignumber';
-import { AddressZero } from '@ethersproject/constants';
-import { Contract } from '@ethersproject/contracts';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+} from "@aragon/sdk-client";
+import { Result } from "@ethersproject/abi";
+import { BigNumber } from "@ethersproject/bignumber";
+import { AddressZero } from "@ethersproject/constants";
+import { Contract } from "@ethersproject/contracts";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 // export function votingModeFromContracts(votingMode: number): VotingMode {
 //   switch (votingMode) {
@@ -32,7 +28,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 // }
 
 export function mintTokenParamsToContract(
-  params: MintTokenParams
+  params: MintTokenParams,
 ): ContractMintTokenParams {
   return [params.address, BigNumber.from(params.amount)];
 }
@@ -45,8 +41,8 @@ export function mintTokenParamsFromContract(result: Result): MintTokenParams {
 }
 
 export function votingSettingsToContract(
-  params: VocdoniVotingSettings
-): [VocdoniVotingSettings] {
+  params: VocdoniVotingSettings,
+): [boolean, number, number, BigNumber, BigNumber, string, number, string] {
   return [
     params.onlyCommitteeProposalCreation,
     params.minTallyApprovals,
@@ -56,21 +52,14 @@ export function votingSettingsToContract(
     params.daoTokenAddress,
     params.minProposerVotingPower,
     params.censusStrategy,
-    // BigNumber.from(
-    //   votingModeToContracts(params.votingMode || VotingMode.STANDARD)
-    // ),
-    // BigNumber.from(encodeRatio(params.supportThreshold, 6)),
-    // BigNumber.from(encodeRatio(params.minParticipation, 6)),
-    // BigNumber.from(params.minDuration),
-    // BigNumber.from(params.minProposerVotingPower ?? 0),
   ];
 }
 
 //TODO adjust to vocdoni contract
 export function tokenVotingInitParamsToContract(
-  params: OffchainVotingPluginInstall
-): ContractTokenVotingInitParams {
-  let token: [string, string, string] = ['', '', ''];
+  params: OffchainVotingPluginInstall,
+) {
+  let token: [string, string, string] = ["", "", ""];
   let balances: [string[], BigNumber[]] = [[], []];
   if (params.newToken) {
     token = [AddressZero, params.newToken.name, params.newToken.symbol];
@@ -85,7 +74,12 @@ export function tokenVotingInitParamsToContract(
       params.useToken.wrappedToken.symbol,
     ];
   }
-  return [[...params.votingSettings], token, balances];
+  return [
+    params.committee,
+    votingSettingsToContract(params.votingSettings),
+    token,
+    balances,
+  ];
 }
 
 export const MAX_UINT64 = BigNumber.from(2).pow(64).sub(1);
@@ -98,7 +92,7 @@ export async function voteWithSigners(
     yes: number[];
     no: number[];
     abstain: number[];
-  }
+  },
 ) {
   let promises = signerIds.yes.map((i) =>
     votingContract.connect(signers[i]).vote(proposalId, VoteOption.Yes, false)
@@ -107,14 +101,14 @@ export async function voteWithSigners(
   promises = promises.concat(
     signerIds.no.map((i) =>
       votingContract.connect(signers[i]).vote(proposalId, VoteOption.No, false)
-    )
+    ),
   );
   promises = promises.concat(
     signerIds.abstain.map((i) =>
       votingContract
         .connect(signers[i])
         .vote(proposalId, VoteOption.Abstain, false)
-    )
+    ),
   );
 
   await Promise.all(promises);

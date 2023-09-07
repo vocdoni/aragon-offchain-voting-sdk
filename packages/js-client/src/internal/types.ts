@@ -1,10 +1,6 @@
-import { ContractVotingSettings } from '@aragon/sdk-client';
-import { TokenVotingPluginInstall } from '@aragon/sdk-client';
 import {
   ContextState,
   OverriddenState,
-  ProposalBase,
-  ProposalStatus,
 } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -26,7 +22,7 @@ type ExistingTokenParams = {
 
 // export type OffchainVotingPluginInstall = TokenVotingPluginInstall;
 export type OffchainVotingPluginInstall = {
-  daoAddress: string;
+  committee: string[];
   votingSettings: VocdoniVotingSettings;
   newToken?: NewTokenParams;
   useToken?: ExistingTokenParams;
