@@ -1,18 +1,20 @@
 // add internal utils
 import {
   ContractMintTokenParams,
+  GasslessVotingProposal,
   OffchainVotingPluginInstall,
   VocdoniVotingSettings,
   VoteOption,
-} from "./types";
-import {
-  MintTokenParams,
-} from "@aragon/sdk-client";
-import { Result } from "@ethersproject/abi";
-import { BigNumber } from "@ethersproject/bignumber";
-import { AddressZero } from "@ethersproject/constants";
-import { Contract } from "@ethersproject/contracts";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+  ProposalFromSC,
+} from '../types';
+import { MintTokenParams, SubgraphAction } from '@aragon/sdk-client';
+import { DaoAction } from '@aragon/sdk-client-common';
+import { hexToBytes } from '@aragon/sdk-common';
+import { Result } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
+import { AddressZero } from '@ethersproject/constants';
+import { Contract } from '@ethersproject/contracts';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 // export function votingModeFromContracts(votingMode: number): VotingMode {
 //   switch (votingMode) {
@@ -28,7 +30,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 // }
 
 export function mintTokenParamsToContract(
-  params: MintTokenParams,
+  params: MintTokenParams
 ): ContractMintTokenParams {
   return [params.address, BigNumber.from(params.amount)];
 }
@@ -41,24 +43,22 @@ export function mintTokenParamsFromContract(result: Result): MintTokenParams {
 }
 
 export function votingSettingsToContract(
-  params: VocdoniVotingSettings,
-): [boolean, number, number, BigNumber, BigNumber, string, number, string] {
+  params: VocdoniVotingSettings
+): [number, number, BigNumber, BigNumber, number, string, string, boolean] {
   return [
-    params.onlyCommitteeProposalCreation,
     params.minTallyApprovals,
     params.minDuration,
     params.minParticipation,
     params.supportThreshold,
-    params.daoTokenAddress,
     params.minProposerVotingPower,
     params.censusStrategy,
+    '',
+    true,
   ];
 }
 
-export function initParamsToContract(
-  params: OffchainVotingPluginInstall,
-) {
-  let token: [string, string, string] = ["", "", ""];
+export function initParamsToContract(params: OffchainVotingPluginInstall) {
+  let token: [string, string, string] = ['', '', ''];
   let balances: [string[], BigNumber[]] = [[], []];
   if (params.newToken) {
     token = [AddressZero, params.newToken.name, params.newToken.symbol];
@@ -91,7 +91,7 @@ export async function voteWithSigners(
     yes: number[];
     no: number[];
     abstain: number[];
-  },
+  }
 ) {
   let promises = signerIds.yes.map((i) =>
     votingContract.connect(signers[i]).vote(proposalId, VoteOption.Yes, false)
@@ -100,14 +100,14 @@ export async function voteWithSigners(
   promises = promises.concat(
     signerIds.no.map((i) =>
       votingContract.connect(signers[i]).vote(proposalId, VoteOption.No, false)
-    ),
+    )
   );
   promises = promises.concat(
     signerIds.abstain.map((i) =>
       votingContract
         .connect(signers[i])
         .vote(proposalId, VoteOption.Abstain, false)
-    ),
+    )
   );
 
   await Promise.all(promises);
@@ -143,3 +143,105 @@ export async function voteWithSigners(
 //   const hex = num.toString(16);
 //   return `0x${'0'.repeat(64 - hex.length)}${hex}`;
 // }
+
+export function toGaslessVotingProposal(
+  proposal: ProposalFromSC
+): GasslessVotingProposal {
+  const startDate = new Date(proposal.parameters.startDate);
+  const endDate = new Date(proposal.parameters.endDate);
+  const expirationDate = new Date(proposal.parameters.expirationDate);
+  return {
+    executed: proposal.executed,
+    // TODO FIX
+    // approvers: proposal.approvals,
+    approvers: [],
+    vochainProposalId: proposal.vochainProposalId,
+    parameters: {
+      censusBlock: proposal.parameters.censusBlock,
+      securityBlock: 0,
+      startDate,
+      endDate,
+      expirationDate,
+    },
+    //TODO to number
+    allowFailureMap: 0,
+    // allowFailureMap: proposal.allowFailureMap,
+    // TODO to number[][]
+    tally: [[1, 2, 3]],
+    // tally: proposal.tally,
+    actions: proposal.actions.map((action): DaoAction => {
+      return {
+        data: hexToBytes(action.data),
+        to: action.to,
+        //TODO to bigint
+        value: BigInt(action.value.toBigInt()),
+        // value: action.value,
+      };
+    }),
+  };
+}
+// let usedVotingWeight: bigint = BigInt(0);
+// for (const voter of proposal.voters) {
+//   usedVotingWeight += BigInt(voter.votingPower);
+// }
+// const token = parseToken(proposal.plugin.token);
+// return {
+//   id: getCompactProposalId(proposal.id),
+//   dao: {
+//     address: proposal.dao.id,
+//     name: proposal.dao.subdomain,
+//   },
+//   creatorAddress: proposal.creator,
+//   metadata: {
+//     title: metadata.title,
+//     summary: metadata.summary,
+//     description: metadata.description,
+//     resources: metadata.resources,
+//     media: metadata.media,
+//   },
+//   startDate,
+//   endDate,
+//   creationDate,
+//   creationBlockNumber: parseInt(proposal.creationBlockNumber),
+//   executionDate,
+//   executionBlockNumber: parseInt(proposal.executionBlockNumber) || null,
+//   executionTxHash: proposal.executionTxHash || null,
+//   actions: proposal.actions.map(
+//     (action: SubgraphAction): DaoAction => {
+//       return {
+//         data: hexToBytes(action.data),
+//         to: action.to,
+//         value: BigInt(action.value),
+//       };
+//     },
+//   ),
+//   status: computeProposalStatus(proposal),
+//   result: {
+//     yes: proposal.yes ? BigInt(proposal.yes) : BigInt(0),
+//     no: proposal.no ? BigInt(proposal.no) : BigInt(0),
+//     abstain: proposal.abstain ? BigInt(proposal.abstain) : BigInt(0),
+//   },
+//   settings: {
+//     supportThreshold: decodeRatio(BigInt(proposal.supportThreshold), 6),
+//     duration: parseInt(proposal.endDate) -
+//       parseInt(proposal.startDate),
+//     minParticipation: decodeRatio(
+//       (BigInt(proposal.minVotingPower) * BigInt(1000000)) /
+//         BigInt(proposal.totalVotingPower),
+//       6,
+//     ),
+//   },
+//   token,
+//   usedVotingWeight,
+//   totalVotingWeight: BigInt(proposal.totalVotingPower),
+//   votes: proposal.voters.map(
+//     (voter: SubgraphTokenVotingVoterListItem) => {
+//       return {
+//         voteReplaced: voter.voteReplaced,
+//         address: voter.voter.address,
+//         vote: SubgraphVoteValuesMap.get(voter.voteOption) as VoteValues,
+//         weight: BigInt(voter.votingPower),
+//       };
+//     },
+//   ),
+// };

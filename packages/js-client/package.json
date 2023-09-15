@@ -1,11 +1,11 @@
 {
-  "name": "@aragon/simple-storage-js-client",
-  "author": "Aragon Association",
-  "version": "1.0.0",
-  "license": "MIT",
+  "name": "@vocdoni/offchain-voting",
+  "author": "Vocdoni Association",
+  "version": "0.0.8",
+  "license": "AGPL-3.0-or-later",
   "main": "dist/index.js",
-  "module": "dist/simple-storage-js-client.esm.js",
-  "types": "dist/index.d.ts",
+  "module": "dist/offchain-voting.esm.js",
+  "types": "dist/js-client/src/index.d.ts",
   "files": [
     "dist"
   ],
@@ -26,7 +26,9 @@
     "clean": "rm -Rf .turbo dist",
     "examples": "node ./scripts/generate-examples-md.js ./examples ./examples.md"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "@vocdoni/offchain-voting-ethers": ">=0.0.1"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint --fix"
@@ -72,7 +74,7 @@
     "@ethersproject/wallet": "^5.7.0",
     "graphql": "^16.6.0",
     "graphql-request": "4.3.0",
-    "@vocdoni/offchain-voting-ethers": "*"
+    "@vocdoni/offchain-voting-ethers": "./vocdoni-offchain-voting-ethers-v0.0.2.tgz"
   },
   "jest": {
     "testEnvironment": "./test-environment.js",

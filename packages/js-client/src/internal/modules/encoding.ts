@@ -1,11 +1,8 @@
 import metadata from '../../../../contracts/src/build-metadata.json';
 import { DEFAULT_ADDRESSES } from '../constants';
 import { ITokenVotingClientEncoding } from '../interfaces';
-import { OffchainVotingPluginInstall } from '../types';
-import {
-  mintTokenParamsToContract,
-  initParamsToContract,
-} from '../utils';
+import { OffchainVotingPluginInstall } from '../../types';
+import { mintTokenParamsToContract, initParamsToContract } from '../utils';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import {
   MintTokenParams,
@@ -58,9 +55,7 @@ export class OffchainVotingClientEncoding
       throw new UnsupportedNetworkError(networkName);
     }
     const args = initParamsToContract(params);
-    const hexBytes = defaultAbiCoder.encode(prepareInstallationDataTypes,
-      args
-    );
+    const hexBytes = defaultAbiCoder.encode(prepareInstallationDataTypes, args);
     return {
       id: DEFAULT_ADDRESSES[networkName].repoAddress,
       data: hexToBytes(hexBytes),

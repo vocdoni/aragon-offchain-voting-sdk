@@ -6,6 +6,8 @@
     "lib": ["dom", "esnext"],
     "target": "es6",
     "importHelpers": true,
+    "outDir": "dist",
+    // "rootDir": "./src",
     // output .d.ts declaration files for consumers
     "declaration": true,
     // output .js.map sourcemap files for consumers

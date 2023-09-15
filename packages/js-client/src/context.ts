@@ -2,7 +2,7 @@ import { DEFAULT_OFFCHAIN_VOTING_BACKEND_URL, DEFAULT_OFFCHAIN_VOTING_REPO_ADDRE
 import {
   OffchainVotingContextState,
   OffchainVotingOverriddenState,
-} from "./internal/types";
+} from "./types";
 import { OffchainVotingContextParams } from "./types";
 import { Context, ContextCore } from "@aragon/sdk-client-common";
 export class OffchainVotingContext extends ContextCore {

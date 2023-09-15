@@ -13,7 +13,7 @@ export class SimpleStoragClientEstimation extends OffchainVotingClientCore
   public async prepareInstallation(
     params: PrepareInstallationParams,
   ): Promise<GasFeeEstimation> {
-    let version = params.version;
+    let version = params.versionTag;
     // if not specified use the lates version
     if (!version) {
       // get signer
@@ -37,7 +37,7 @@ export class SimpleStoragClientEstimation extends OffchainVotingClientCore
       pluginRepo: this.offchainVotingRepoAddress,
       version,
       installationAbi: BUILD_METADATA.pluginSetup.prepareInstallation.inputs,
-      installationParams: [params.settings.number],
+      // installationParams: [params.settings],
     });
   }
 }

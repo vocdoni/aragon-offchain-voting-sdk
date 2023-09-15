@@ -1,6 +1,7 @@
 {
   "name": "@vocdoni/offchain-voting-ethers",
-  "version": "1.0.0",
+  "author": "Vocdoni Association",
+  "version": "0.0.2",
   "description": "Plugin contract definitions for ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
@@ -19,7 +20,6 @@
     "type": "git",
     "url": "git+https://github.com/aragon/osx.git"
   },
-  "author": "",
   "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/aragon/osx/issues"

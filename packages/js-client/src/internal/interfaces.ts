@@ -1,4 +1,4 @@
-import { PrepareInstallationParams } from './types';
+import { PrepareInstallationParams } from '../types';
 import {
   VotingSettings,
   MintTokenParams,
@@ -24,7 +24,7 @@ export interface IOffchainVotingClientMethods {
   // repo if its not specified in the state of the client
   prepareInstallation(
     params: PrepareInstallationParams
-  ): AsyncGenerator<PrepareInstallationStepValue> 
+  ): AsyncGenerator<PrepareInstallationStepValue>
   // Add any methods that you need
 }
 export interface IOffchainVotingClientEstimation {

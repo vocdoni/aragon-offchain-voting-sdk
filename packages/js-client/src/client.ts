@@ -15,7 +15,7 @@ import {
   PluginInstallItem,
 } from '@aragon/sdk-client-common';
 import { Networkish } from '@ethersproject/providers';
-import { OffchainVotingPluginInstall } from './internal/types';
+import { OffchainVotingPluginInstall } from './types';
 
 export class OffchainVotingClient
   extends OffchainVotingClientCore

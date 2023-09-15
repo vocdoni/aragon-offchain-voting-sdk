@@ -5,24 +5,26 @@ import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 
 export const DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS =
   '0x0000000000000000000000000000000000000000';
-export const DEFAULT_ADDRESSES:{ [K in SupportedNetwork] : {repoAddress: string, setupAddress:string}} = {
-  homestead:{
-    setupAddress: "",
-    repoAddress: "",
+export const DEFAULT_ADDRESSES: {
+  [K in SupportedNetwork]: { repoAddress: string; setupAddress: string };
+} = {
+  homestead: {
+    setupAddress: '',
+    repoAddress: '',
   },
   goerli: {
-    setupAddress: "",
-    repoAddress: "",
+    setupAddress: '',
+    repoAddress: '',
   },
   matic: {
-    setupAddress: "",
-    repoAddress: "",
+    setupAddress: '',
+    repoAddress: '',
   },
   maticmum: {
-    setupAddress: "",
-    repoAddress: "0xaca70d8c462940b839de386bcdd4cacf745632ca",
-  }
-}
+    setupAddress: '',
+    repoAddress: '0xaca70d8c462940b839de386bcdd4cacf745632ca',
+  },
+};
 
 export const DEFAULT_OFFCHAIN_VOTING_BACKEND_URL =
   'https://example.otg/offchain-voting/rpc';
