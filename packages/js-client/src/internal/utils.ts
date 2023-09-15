@@ -15,6 +15,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
 
 // export function votingModeFromContracts(votingMode: number): VotingMode {
 //   switch (votingMode) {
@@ -44,17 +45,32 @@ export function mintTokenParamsFromContract(result: Result): MintTokenParams {
 
 export function votingSettingsToContract(
   params: VocdoniVotingSettings
-): [number, number, BigNumber, BigNumber, number, string, string, boolean] {
+): [boolean, number, number, number, BigNumber, string, BigNumber, string] {
   return [
+    true,
     params.minTallyApprovals,
-    params.minDuration,
     params.minParticipation,
     params.supportThreshold,
+    params.minDuration,
+    '',
     params.minProposerVotingPower,
     params.censusStrategy,
-    '',
-    true,
   ];
+}
+
+export function votingSettingsfromContract(
+  settings: VocdoniVoting.PluginSettingsStructOutput
+): VocdoniVotingSettings {
+  return {
+    onlyCommitteeProposalCreation: settings[0],
+    minTallyApprovals: settings[1],
+    minParticipation: settings[2],
+    supportThreshold: settings[3],
+    minDuration: settings[4],
+    daoTokenAddress: settings[5],
+    minProposerVotingPower: settings[6],
+    censusStrategy: settings[7],
+  };
 }
 
 export function initParamsToContract(params: OffchainVotingPluginInstall) {
@@ -147,9 +163,12 @@ export async function voteWithSigners(
 export function toGaslessVotingProposal(
   proposal: ProposalFromSC
 ): GasslessVotingProposal {
-  const startDate = new Date(proposal.parameters.startDate);
-  const endDate = new Date(proposal.parameters.endDate);
-  const expirationDate = new Date(proposal.parameters.expirationDate);
+  proposal.parameters.startDate;
+  const startDate = new Date(proposal.parameters.startDate.toString());
+  const endDate = new Date(proposal.parameters.endDate.toString());
+  const expirationDate = new Date(
+    proposal.parameters.expirationDate.toString()
+  );
   return {
     executed: proposal.executed,
     // TODO FIX
@@ -157,25 +176,21 @@ export function toGaslessVotingProposal(
     approvers: [],
     vochainProposalId: proposal.vochainProposalId,
     parameters: {
-      censusBlock: proposal.parameters.censusBlock,
+      censusBlock: proposal.parameters.censusBlock.toNumber(),
       securityBlock: 0,
       startDate,
       endDate,
       expirationDate,
     },
-    //TODO to number
-    allowFailureMap: 0,
-    // allowFailureMap: proposal.allowFailureMap,
-    // TODO to number[][]
-    tally: [[1, 2, 3]],
-    // tally: proposal.tally,
+    allowFailureMap: proposal.allowFailureMap.toNumber(),
+    tally: proposal.tally.map((int) => {
+      return int.map((x) => x.toNumber());
+    }),
     actions: proposal.actions.map((action): DaoAction => {
       return {
         data: hexToBytes(action.data),
         to: action.to,
-        //TODO to bigint
         value: BigInt(action.value.toBigInt()),
-        // value: action.value,
       };
     }),
   };

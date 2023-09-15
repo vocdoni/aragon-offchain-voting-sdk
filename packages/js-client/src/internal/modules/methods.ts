@@ -2,12 +2,17 @@ import {
   CreateGasslessProposalParams,
   GasslessVotingProposal,
   PrepareInstallationParams,
+  VocdoniVotingSettings,
   vocdoniProposalParams,
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientMethods } from '../interfaces';
-import { initParamsToContract, toGaslessVotingProposal } from '../utils';
+import {
+  initParamsToContract,
+  toGaslessVotingProposal,
+  votingSettingsfromContract,
+} from '../utils';
 import { GovernanceWrappedERC20__factory } from '@aragon/osx-ethers';
 import {
   Erc20TokenDetails,
@@ -259,26 +264,25 @@ export class OffchainVotingClientMethods
    * @return {*}  {Promise<TokenVotingProposal>}
    * @memberof TokenVotingClient
    */
-  // public async getProposal(
-  //   pluginAddress: string,
-  //   proposalId: number
-  // // ): Promise<GasslessVotingProposal | null> {
-  //   ): Promise<GasslessVotingProposal | null> {
-  //   const signer = this.web3.getConnectedSigner();
+  public async getProposal(
+    pluginAddress: string,
+    proposalId: number
+    // ): Promise<GasslessVotingProposal | null> {
+  ): Promise<GasslessVotingProposal | null> {
+    const signer = this.web3.getConnectedSigner();
 
-  //   const gaslessVotingContract = VocdoniVoting__factory.connect(
-  //     pluginAddress,
-  //     signer
-  //   );
-  //   let proposal = gaslessVotingContract.getProposal(proposalId);
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
+      pluginAddress,
+      signer
+    );
+    let proposal = await gaslessVotingContract.getProposal(proposalId);
 
-  //   if (!proposal) {
-  //     return null;
-
-  //   // TODO
-  //   return toGaslessVotingProposal(proposal);
-  //   }
-  // }
+    if (!proposal) {
+      return null;
+    }
+    // TODO
+    return toGaslessVotingProposal(proposal);
+  }
 
   /**
    * Returns a list of proposals on the Plugin, filtered by the given criteria
@@ -380,41 +384,26 @@ export class OffchainVotingClientMethods
    * @return {*}  {Promise<VotingSettings>}
    * @memberof TokenVotingClient
    */
-  // public async getVotingSettings(
-  //   pluginAddress: string,
-  //   blockNumber?: number
-  // ): Promise<VotingSettings | null> {
-  //   if (!isAddress(pluginAddress)) {
-  //     throw new InvalidAddressError();
-  //   }
-  //   const query = QueryTokenVotingSettings;
-  //   const params = {
-  //     address: pluginAddress.toLowerCase(),
-  //     block: blockNumber ? { number: blockNumber } : null,
-  //   };
-  //   const name = 'TokenVoting settings';
-  //   type T = { tokenVotingPlugin: SubgraphVotingSettings };
-  //   const { tokenVotingPlugin } = await this.graphql.request<T>({
-  //     query,
-  //     params,
-  //     name,
-  //   });
-  //   if (!tokenVotingPlugin) {
-  //     return null;
-  //   }
-  //   return {
-  //     minDuration: parseInt(tokenVotingPlugin.minDuration),
-  //     supportThreshold: decodeRatio(
-  //       BigInt(tokenVotingPlugin.supportThreshold),
-  //       6
-  //     ),
-  //     minParticipation: decodeRatio(
-  //       BigInt(tokenVotingPlugin.minParticipation),
-  //       6
-  //     ),
-  //     minProposerVotingPower: BigInt(tokenVotingPlugin.minProposerVotingPower),
-  //     votingMode: tokenVotingPlugin.votingMode,
-  //   };
+  public async getVotingSettings(
+    pluginAddress: string,
+    blockNumber?: number
+  ): Promise<VocdoniVotingSettings | null> {
+    if (!isAddress(pluginAddress)) {
+      throw new InvalidAddressError();
+    }
+    const signer = this.web3.getConnectedSigner();
+
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
+      pluginAddress,
+      signer
+    );
+    if (!gaslessVotingContract) {
+      return null;
+    }
+    let params = blockNumber ? { blockTag: blockNumber || 0 } : {};
+    const settings = await gaslessVotingContract.getPluginSettings(params);
+    return votingSettingsfromContract(settings);
+  }
 
   /**
    * Returns the details of the token used in a specific plugin instance

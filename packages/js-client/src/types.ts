@@ -108,10 +108,10 @@ export const ONE_YEAR = 365 * ONE_DAY;
 
 export type VocdoniVotingSettings = {
   minTallyApprovals: number;
-  minDuration: number;
-  minParticipation: BigNumber;
-  supportThreshold: BigNumber;
-  minProposerVotingPower: number;
+  minDuration: BigNumber;
+  minParticipation: number;
+  supportThreshold: number;
+  minProposerVotingPower: BigNumber;
   censusStrategy: string;
   daoTokenAddress: string;
   onlyCommitteeProposalCreation?: boolean;
@@ -205,9 +205,9 @@ export const UPDATE_INFOS: { [index: string]: UpdateInfo } = {
 
 export type ProposalFromSC = {
   executed: boolean;
-  approvals: number;
+  approvers: string[];
   vochainProposalId: string;
-  parameters: vocdoniProposalParams;
+  parameters: VocdoniVoting.ProposalParametersStructOutput;
   allowFailureMap: BigNumber;
   tally: BigNumber[][];
   actions: IDAO.ActionStructOutput[];
