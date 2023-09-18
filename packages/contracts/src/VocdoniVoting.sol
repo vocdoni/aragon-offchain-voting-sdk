@@ -90,7 +90,7 @@ contract VocdoniVoting is IVocdoniVoting, PluginUUPSUpgradeable, VocdoniProposal
     /// @param endDate The timestamp when the proposal ends. At this point the tally can be set.
     /// @param expirationDate The timestamp when the proposal expires. Proposal can't be executed after.
     struct ProposalParameters {
-        uint64[] censusBlock;
+        string[] censusBlock;
         uint64 securityBlock;
         uint64 startDate;
         uint64 endDate;
