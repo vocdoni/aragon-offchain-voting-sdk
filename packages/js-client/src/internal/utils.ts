@@ -1,21 +1,31 @@
 // add internal utils
 import {
   ContractMintTokenParams,
-  GasslessVotingProposal,
+  GaslessVotingProposal,
   OffchainVotingPluginInstall,
-  VocdoniVotingSettings,
+  GaslessPluginVotingSettings,
   VoteOption,
   ProposalFromSC,
+  GaslessProposalParametersStruct,
+  GaslessProposalParametersContractStruct,
+  InvalidResults,
+  GaslessVotingProposalFromSC,
 } from '../types';
-import { MintTokenParams, SubgraphAction } from '@aragon/sdk-client';
-import { DaoAction } from '@aragon/sdk-client-common';
-import { hexToBytes } from '@aragon/sdk-common';
+import { IDAO } from '@aragon/osx-ethers';
+import { MintTokenParams, VoteValues } from '@aragon/sdk-client';
+import {
+  DaoAction,
+  EMPTY_PROPOSAL_METADATA_LINK,
+  ProposalStatus,
+} from '@aragon/sdk-client-common';
+import { hexToBytes, encodeRatio, decodeRatio } from '@aragon/sdk-common';
 import { Result } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
+import { ElectionStatus, PublishedElection } from '@vocdoni/sdk';
 
 // export function votingModeFromContracts(votingMode: number): VotingMode {
 //   switch (votingMode) {
@@ -43,33 +53,57 @@ export function mintTokenParamsFromContract(result: Result): MintTokenParams {
   };
 }
 
-export function votingSettingsToContract(
-  params: VocdoniVotingSettings
-): [boolean, number, number, number, BigNumber, string, BigNumber, string] {
+export function createProposalVotingSettingsToContract(
+  params: GaslessPluginVotingSettings
+): [
+  boolean,
+  number,
+  number,
+  number,
+  BigNumber,
+  BigNumber,
+  string,
+  BigNumber,
+  string
+] {
   return [
     true,
     params.minTallyApprovals,
-    params.minParticipation,
-    params.supportThreshold,
-    params.minDuration,
-    '',
-    params.minProposerVotingPower,
+    encodeRatio(params.minParticipation, 6),
+    encodeRatio(params.supportThreshold, 6),
+    BigNumber.from(params.minDuration),
+    BigNumber.from(0),
+    '0x0000000000000000000000000000000000000000',
+    BigNumber.from(params.minProposerVotingPower ?? 0),
     params.censusStrategy,
   ];
 }
 
 export function votingSettingsfromContract(
   settings: VocdoniVoting.PluginSettingsStructOutput
-): VocdoniVotingSettings {
+): GaslessPluginVotingSettings {
   return {
     onlyCommitteeProposalCreation: settings[0],
     minTallyApprovals: settings[1],
-    minParticipation: settings[2],
-    supportThreshold: settings[3],
+    minParticipation: decodeRatio(settings[2], 6),
+    supportThreshold: decodeRatio(settings[3], 6),
     minDuration: settings[4],
-    daoTokenAddress: settings[5],
-    minProposerVotingPower: settings[6],
-    censusStrategy: settings[7],
+    expirationTime: settings[5],
+    daoTokenAddress: settings[6],
+    minProposerVotingPower: settings[7].toBigInt(),
+    censusStrategy: settings[8],
+  };
+}
+
+export function proposalParamsfromContract(
+  params: GaslessProposalParametersContractStruct
+): GaslessProposalParametersStruct {
+  return {
+    censusBlock: params.censusBlock,
+    securityBlock: 0,
+    startDate: params.startDate.toNumber(),
+    endDate: params.endDate.toNumber(),
+    expirationDate: params.expirationDate.toNumber(),
   };
 }
 
@@ -91,7 +125,7 @@ export function initParamsToContract(params: OffchainVotingPluginInstall) {
   }
   return [
     params.committee,
-    votingSettingsToContract(params.votingSettings),
+    createProposalVotingSettingsToContract(params.votingSettings),
     token,
     balances,
   ];
@@ -162,26 +196,19 @@ export async function voteWithSigners(
 
 export function toGaslessVotingProposal(
   proposal: ProposalFromSC
-): GasslessVotingProposal {
-  proposal.parameters.startDate;
-  const startDate = new Date(proposal.parameters.startDate.toString());
-  const endDate = new Date(proposal.parameters.endDate.toString());
-  const expirationDate = new Date(
-    proposal.parameters.expirationDate.toString()
-  );
+): GaslessVotingProposalFromSC {
+  // const startDate = new Date(proposal.parameters.startDate.toString());
+  // const endDate = new Date(proposal.parameters.endDate.toString());
+  // const expirationDate = new Date(
+  //   proposal.parameters.expirationDate.toString()
+  // );
   return {
     executed: proposal.executed,
     // TODO FIX
     // approvers: proposal.approvals,
     approvers: [],
     vochainProposalId: proposal.vochainProposalId,
-    parameters: {
-      censusBlock: proposal.parameters.censusBlock.toNumber(),
-      securityBlock: 0,
-      startDate,
-      endDate,
-      expirationDate,
-    },
+    parameters: proposalParamsfromContract(proposal.parameters),
     allowFailureMap: proposal.allowFailureMap.toNumber(),
     tally: proposal.tally.map((int) => {
       return int.map((x) => x.toNumber());
@@ -195,68 +222,140 @@ export function toGaslessVotingProposal(
     }),
   };
 }
-// let usedVotingWeight: bigint = BigInt(0);
-// for (const voter of proposal.voters) {
-//   usedVotingWeight += BigInt(voter.votingPower);
-// }
-// const token = parseToken(proposal.plugin.token);
-// return {
-//   id: getCompactProposalId(proposal.id),
-//   dao: {
-//     address: proposal.dao.id,
-//     name: proposal.dao.subdomain,
-//   },
-//   creatorAddress: proposal.creator,
-//   metadata: {
-//     title: metadata.title,
-//     summary: metadata.summary,
-//     description: metadata.description,
-//     resources: metadata.resources,
-//     media: metadata.media,
-//   },
-//   startDate,
-//   endDate,
-//   creationDate,
-//   creationBlockNumber: parseInt(proposal.creationBlockNumber),
-//   executionDate,
-//   executionBlockNumber: parseInt(proposal.executionBlockNumber) || null,
-//   executionTxHash: proposal.executionTxHash || null,
-//   actions: proposal.actions.map(
-//     (action: SubgraphAction): DaoAction => {
-//       return {
-//         data: hexToBytes(action.data),
-//         to: action.to,
-//         value: BigInt(action.value),
-//       };
-//     },
-//   ),
-//   status: computeProposalStatus(proposal),
-//   result: {
-//     yes: proposal.yes ? BigInt(proposal.yes) : BigInt(0),
-//     no: proposal.no ? BigInt(proposal.no) : BigInt(0),
-//     abstain: proposal.abstain ? BigInt(proposal.abstain) : BigInt(0),
-//   },
-//   settings: {
-//     supportThreshold: decodeRatio(BigInt(proposal.supportThreshold), 6),
-//     duration: parseInt(proposal.endDate) -
-//       parseInt(proposal.startDate),
-//     minParticipation: decodeRatio(
-//       (BigInt(proposal.minVotingPower) * BigInt(1000000)) /
-//         BigInt(proposal.totalVotingPower),
-//       6,
-//     ),
-//   },
-//   token,
-//   usedVotingWeight,
-//   totalVotingWeight: BigInt(proposal.totalVotingPower),
-//   votes: proposal.voters.map(
-//     (voter: SubgraphTokenVotingVoterListItem) => {
-//       return {
-//         voteReplaced: voter.voteReplaced,
-//         address: voter.voter.address,
-//         vote: SubgraphVoteValuesMap.get(voter.voteOption) as VoteValues,
-//         weight: BigInt(voter.votingPower),
-//       };
-//     },
-//   ),
-// };
+
+function vochainVoteResultsToProposal(results: string[][]): {
+  [key: string]: number;
+} {
+  let parsedResults: { [key: string]: number } = {};
+  Object.keys(VoteValues)
+    .filter((key) => isNaN(Number(key)))
+    .forEach((key, i) => {
+      parsedResults[key] = Number(results[i]);
+    });
+  return parsedResults;
+}
+
+function hasSupportThreshold(
+  yes: number,
+  no: number,
+  supportThreshold: number
+): boolean {
+  return (1 - supportThreshold) * yes > supportThreshold * no;
+}
+
+function hasMinParticipation(
+  yes: number,
+  no: number,
+  abstain: number,
+  totalVotes: number,
+  minParticipation: number
+): boolean {
+  return yes + no + abstain > minParticipation * totalVotes;
+}
+
+function isProposalApproved(
+  results: string[][],
+  totalVotes: number,
+  supportThreshold: number,
+  minParticipation: number
+): boolean {
+  const parsedResults = vochainVoteResultsToProposal(results);
+  const calculatedTotal = Object.keys(VoteValues)
+    .filter((key) => isNaN(Number(key)))
+    .map((x) => parsedResults[x])
+    .reduce((a, b) => a + b);
+  if (calculatedTotal != totalVotes) throw new InvalidResults();
+
+  return (
+    hasSupportThreshold(
+      parsedResults[VoteValues.YES.toString()],
+      parsedResults[VoteValues.NO.toString()],
+      supportThreshold
+    ) &&
+    hasMinParticipation(
+      parsedResults[VoteValues.YES.toString()],
+      parsedResults[VoteValues.NO.toString()],
+      parsedResults[VoteValues.ABSTAIN.toString()],
+      totalVotes,
+      minParticipation
+    )
+  );
+}
+
+export function vochainStatusToProposalStatus(
+  vochainProposal: PublishedElection,
+  executed: boolean,
+  supportThreshold: number,
+  minParticipation: number
+): ProposalStatus {
+  const vochainStatus = vochainProposal.status;
+  if ([ElectionStatus.UPCOMING, ElectionStatus.PAUSED].includes(vochainStatus))
+    return ProposalStatus.PENDING;
+  if (ElectionStatus.ONGOING === vochainStatus) return ProposalStatus.ACTIVE;
+  // if ([].includes[vochainStatus])
+  if (ElectionStatus.RESULTS) {
+    if (executed) return ProposalStatus.EXECUTED;
+    else if (vochainProposal.finalResults) {
+      return isProposalApproved(
+        vochainProposal.results,
+        vochainProposal.voteCount,
+        supportThreshold,
+        minParticipation
+      )
+        ? ProposalStatus.SUCCEEDED
+        : ProposalStatus.DEFEATED;
+    } else {
+      //TODO decide how to handle this cases
+      return ProposalStatus.PENDING;
+    }
+  }
+  // TODO decide how to handle this cases
+  if (
+    [ElectionStatus.CANCELED, ElectionStatus.PROCESS_UNKNOWN].includes(
+      vochainStatus
+    )
+  )
+    return ProposalStatus.PENDING;
+  // TODO decide which is the generic one
+  return ProposalStatus.PENDING;
+}
+
+export function toNewProposal(
+  SCproposalID: number,
+  dao: IDAO,
+  settings: GaslessPluginVotingSettings,
+  vochainProposal: PublishedElection,
+  SCProposal: GaslessVotingProposalFromSC
+): GaslessVotingProposal {
+  // vochainProposal.
+  return {
+    id: `0x${SCproposalID.toString()}`, // string;
+    dao: {
+      address: dao.address, //string;
+      name: '', //string; TODO
+    },
+    creatorAddress: vochainProposal.organizationId, //string;
+    metadata: EMPTY_PROPOSAL_METADATA_LINK, //ProposalMetadata; //TODO
+    startDate: vochainProposal.startDate, //Date;
+    endDate: vochainProposal.endDate, //Date;
+    creationDate: vochainProposal.creationTime, //Date;
+    actions: SCProposal.actions, //DaoAction[];
+    status: vochainStatusToProposalStatus(
+      vochainProposal,
+      SCProposal.executed,
+      settings.supportThreshold,
+      settings.minParticipation
+    ), //ProposalStatus; //TODO
+    creationBlockNumber: 0, //number; //TODO
+    executionDate: null, //Date | null; //TODO
+    executionBlockNumber: null, //number | null; //TODO
+    executionTxHash: null, //string | null;
+    executed: SCProposal.executed, //boolean;
+    approvers: SCProposal.approvers, //string[];
+    vochainProposalId: SCProposal.vochainProposalId, //string;
+    parameters: SCProposal.parameters, //GaslessProposalParametersStruct;
+    allowFailureMap: SCProposal.allowFailureMap, //number;
+    tally: SCProposal.tally, //number[][];
+    settings,
+  } as GaslessVotingProposal;
+}

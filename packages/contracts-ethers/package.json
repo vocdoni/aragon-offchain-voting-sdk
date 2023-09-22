@@ -1,7 +1,7 @@
 {
   "name": "@vocdoni/offchain-voting-ethers",
   "author": "Vocdoni Association",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Plugin contract definitions for ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",

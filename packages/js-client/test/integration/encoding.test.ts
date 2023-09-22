@@ -8,7 +8,7 @@ import {
 } from "@aragon/sdk-client-common";
 import { Server } from "ganache";
 import { OffchainVotingClient } from "../../src";
-import { VocdoniVotingSettings } from "../../src/internal/types";
+import { GaslessPluginVotingSettings } from "../../src/internal/types";
 import { AddressZero } from "@ethersproject/constants";
 import { BigNumber } from "@ethersproject/bignumber";
 import { encodeRatio } from "@aragon/sdk-common";
@@ -50,7 +50,7 @@ describe("Encoding", () => {
       ],
     };
 
-    const vocdoniVotingSettings: VocdoniVotingSettings = {
+    const GaslessPluginVotingSettings: GaslessPluginVotingSettings = {
       onlyCommitteeProposalCreation: true,
       minTallyApprovals: 1,
       minDuration: 3600,
@@ -65,7 +65,7 @@ describe("Encoding", () => {
       .getPluginInstallItem(
         {
           committee: [TEST_WALLET_ADDRESS],
-          votingSettings: vocdoniVotingSettings,
+          votingSettings: GaslessPluginVotingSettings,
           newToken: token,
         },
         "maticmum",

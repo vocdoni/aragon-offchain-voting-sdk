@@ -6,6 +6,7 @@ import {
   VersionTag,
   ContextParams,
   DaoAction,
+  ProposalBase,
 } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
 import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
@@ -36,7 +37,7 @@ type ExistingTokenParams = {
 // export type OffchainVotingPluginInstall = TokenVotingPluginInstall;
 export type OffchainVotingPluginInstall = {
   committee: string[];
-  votingSettings: VocdoniVotingSettings;
+  votingSettings: GaslessPluginVotingSettings;
   newToken?: NewTokenParams;
   useToken?: ExistingTokenParams;
 };
@@ -58,7 +59,7 @@ export type OffchainVotingOverriddenState = OverriddenState & {
 };
 export type ContractMintTokenParams = [string, BigNumber];
 export type ContractTokenVotingInitParams = [
-  VocdoniVotingSettings[],
+  GaslessPluginVotingSettings[],
   [
     string, // address
     string, // name
@@ -93,10 +94,10 @@ export enum VotingMode {
 
 export type VotingSettings = {
   votingMode: number;
-  supportThreshold: BigNumber;
-  minParticipation: BigNumber;
-  minDuration: number;
-  minProposerVotingPower: number;
+  supportThreshold: number;
+  minParticipation: number;
+  minDuration: BigNumber;
+  minProposerVotingPower: BigNumber;
 };
 
 export const RATIO_BASE = BigNumber.from(10).pow(6); // 100% => 10**6
@@ -106,45 +107,72 @@ export const ONE_HOUR = 60 * 60;
 export const ONE_DAY = 24 * ONE_HOUR;
 export const ONE_YEAR = 365 * ONE_DAY;
 
-export type VocdoniVotingSettings = {
+export type GaslessPluginVotingSettings = {
   minTallyApprovals: number;
   minDuration: BigNumber;
+  expirationTime: BigNumber;
   minParticipation: number;
   supportThreshold: number;
-  minProposerVotingPower: BigNumber;
+  minProposerVotingPower: bigint;
   censusStrategy: string;
-  daoTokenAddress: string;
+  daoTokenAddress?: string; // calculated during the DAO installation
   onlyCommitteeProposalCreation?: boolean;
 };
 
-export type vocdoniProposalParamsOut = {
-  censusBlock: number;
-  securityBlock: number;
-  startDate: Date;
-  endDate: Date;
-  expirationDate: Date;
+// export type GaslessProposalParamsOut = {
+//   censusBlock: number;
+//   securityBlock: number;
+//   startDate: Date;
+//   endDate: Date;
+//   expirationDate: Date;
+// };
+
+// export type GaslessProposalParams = {
+//   censusBlock: string[]; // following the multichain notation https://eips.ethereum.org/EIPS/eip-3770
+//   securityBlock: number; // calculated internally in the smart contract
+//   startDate: number;
+//   endDate: number;
+//   expirationDate: number; // calculated internally in the smart contract based on expirationTime
+// };
+
+export type GaslessProposalParametersStruct = {
+  censusBlock?: string[]; // following the multichain notation https://eips.ethereum.org/EIPS/eip-3770
+  securityBlock?: number; // calculated internally in the smart contract
+  startDate: number; // UNIX timestamp (ms)
+  endDate: number; // UNIX timestamp (ms)
+  expirationDate?: number; // calculated internally in the smart contract based on expirationTime
 };
 
-export type vocdoniProposalParams = {
-  censusBlock: number;
-  securityBlock: number;
-  startDate: number;
-  endDate: number;
-  expirationDate: number;
+export type GaslessProposalParametersContractStruct = {
+  censusBlock: string[];
+  securityBlock: BigNumber;
+  startDate: BigNumber;
+  endDate: BigNumber;
+  expirationDate: BigNumber;
 };
 
-export type GasslessVotingProposal = {
+export type GaslessVotingProposalFromSC = {
   executed: boolean;
   approvers: string[];
   vochainProposalId: string;
-  parameters: vocdoniProposalParamsOut;
+  parameters: GaslessProposalParametersStruct;
   allowFailureMap: number;
   tally: number[][];
   actions?: DaoAction[];
 };
 
+export type GaslessVotingProposal = ProposalBase & {
+  executed: boolean;
+  approvers: string[];
+  vochainProposalId: string;
+  parameters: GaslessProposalParametersStruct;
+  allowFailureMap: number;
+  tally: number[][];
+  settings: GaslessPluginVotingSettings;
+};
+
 export type CreateGasslessProposalParams = CreateProposalBaseParams &
-  vocdoniProposalParams & {
+  GaslessProposalParametersStruct & {
     vochainProposalId: string;
   };
 
@@ -212,3 +240,28 @@ export type ProposalFromSC = {
   tally: BigNumber[][];
   actions: IDAO.ActionStructOutput[];
 };
+
+export type GaslessVotingMember = {
+  /** The address of the member */
+  address: string;
+  /** The balance of the member */
+  balance: bigint;
+};
+
+class SdkError extends Error {
+  public cause?: Error | string;
+  constructor(message: string, cause?: any) {
+    super(message);
+    if (typeof cause === 'string') {
+      this.cause = cause;
+    } else if (cause instanceof Error) {
+      this.cause = cause.message;
+    }
+  }
+}
+
+export class InvalidResults extends SdkError {
+  constructor(message?: string, cause?: any) {
+    super(message ? message : 'Invalid results', cause);
+  }
+}

@@ -35,7 +35,6 @@ export const ERRORS = {
 
 export function getPluginRepoFactoryAddress(networkName: string) {
   let pluginRepoFactoryAddr: string;
-
   if (
     networkName === 'localhost' ||
     networkName === 'hardhat' ||

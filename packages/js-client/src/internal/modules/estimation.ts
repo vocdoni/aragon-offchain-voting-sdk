@@ -1,17 +1,19 @@
-import * as BUILD_METADATA from "../../../../contracts/src/build-metadata.json";
-import { PrepareInstallationParams } from "../../types";
-import { OffchainVotingClientCore } from "../core";
-import { IOffchainVotingClientEstimation } from "../interfaces";
-import { PluginRepo__factory } from "@aragon/osx-ethers";
+import * as BUILD_METADATA from '../../../../contracts/src/build-metadata.json';
+import { PrepareInstallationParams } from '../../types';
+import { OffchainVotingClientCore } from '../core';
+import { IOffchainVotingClientEstimation } from '../interfaces';
+import { PluginRepo__factory } from '@aragon/osx-ethers';
 import {
   GasFeeEstimation,
   prepareGenericInstallationEstimation,
-} from "@aragon/sdk-client-common";
+} from '@aragon/sdk-client-common';
 
-export class SimpleStoragClientEstimation extends OffchainVotingClientCore
-  implements IOffchainVotingClientEstimation {
+export class OffchainVotingClientEstimation
+  extends OffchainVotingClientCore
+  implements IOffchainVotingClientEstimation
+{
   public async prepareInstallation(
-    params: PrepareInstallationParams,
+    params: PrepareInstallationParams
   ): Promise<GasFeeEstimation> {
     let version = params.versionTag;
     // if not specified use the lates version
@@ -21,13 +23,13 @@ export class SimpleStoragClientEstimation extends OffchainVotingClientCore
       // connect to the plugin repo
       const pluginRepo = PluginRepo__factory.connect(
         this.offchainVotingRepoAddress,
-        signer,
+        signer
       );
       // get latest release
       const currentRelease = await pluginRepo.latestRelease();
       // get latest version
-      const latestVersion = await pluginRepo["getLatestVersion(uint8)"](
-        currentRelease,
+      const latestVersion = await pluginRepo['getLatestVersion(uint8)'](
+        currentRelease
       );
       version = latestVersion.tag;
     }

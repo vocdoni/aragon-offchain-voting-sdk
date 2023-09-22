@@ -1,7 +1,18 @@
-import { PrepareInstallationParams } from '../types';
+import {
+  CreateGasslessProposalParams,
+  GaslessVotingProposal,
+  PrepareInstallationParams,
+  GaslessPluginVotingSettings,
+} from '../types';
+import { IDAO } from '@aragon/osx-ethers';
 import {
   VotingSettings,
   MintTokenParams,
+  ProposalCreationStepValue,
+  Erc20TokenDetails,
+  Erc721TokenDetails,
+  Erc20WrapperTokenDetails,
+  TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
   GasFeeEstimation,
@@ -24,8 +35,33 @@ export interface IOffchainVotingClientMethods {
   // repo if its not specified in the state of the client
   prepareInstallation(
     params: PrepareInstallationParams
-  ): AsyncGenerator<PrepareInstallationStepValue>
+  ): AsyncGenerator<PrepareInstallationStepValue>;
   // Add any methods that you need
+  createProposal(
+    params: CreateGasslessProposalParams
+  ): AsyncGenerator<ProposalCreationStepValue>;
+  //
+  getProposal(
+    dao: IDAO,
+    pluginAddress: string,
+    proposalId: number
+  ): Promise<GaslessVotingProposal | null>;
+  //
+  getProposals(
+    dao: IDAO,
+    pluginAddress: string
+  ): Promise<GaslessVotingProposal[]>;
+  //
+  getVotingSettings(
+    pluginAddress: string,
+    blockNumber?: number
+  ): Promise<GaslessPluginVotingSettings | null>;
+  getToken(
+    pluginAddress: string
+  ): Promise<
+    Erc20TokenDetails | Erc721TokenDetails | Erc20WrapperTokenDetails | null
+  >;
+  getMembers(pluginAddress: string): Promise<TokenVotingMember[]>;
 }
 export interface IOffchainVotingClientEstimation {
   prepareInstallation(

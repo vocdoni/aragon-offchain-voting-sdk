@@ -13,16 +13,16 @@ export const DEFAULT_ADDRESSES: {
     repoAddress: '',
   },
   goerli: {
-    setupAddress: '',
-    repoAddress: '',
+    setupAddress: '0xAe0c94AB8289C6fb0a45CA7733a84f549808F75b',
+    repoAddress: '0x2a5Cc5974D3ab30d4B0a6e6a605e06956c975171',
   },
   matic: {
     setupAddress: '',
     repoAddress: '',
   },
   maticmum: {
-    setupAddress: '',
-    repoAddress: '0xaca70d8c462940b839de386bcdd4cacf745632ca',
+    setupAddress: '0x5A6E29875cCa6eb7a9c39938720e6096468a8917',
+    repoAddress: '0x5BD8F8Dc73476d24F37c4d885c4528d5abB8cBe6',
   },
 };
 

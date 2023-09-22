@@ -1,9 +1,10 @@
 import {
   CreateGasslessProposalParams,
-  GasslessVotingProposal,
+  GaslessVotingProposal,
   PrepareInstallationParams,
-  VocdoniVotingSettings,
-  vocdoniProposalParams,
+  GaslessPluginVotingSettings,
+  GaslessProposalParametersContractStruct,
+  GaslessVotingMember,
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { OffchainVotingClientCore } from '../core';
@@ -11,15 +12,17 @@ import { IOffchainVotingClientMethods } from '../interfaces';
 import {
   initParamsToContract,
   toGaslessVotingProposal,
+  toNewProposal,
   votingSettingsfromContract,
 } from '../utils';
-import { GovernanceWrappedERC20__factory } from '@aragon/osx-ethers';
+import { GovernanceWrappedERC20__factory, IDAO } from '@aragon/osx-ethers';
 import {
   Erc20TokenDetails,
   Erc20WrapperTokenDetails,
   Erc721TokenDetails,
   ProposalCreationStepValue,
   ProposalCreationSteps,
+  TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
   findLog,
@@ -31,16 +34,22 @@ import {
 } from '@aragon/sdk-client-common';
 import {
   InvalidAddressError,
-  InvalidProposalIdError,
   ProposalCreationError,
   SizeMismatchError,
   UnsupportedNetworkError,
   boolArrayToBitmap,
   encodeProposalId,
-  isProposalId,
+  hexToBytes,
 } from '@aragon/sdk-common';
 import { isAddress } from '@ethersproject/address';
+import { BigNumber } from '@ethersproject/bignumber';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
+import {
+  EnvOptions,
+  ErrElectionNotFound,
+  VocdoniCensus3Client,
+} from '@vocdoni/sdk';
+import axios from 'axios';
 
 export class OffchainVotingClientMethods
   extends OffchainVotingClientCore
@@ -77,7 +86,7 @@ export class OffchainVotingClientMethods
    * @return {*}  {AsyncGenerator<ProposalCreationStepValue>}
    * @memberof TokenVotingClient
    */
-  public async *createProposalOffchain(
+  public async *createProposal(
     params: CreateGasslessProposalParams
   ): AsyncGenerator<ProposalCreationStepValue> {
     const signer = this.web3.getConnectedSigner();
@@ -94,22 +103,22 @@ export class OffchainVotingClientMethods
       throw new SizeMismatchError();
     }
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
-    const startTimestamp = params.startDate
-      ? new Date(params.startDate).getTime()
-      : 0;
-    const endTimestamp = params.endDate
-      ? new Date(params.endDate).getTime()
-      : 0;
-    const votingParams: vocdoniProposalParams = {
-      censusBlock: params.censusBlock,
-      securityBlock: params.securityBlock,
-      startDate: Math.round(startTimestamp / 1000),
-      endDate: Math.round(endTimestamp / 1000),
-      expirationDate: params.expirationDate,
+    // const startTimestamp = params.startDate
+    //   ? new Date(params.startDate.toNumber()).getTime()
+    //   : 0;
+    // const endTimestamp = params.endDate
+    //   ? new Date(params.endDate.toNumber()).getTime()
+    //   : 0;
+    const votingParams: GaslessProposalParametersContractStruct = {
+      censusBlock: [] as string[],
+      startDate: BigNumber.from(params.startDate),
+      endDate: BigNumber.from(params.endDate),
+      expirationDate: BigNumber.from(0),
+      securityBlock: BigNumber.from(0),
     };
     const tx = await gaslessVotingContract.createProposal(
       // toUtf8Bytes(params.metadataUri),
-      params.vochainProposalId,
+      hexToBytes(params.vochainProposalId),
       allowFailureMap,
       votingParams,
       params.actions || []
@@ -265,23 +274,38 @@ export class OffchainVotingClientMethods
    * @memberof TokenVotingClient
    */
   public async getProposal(
+    dao: IDAO,
     pluginAddress: string,
     proposalId: number
-    // ): Promise<GasslessVotingProposal | null> {
-  ): Promise<GasslessVotingProposal | null> {
+  ): Promise<GaslessVotingProposal | null> {
     const signer = this.web3.getConnectedSigner();
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
       signer
     );
+    let pluginSettings = votingSettingsfromContract(
+      await gaslessVotingContract.getPluginSettings()
+    );
     let proposal = await gaslessVotingContract.getProposal(proposalId);
 
     if (!proposal) {
       return null;
     }
+    let parsedSCProposal = toGaslessVotingProposal(proposal);
+    if (!parsedSCProposal.vochainProposalId)
+      Promise.reject(new ErrElectionNotFound());
+    const vochainProposal = await this.vocdoniSDK.fetchElection(
+      parsedSCProposal.vochainProposalId
+    );
     // TODO
-    return toGaslessVotingProposal(proposal);
+    return toNewProposal(
+      proposalId,
+      dao,
+      pluginSettings,
+      vochainProposal,
+      parsedSCProposal
+    );
   }
 
   /**
@@ -291,90 +315,20 @@ export class OffchainVotingClientMethods
    * @return {*}  {Promise<TokenVotingProposalListItem[]>}
    * @memberof TokenVotingClient
    */
-  // public async getProposals({
-  //   daoAddressOrEns,
-  //   limit = 10,
-  //   status,
-  //   skip = 0,
-  //   direction = SortDirection.ASC,
-  //   sortBy = ProposalSortBy.CREATED_AT,
-  // }: ProposalQueryParams): Promise<TokenVotingProposalListItem[]> {
-  //   let where = {};
-  //   let address = daoAddressOrEns;
-  //   if (address) {
-  //     if (!isAddress(address)) {
-  //       await this.web3.ensureOnline();
-  //       const provider = this.web3.getProvider();
-  //       if (!provider) {
-  //         throw new NoProviderError();
-  //       }
-  //       try {
-  //         const resolvedAddress = await provider.resolveName(address);
-  //         if (!resolvedAddress) {
-  //           throw new InvalidAddressOrEnsError();
-  //         }
-  //         address = resolvedAddress;
-  //       } catch (e) {
-  //         throw new InvalidAddressOrEnsError(e);
-  //       }
-  //     }
-  //     where = { dao: address.toLowerCase() };
-  //   }
-  //   if (status) {
-  //     where = { ...where, ...computeProposalStatusFilter(status) };
-  //   }
-  //   const query = QueryTokenVotingProposals;
-  //   const params = {
-  //     where,
-  //     limit,
-  //     skip,
-  //     direction,
-  //     sortBy,
-  //   };
-  //   const name = "TokenVoting proposals";
-  //   type T = { tokenVotingProposals: SubgraphTokenVotingProposalListItem[] };
-  //   const { tokenVotingProposals } = await this.graphql.request<T>({
-  //     query,
-  //     params,
-  //     name,
-  //   });
-  //   return Promise.all(
-  //     tokenVotingProposals.map(
-  //       async (
-  //         proposal: SubgraphTokenVotingProposalListItem,
-  //       ): Promise<TokenVotingProposalListItem> => {
-  //         // format in the metadata field
-  //         if (!proposal.metadata) {
-  //           return toTokenVotingProposalListItem(
-  //             proposal,
-  //             EMPTY_PROPOSAL_METADATA_LINK,
-  //           );
-  //         }
-  //         try {
-  //           const metadataCid = resolveIpfsCid(proposal.metadata);
-  //           // Avoid blocking Promise.all if this individual fetch takes too long
-  //           const stringMetadata = await promiseWithTimeout(
-  //             this.ipfs.fetchString(metadataCid),
-  //             MULTI_FETCH_TIMEOUT,
-  //           );
-  //           const metadata = JSON.parse(stringMetadata) as ProposalMetadata;
-  //           return toTokenVotingProposalListItem(proposal, metadata);
-  //         } catch (err) {
-  //           if (err instanceof InvalidCidError) {
-  //             return toTokenVotingProposalListItem(
-  //               proposal,
-  //               UNSUPPORTED_PROPOSAL_METADATA_LINK,
-  //             );
-  //           }
-  //           return toTokenVotingProposalListItem(
-  //             proposal,
-  //             UNAVAILABLE_PROPOSAL_METADATA,
-  //           );
-  //         }
-  //       },
-  //     ),
-  //   );
-  // }
+  public async getProposals(
+    dao: IDAO,
+    pluginAddress: string
+  ): Promise<GaslessVotingProposal[]> {
+    let id = 0;
+    let proposal = null;
+    let proposals: GaslessVotingProposal[] = [];
+    do {
+      let proposal = await this.getProposal(dao, pluginAddress, id);
+      if (proposal) proposals.push(proposal);
+      id += 1;
+    } while (proposal != null);
+    return proposals;
+  }
 
   /**
    * Returns the settings of a plugin given the address of the plugin instance
@@ -387,7 +341,7 @@ export class OffchainVotingClientMethods
   public async getVotingSettings(
     pluginAddress: string,
     blockNumber?: number
-  ): Promise<VocdoniVotingSettings | null> {
+  ): Promise<GaslessPluginVotingSettings | null> {
     if (!isAddress(pluginAddress)) {
       throw new InvalidAddressError();
     }
@@ -442,5 +396,47 @@ export class OffchainVotingClientMethods
       decimals: await tokenContract.decimals(),
       type: TokenType.ERC20,
     };
+  }
+
+  /**
+   * Returns the details of the token used in a specific plugin instance
+   *
+   * @param {string} pluginAddress
+   * @return {*}  {Promise<Erc20TokenDetails | null>}
+   * @memberof TokenVotingClient
+   */
+  public async getMembers(pluginAddress: string): Promise<TokenVotingMember[]> {
+    if (!isAddress(pluginAddress)) {
+      throw new InvalidAddressError();
+    }
+    const signer = this.web3.getConnectedSigner();
+
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
+      pluginAddress,
+      signer
+    );
+    if (!gaslessVotingContract) {
+      return Promise.reject();
+    }
+    const pluginSettings = await gaslessVotingContract.getPluginSettings();
+    const census3client = new VocdoniCensus3Client({ env: EnvOptions.STG });
+    return axios
+      .get(
+        census3client.url +
+          `/debug/token/${pluginSettings.daoTokenAddress}/holders`
+      )
+      .then((response) =>
+        response.data.map(
+          (val: GaslessVotingMember) =>
+            ({
+              address: val.address,
+              balance: val.balance,
+              delegatee: null,
+              delegators: [],
+              votingPower: val.balance,
+            } as TokenVotingMember)
+        )
+      )
+      .catch(() => []);
   }
 }

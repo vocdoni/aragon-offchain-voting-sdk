@@ -69,6 +69,7 @@
     "lint:ts": "eslint --ignore-path ./.eslintignore --ext .js,.ts .",
     "postinstall": "DOTENV_CONFIG_PATH=../../.env.example yarn typechain",
     "test": "hardhat test",
+    "my": "hardhat run --network goerli deploy/02_setup/11_setup_conclude.ts",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
     "clean": "rimraf ./artifacts ./cache ./coverage ./types ./coverage.json && yarn typechain"
   }

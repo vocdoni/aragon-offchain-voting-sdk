@@ -1,7 +1,11 @@
 import metadata from '../../../../contracts/src/build-metadata.json';
-import { DEFAULT_ADDRESSES } from '../constants';
-import { ITokenVotingClientEncoding } from '../interfaces';
 import { OffchainVotingPluginInstall } from '../../types';
+import { DEFAULT_ADDRESSES } from '../constants';
+import { OffchainVotingClientCore } from '../core';
+import {
+  IOffchainVotingClientEncoding,
+  ITokenVotingClientEncoding,
+} from '../interfaces';
 import { mintTokenParamsToContract, initParamsToContract } from '../utils';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import {
@@ -34,8 +38,8 @@ const prepareInstallationDataTypes = getNamedTypesFromMetadata(
  * Encoding module the SDK TokenVoting Client
  */
 export class OffchainVotingClientEncoding
-  extends ClientCore
-  implements ITokenVotingClientEncoding
+  extends OffchainVotingClientCore
+  implements IOffchainVotingClientEncoding
 {
   /**
    * Computes the parameters to be given when creating the DAO,
@@ -56,6 +60,8 @@ export class OffchainVotingClientEncoding
     }
     const args = initParamsToContract(params);
     const hexBytes = defaultAbiCoder.encode(prepareInstallationDataTypes, args);
+    console.log(`network ${networkName}`);
+    console.log(`repoaddress ${DEFAULT_ADDRESSES[networkName].repoAddress}`);
     return {
       id: DEFAULT_ADDRESSES[networkName].repoAddress,
       data: hexToBytes(hexBytes),

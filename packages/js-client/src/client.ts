@@ -5,17 +5,16 @@ import {
   IOffchainVotingClientEncoding,
   IOffchainVotingClientEstimation,
   IOffchainVotingClientMethods,
-  SimpleStoragClientEstimation,
+  OffchainVotingClientEstimation,
   OffchainVotingClientDecoding,
   OffchainVotingClientEncoding,
   OffchainVotingClientMethods,
 } from './internal';
 import { OffchainVotingClientCore } from './internal/core';
-import {
-  PluginInstallItem,
-} from '@aragon/sdk-client-common';
-import { Networkish } from '@ethersproject/providers';
 import { OffchainVotingPluginInstall } from './types';
+import { PluginInstallItem } from '@aragon/sdk-client-common';
+import { Networkish } from '@ethersproject/providers';
+import { EnvOptions } from '@vocdoni/sdk';
 
 export class OffchainVotingClient
   extends OffchainVotingClientCore
@@ -26,12 +25,16 @@ export class OffchainVotingClient
   public encoding: IOffchainVotingClientEncoding;
   public decoding: IOffchainVotingClientDecoding;
 
-  constructor(pluginContext: OffchainVotingContext) {
-    super(pluginContext);
-    this.methods = new OffchainVotingClientMethods(pluginContext);
-    this.estimation = new SimpleStoragClientEstimation(pluginContext);
-    this.encoding = new OffchainVotingClientEncoding(pluginContext);
-    this.decoding = new OffchainVotingClientDecoding(pluginContext);
+  constructor(pluginContext: OffchainVotingContext, vocdoniEnv: EnvOptions) {
+    if (!vocdoniEnv) throw 'Invalid Vocdoni environment';
+    super(pluginContext, vocdoniEnv);
+    this.methods = new OffchainVotingClientMethods(pluginContext, vocdoniEnv);
+    this.estimation = new OffchainVotingClientEstimation(
+      pluginContext,
+      vocdoniEnv
+    );
+    this.encoding = new OffchainVotingClientEncoding(pluginContext, vocdoniEnv);
+    this.decoding = new OffchainVotingClientDecoding(pluginContext, vocdoniEnv);
   }
 
   static encoding = {
