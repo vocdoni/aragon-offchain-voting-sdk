@@ -64,8 +64,12 @@ export interface IOffchainVotingClientMethods {
   getMembers(pluginAddress: string): Promise<TokenVotingMember[]>;
 }
 export interface IOffchainVotingClientEstimation {
-  prepareInstallation(
-    params: PrepareInstallationParams
+  // prepareInstallation(
+  //   params: PrepareInstallationParams
+  // ): Promise<GasFeeEstimation>;
+  // createProposal
+  createProposal(
+    params: CreateGasslessProposalParams
   ): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }

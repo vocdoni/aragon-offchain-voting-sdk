@@ -42,7 +42,6 @@ import {
   hexToBytes,
 } from '@aragon/sdk-common';
 import { isAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 import {
   EnvOptions,

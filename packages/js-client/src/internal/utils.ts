@@ -7,7 +7,6 @@ import {
   VoteOption,
   ProposalFromSC,
   GaslessProposalParametersStruct,
-  GaslessProposalParametersContractStruct,
   InvalidResults,
   GaslessVotingProposalFromSC,
 } from '../types';

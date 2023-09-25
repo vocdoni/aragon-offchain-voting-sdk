@@ -1,11 +1,15 @@
+import {
+  CreateGasslessProposalParams,
+  GaslessProposalParametersContractStruct,
+} from '../../types';
 import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientEstimation } from '../interfaces';
-import { PluginRepo__factory } from '@aragon/osx-ethers';
+import { GasFeeEstimation } from '@aragon/sdk-client-common';
 import {
-  GasFeeEstimation,
-  prepareGenericInstallationEstimation,
-} from '@aragon/sdk-client-common';
-import { SizeMismatchError, boolArrayToBitmap } from '@aragon/sdk-common';
+  SizeMismatchError,
+  boolArrayToBitmap,
+  hexToBytes,
+} from '@aragon/sdk-common';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 
 export class OffchainVotingClientEstimation
@@ -15,16 +19,16 @@ export class OffchainVotingClientEstimation
   /**
    * Estimates the gas fee of creating a proposal on the plugin
    *
-   * @param {CreateMajorityVotingProposalParams} params
+   * @param {CreateGasslessProposalParams} params
    * @return {*}  {Promise<GasFeeEstimation>}
-   * @memberof TokenVotingClientEstimation
+   * @memberof OffchainVotingClientEstimation
    */
   public async createProposal(
-    params: CreateMajorityVotingProposalParams
+    params: CreateGasslessProposalParams
   ): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
 
-    const tokenVotingContract = VocdoniVoting__factory.connect(
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
       params.pluginAddress,
       signer
     );
@@ -37,9 +41,6 @@ export class OffchainVotingClientEstimation
     }
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
 
-    const startTimestamp = params.startDate?.getTime() || 0;
-    const endTimestamp = params.endDate?.getTime() || 0;
-
     const votingParams: GaslessProposalParametersContractStruct = {
       censusBlock: [] as string[],
       startDate: BigInt(params.startDate),
@@ -47,25 +48,15 @@ export class OffchainVotingClientEstimation
       expirationDate: BigInt(0),
       securityBlock: BigInt(0),
     };
-    const tx = await gaslessVotingContract.createProposal(
-      // toUtf8Bytes(params.metadataUri),
-      hexToBytes(params.vochainProposalId),
-      allowFailureMap,
-      votingParams,
-      params.actions || []
-      // params.creatorVote || 0,
-      // params.executeOnPass || false,
-    );
-
     const estimatedGasFee =
-      await tokenVotingContract.estimateGas.createProposal(
-        toUtf8Bytes(params.metadataUri),
-        params.actions || [],
+      await gaslessVotingContract.estimateGas.createProposal(
+        // toUtf8Bytes(params.metadataUri),
+        hexToBytes(params.vochainProposalId),
         allowFailureMap,
-        Math.round(startTimestamp / 1000),
-        Math.round(endTimestamp / 1000),
-        params.creatorVote || 0,
-        params.executeOnPass || false
+        votingParams,
+        params.actions || []
+        // params.creatorVote || 0,
+        // params.executeOnPass || false,
       );
     return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
   }
