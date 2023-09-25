@@ -57,7 +57,7 @@ export type OffchainVotingContextState = ContextState & {
 export type OffchainVotingOverriddenState = OverriddenState & {
   [key in keyof OffchainVotingContextState]: boolean;
 };
-export type ContractMintTokenParams = [string, BigNumber];
+export type ContractMintTokenParams = [string, bigint];
 export type ContractTokenVotingInitParams = [
   GaslessPluginVotingSettings[],
   [
@@ -67,7 +67,7 @@ export type ContractTokenVotingInitParams = [
   ],
   [
     string[], // receivers,
-    BigNumber[] // amounts
+    bigint[] // amounts
   ]
 ];
 
@@ -96,8 +96,8 @@ export type VotingSettings = {
   votingMode: number;
   supportThreshold: number;
   minParticipation: number;
-  minDuration: BigNumber;
-  minProposerVotingPower: BigNumber;
+  minDuration: bigint;
+  minProposerVotingPower: bigint;
 };
 
 export const RATIO_BASE = BigNumber.from(10).pow(6); // 100% => 10**6
@@ -109,8 +109,8 @@ export const ONE_YEAR = 365 * ONE_DAY;
 
 export type GaslessPluginVotingSettings = {
   minTallyApprovals: number;
-  minDuration: BigNumber;
-  expirationTime: BigNumber;
+  minDuration: bigint;
+  expirationTime: bigint;
   minParticipation: number;
   supportThreshold: number;
   minProposerVotingPower: bigint;
@@ -145,10 +145,10 @@ export type GaslessProposalParametersStruct = {
 
 export type GaslessProposalParametersContractStruct = {
   censusBlock: string[];
-  securityBlock: BigNumber;
-  startDate: BigNumber;
-  endDate: BigNumber;
-  expirationDate: BigNumber;
+  securityBlock: bigint;
+  startDate: bigint;
+  endDate: bigint;
+  expirationDate: bigint;
 };
 
 export type GaslessVotingProposalFromSC = {

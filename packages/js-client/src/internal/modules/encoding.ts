@@ -2,10 +2,7 @@ import metadata from '../../../../contracts/src/build-metadata.json';
 import { OffchainVotingPluginInstall } from '../../types';
 import { DEFAULT_ADDRESSES } from '../constants';
 import { OffchainVotingClientCore } from '../core';
-import {
-  IOffchainVotingClientEncoding,
-  ITokenVotingClientEncoding,
-} from '../interfaces';
+import { IOffchainVotingClientEncoding } from '../interfaces';
 import { mintTokenParamsToContract, initParamsToContract } from '../utils';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import {
@@ -14,7 +11,6 @@ import {
   VotingSettings,
 } from '@aragon/sdk-client';
 import {
-  ClientCore,
   DaoAction,
   getNamedTypesFromMetadata,
   PluginInstallItem,

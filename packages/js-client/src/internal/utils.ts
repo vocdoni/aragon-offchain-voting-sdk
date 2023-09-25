@@ -43,7 +43,7 @@ import { ElectionStatus, PublishedElection } from '@vocdoni/sdk';
 export function mintTokenParamsToContract(
   params: MintTokenParams
 ): ContractMintTokenParams {
-  return [params.address, BigNumber.from(params.amount)];
+  return [params.address, BigInt(params.amount)];
 }
 
 export function mintTokenParamsFromContract(result: Result): MintTokenParams {
@@ -87,8 +87,8 @@ export function votingSettingsfromContract(
     minTallyApprovals: settings[1],
     minParticipation: decodeRatio(settings[2], 6),
     supportThreshold: decodeRatio(settings[3], 6),
-    minDuration: settings[4],
-    expirationTime: settings[5],
+    minDuration: settings[4].toBigInt(),
+    expirationTime: settings[5].toBigInt(),
     daoTokenAddress: settings[6],
     minProposerVotingPower: settings[7].toBigInt(),
     censusStrategy: settings[8],
@@ -96,14 +96,14 @@ export function votingSettingsfromContract(
 }
 
 export function proposalParamsfromContract(
-  params: GaslessProposalParametersContractStruct
+  params: VocdoniVoting.ProposalParametersStructOutput
 ): GaslessProposalParametersStruct {
   return {
     censusBlock: params.censusBlock,
     securityBlock: 0,
-    startDate: params.startDate.toNumber(),
-    endDate: params.endDate.toNumber(),
-    expirationDate: params.expirationDate.toNumber(),
+    startDate: Number(params.startDate),
+    endDate: Number(params.endDate),
+    expirationDate: Number(params.expirationDate),
   };
 }
 
@@ -168,7 +168,7 @@ export async function voteWithSigners(
 //   return (await provider.getBlock('latest')).timestamp;
 // }
 
-// export async function advanceTime(time: number) {
+// export async function advanceTime(timmmme: number) {
 //   const provider = this.web3.getProvider();
 //   await provider.send('evm_increaseTime', [time]);
 //   await provider.send('evm_mine', []);
@@ -211,13 +211,13 @@ export function toGaslessVotingProposal(
     parameters: proposalParamsfromContract(proposal.parameters),
     allowFailureMap: proposal.allowFailureMap.toNumber(),
     tally: proposal.tally.map((int) => {
-      return int.map((x) => x.toNumber());
+      return int.map((x) => Number(x));
     }),
     actions: proposal.actions.map((action): DaoAction => {
       return {
         data: hexToBytes(action.data),
         to: action.to,
-        value: BigInt(action.value.toBigInt()),
+        value: action.value.toBigInt(),
       };
     }),
   };

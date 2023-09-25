@@ -111,10 +111,10 @@ export class OffchainVotingClientMethods
     //   : 0;
     const votingParams: GaslessProposalParametersContractStruct = {
       censusBlock: [] as string[],
-      startDate: BigNumber.from(params.startDate),
-      endDate: BigNumber.from(params.endDate),
-      expirationDate: BigNumber.from(0),
-      securityBlock: BigNumber.from(0),
+      startDate: BigInt(params.startDate),
+      endDate: BigInt(params.endDate),
+      expirationDate: BigInt(0),
+      securityBlock: BigInt(0),
     };
     const tx = await gaslessVotingContract.createProposal(
       // toUtf8Bytes(params.metadataUri),
