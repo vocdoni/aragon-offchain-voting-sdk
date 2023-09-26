@@ -268,3 +268,21 @@ export class InvalidResults extends SdkError {
     super(message ? message : 'Invalid results', cause);
   }
 }
+
+export enum SetTallyStep {
+  EXECUTING = 'executing',
+  DONE = 'done',
+}
+
+export type SetTallyStepValue =
+  | { key: SetTallyStep.EXECUTING; txHash: string }
+  | { key: SetTallyStep.DONE };
+
+export enum ApproveTallyStep {
+  EXECUTING = 'executing',
+  DONE = 'done',
+}
+
+export type ApproveTallyStepValue =
+  | { key: ApproveTallyStep.EXECUTING; txHash: string }
+  | { key: ApproveTallyStep.DONE };

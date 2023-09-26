@@ -3,6 +3,8 @@ import {
   GaslessVotingProposal,
   PrepareInstallationParams,
   GaslessPluginVotingSettings,
+  SetTallyStepValue,
+  ApproveTallyStepValue,
 } from '../types';
 import {
   VotingSettings,
@@ -63,6 +65,15 @@ export interface IOffchainVotingClientMethods {
     Erc20TokenDetails | Erc721TokenDetails | Erc20WrapperTokenDetails | null
   >;
   getMembers(pluginAddress: string): Promise<TokenVotingMember[]>;
+  isCommitteeMember(
+    pluginAddress: string,
+    memberAddress: string
+  ): Promise<boolean>;
+  setTally(proposalId: string): AsyncGenerator<SetTallyStepValue>;
+  approveTally(
+    proposalId: string,
+    tryExecution: boolean
+  ): AsyncGenerator<ApproveTallyStepValue>;
 }
 export interface IOffchainVotingClientEstimation {
   // prepareInstallation(
