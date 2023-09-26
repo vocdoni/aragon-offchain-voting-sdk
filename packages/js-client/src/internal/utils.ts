@@ -10,7 +10,6 @@ import {
   InvalidResults,
   GaslessVotingProposalFromSC,
 } from '../types';
-import { IDAO } from '@aragon/osx-ethers';
 import { MintTokenParams, VoteValues } from '@aragon/sdk-client';
 import {
   DaoAction,
@@ -287,6 +286,7 @@ export function vochainStatusToProposalStatus(
   supportThreshold: number,
   minParticipation: number
 ): ProposalStatus {
+  //TODO probably need to check also the state of the contract
   const vochainStatus = vochainProposal.status;
   if ([ElectionStatus.UPCOMING, ElectionStatus.PAUSED].includes(vochainStatus))
     return ProposalStatus.PENDING;
@@ -321,17 +321,17 @@ export function vochainStatusToProposalStatus(
 
 export function toNewProposal(
   SCproposalID: number,
-  dao: IDAO,
+  daoName: string,
+  daoAddress: string,
   settings: GaslessPluginVotingSettings,
   vochainProposal: PublishedElection,
   SCProposal: GaslessVotingProposalFromSC
 ): GaslessVotingProposal {
-  // vochainProposal.
   return {
     id: `0x${SCproposalID.toString()}`, // string;
     dao: {
-      address: dao.address, //string;
-      name: '', //string; TODO
+      address: daoAddress, //string;
+      name: daoName, //string; TODO
     },
     creatorAddress: vochainProposal.organizationId, //string;
     metadata: EMPTY_PROPOSAL_METADATA_LINK, //ProposalMetadata; //TODO
@@ -356,5 +356,8 @@ export function toNewProposal(
     allowFailureMap: SCProposal.allowFailureMap, //number;
     tally: SCProposal.tally, //number[][];
     settings,
+    vochainMetadata: vochainProposal.meta,
+    tallyVochain: vochainProposal.results.map((x) => x.map((y) => Number(y))),
+    tallyVochainFinal: vochainProposal.finalResults,
   } as GaslessVotingProposal;
 }

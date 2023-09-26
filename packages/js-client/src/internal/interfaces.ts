@@ -4,7 +4,6 @@ import {
   PrepareInstallationParams,
   GaslessPluginVotingSettings,
 } from '../types';
-import { IDAO } from '@aragon/osx-ethers';
 import {
   VotingSettings,
   MintTokenParams,
@@ -42,13 +41,15 @@ export interface IOffchainVotingClientMethods {
   ): AsyncGenerator<ProposalCreationStepValue>;
   //
   getProposal(
-    dao: IDAO,
+    daoName: string,
+    daoAddress: string,
     pluginAddress: string,
     proposalId: number
   ): Promise<GaslessVotingProposal | null>;
   //
   getProposals(
-    dao: IDAO,
+    daoName: string,
+    daoAddress: string,
     pluginAddress: string
   ): Promise<GaslessVotingProposal[]>;
   //

@@ -15,7 +15,7 @@ import {
   toNewProposal,
   votingSettingsfromContract,
 } from '../utils';
-import { GovernanceWrappedERC20__factory, IDAO } from '@aragon/osx-ethers';
+import { GovernanceWrappedERC20__factory } from '@aragon/osx-ethers';
 import {
   Erc20TokenDetails,
   Erc20WrapperTokenDetails,
@@ -153,7 +153,6 @@ export class OffchainVotingClientMethods
       proposalId: encodeProposalId(params.pluginAddress, Number(proposalId)),
     };
   }
-  // }
 
   /**
    * Executes the given proposal, provided that it has already passed
@@ -273,7 +272,8 @@ export class OffchainVotingClientMethods
    * @memberof TokenVotingClient
    */
   public async getProposal(
-    dao: IDAO,
+    daoName: string,
+    daoAddress: string,
     pluginAddress: string,
     proposalId: number
   ): Promise<GaslessVotingProposal | null> {
@@ -300,7 +300,8 @@ export class OffchainVotingClientMethods
     // TODO
     return toNewProposal(
       proposalId,
-      dao,
+      daoName,
+      daoAddress,
       pluginSettings,
       vochainProposal,
       parsedSCProposal
@@ -315,14 +316,20 @@ export class OffchainVotingClientMethods
    * @memberof TokenVotingClient
    */
   public async getProposals(
-    dao: IDAO,
+    daoName: string,
+    daoAddress: string,
     pluginAddress: string
   ): Promise<GaslessVotingProposal[]> {
     let id = 0;
     let proposal = null;
     let proposals: GaslessVotingProposal[] = [];
     do {
-      let proposal = await this.getProposal(dao, pluginAddress, id);
+      let proposal = await this.getProposal(
+        daoName,
+        daoAddress,
+        pluginAddress,
+        id
+      );
       if (proposal) proposals.push(proposal);
       id += 1;
     } while (proposal != null);

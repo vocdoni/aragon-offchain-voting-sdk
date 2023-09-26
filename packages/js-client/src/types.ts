@@ -169,6 +169,9 @@ export type GaslessVotingProposal = ProposalBase & {
   allowFailureMap: number;
   tally: number[][];
   settings: GaslessPluginVotingSettings;
+  vochainMetadata: any;
+  tallyVochain: number[][];
+  tallyVochainFinal: boolean;
 };
 
 export type CreateGasslessProposalParams = CreateProposalBaseParams &
