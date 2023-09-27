@@ -4,7 +4,6 @@ import {
   PrepareInstallationParams,
   GaslessPluginVotingSettings,
   GaslessProposalParametersContractStruct,
-  GaslessVotingMember,
   SetTallyStepValue,
   SetTallyStep,
   ApproveTallyStep,
@@ -407,14 +406,14 @@ export class OffchainVotingClientMethods
           `/debug/token/${pluginSettings.daoTokenAddress}/holders`
       )
       .then((response) =>
-        response.data.map(
-          (val: GaslessVotingMember) =>
+        Object.keys(response.data['holders']).map(
+          (val: string) =>
             ({
-              address: val.address,
-              balance: val.balance,
+              address: val,
+              balance: response.data['holders'][val],
               delegatee: null,
               delegators: [],
-              votingPower: val.balance,
+              votingPower: response.data['holders'][val],
             } as TokenVotingMember)
         )
       )
