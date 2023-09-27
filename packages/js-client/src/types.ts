@@ -110,8 +110,8 @@ export const ONE_YEAR = 365 * ONE_DAY;
 
 export type GaslessPluginVotingSettings = {
   minTallyApprovals: number;
-  minDuration: bigint;
-  expirationTime: bigint;
+  minDuration: number;
+  expirationTime: number;
   minParticipation: number;
   supportThreshold: number;
   minProposerVotingPower: bigint;
