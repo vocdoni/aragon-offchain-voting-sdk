@@ -356,7 +356,7 @@ export function toNewProposal(
     allowFailureMap: SCProposal.allowFailureMap, //number;
     tally: SCProposal.tally, //number[][];
     settings,
-    vochainMetadata: vochainProposal.meta,
+    vochainMetadata: vochainProposal,
     tallyVochain: vochainProposal.results.map((x) => x.map((y) => Number(y))),
     tallyVochainFinal: vochainProposal.finalResults,
   } as GaslessVotingProposal;

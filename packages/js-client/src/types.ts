@@ -10,6 +10,7 @@ import {
 } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
 import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
+import { PublishedElection } from '@vocdoni/sdk';
 
 // extend the ContextParams interface with the params that you need
 export type OffchainVotingContextParams = ContextParams & {
@@ -169,7 +170,7 @@ export type GaslessVotingProposal = ProposalBase & {
   allowFailureMap: number;
   tally: number[][];
   settings: GaslessPluginVotingSettings;
-  vochainMetadata: any;
+  vochainMetadata: PublishedElection;
   tallyVochain: number[][];
   tallyVochainFinal: boolean;
 };

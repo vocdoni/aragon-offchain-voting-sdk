@@ -19,6 +19,7 @@ import {
   GasFeeEstimation,
   PrepareInstallationStepValue,
   DaoAction,
+  InterfaceParams,
 } from '@aragon/sdk-client-common';
 
 export interface IOffchainVotingClient {
@@ -92,6 +93,7 @@ export interface IOffchainVotingClientEncoding {
 export interface IOffchainVotingClientDecoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(data: Uint8Array): params;
+  findInterface(data: Uint8Array): InterfaceParams | null;
 }
 
 export interface ITokenVotingClientEncoding {
