@@ -327,6 +327,10 @@ export function toNewProposal(
   vochainProposal: PublishedElection,
   SCProposal: GaslessVotingProposalFromSC
 ): GaslessVotingProposal {
+  let metadata = EMPTY_PROPOSAL_METADATA_LINK;
+  metadata.title = vochainProposal.title.default;
+  metadata.description =
+    vochainProposal.description?.default || metadata.description;
   return {
     id: `0x${SCproposalID.toString()}`, // string;
     dao: {
