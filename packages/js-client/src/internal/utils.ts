@@ -7,10 +7,13 @@ import {
   VoteOption,
   ProposalFromSC,
   GaslessProposalParametersStruct,
-  InvalidResults,
   GaslessVotingProposalFromSC,
 } from '../types';
-import { MintTokenParams, VoteValues } from '@aragon/sdk-client';
+import {
+  MintTokenParams,
+  TokenVotingProposalResult,
+  VoteValues,
+} from '@aragon/sdk-client';
 import {
   DaoAction,
   EMPTY_PROPOSAL_METADATA_LINK,
@@ -23,7 +26,12 @@ import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
-import { ElectionStatus, PublishedElection } from '@vocdoni/sdk';
+import {
+  ElectionStatus,
+  IChoice,
+  IQuestion,
+  PublishedElection,
+} from '@vocdoni/sdk';
 
 // export function votingModeFromContracts(votingMode: number): VotingMode {
 //   switch (votingMode) {
@@ -221,66 +229,62 @@ export function toGaslessVotingProposal(
   };
 }
 
-function vochainVoteResultsToProposal(results: string[][]): {
-  [key: string]: number;
-} {
-  let parsedResults: { [key: string]: number } = {};
-  Object.keys(VoteValues)
-    .filter((key) => isNaN(Number(key)))
-    .forEach((key, i) => {
-      parsedResults[key] = Number(results[i]);
-    });
-  return parsedResults;
+export function vochainVoteResultsToProposal(
+  questions: IQuestion[]
+): TokenVotingProposalResult {
+  let parsedResults: { [key: string]: bigint } = {};
+  questions[0].choices.map((choice: IChoice) => {
+    if (VoteValues[choice.title.default.toUpperCase() as any] !== undefined) {
+      parsedResults[choice.title.default.toLowerCase()] =
+        choice.results !== undefined ? BigInt(choice.results) : BigInt(0);
+    }
+  });
+  return parsedResults as TokenVotingProposalResult;
 }
 
-function hasSupportThreshold(
-  yes: number,
-  no: number,
+export function hasSupportThreshold(
+  yes: bigint,
+  no: bigint,
   supportThreshold: number
 ): boolean {
-  return (1 - supportThreshold) * yes > supportThreshold * no;
+  return (
+    (BigInt(1) - BigInt(supportThreshold)) * yes > BigInt(supportThreshold) * no
+  );
 }
 
-function hasMinParticipation(
-  yes: number,
-  no: number,
-  abstain: number,
-  totalVotes: number,
+export function hasMinParticipation(
+  yes: bigint,
+  no: bigint,
+  abstain: bigint,
   minParticipation: number
 ): boolean {
-  return yes + no + abstain > minParticipation * totalVotes;
+  //   const calculatedTotal = Object.values(results)
+  //   // .map((x) => results[x])
+  //   .reduce((a, b) => a + b);
+  // // if (calculatedTotal != totalVotes) throw new InvalidResults();
+
+  return yes + no + abstain > BigInt(minParticipation) * (yes + no + abstain);
 }
 
-function isProposalApproved(
-  results: string[][],
-  totalVotes: number,
+export function isProposalApproved(
+  results: TokenVotingProposalResult,
   supportThreshold: number,
   minParticipation: number
 ): boolean {
-  const parsedResults = vochainVoteResultsToProposal(results);
-  const calculatedTotal = Object.keys(VoteValues)
-    .filter((key) => isNaN(Number(key)))
-    .map((x) => parsedResults[x])
-    .reduce((a, b) => a + b);
-  if (calculatedTotal != totalVotes) throw new InvalidResults();
-
+  if (!results) return false;
   return (
-    hasSupportThreshold(
-      parsedResults[VoteValues.YES.toString()],
-      parsedResults[VoteValues.NO.toString()],
-      supportThreshold
-    ) &&
+    hasSupportThreshold(results.yes, results.no, supportThreshold) &&
     hasMinParticipation(
-      parsedResults[VoteValues.YES.toString()],
-      parsedResults[VoteValues.NO.toString()],
-      parsedResults[VoteValues.ABSTAIN.toString()],
-      totalVotes,
+      results.yes,
+      results.no,
+      results.abstain,
       minParticipation
     )
   );
 }
 
 export function vochainStatusToProposalStatus(
+  parsedResults: TokenVotingProposalResult,
   vochainProposal: PublishedElection,
   executed: boolean,
   supportThreshold: number,
@@ -296,8 +300,7 @@ export function vochainStatusToProposalStatus(
     if (executed) return ProposalStatus.EXECUTED;
     else if (vochainProposal.finalResults) {
       return isProposalApproved(
-        vochainProposal.results,
-        vochainProposal.voteCount,
+        parsedResults,
         supportThreshold,
         minParticipation
       )
@@ -331,6 +334,7 @@ export function toNewProposal(
   metadata.title = vochainProposal.title.default;
   metadata.description =
     vochainProposal.description?.default || metadata.description;
+  const result = vochainVoteResultsToProposal(vochainProposal.questions);
   return {
     id: `0x${SCproposalID.toString()}`, // string;
     dao: {
@@ -344,6 +348,7 @@ export function toNewProposal(
     creationDate: vochainProposal.creationTime, //Date;
     actions: SCProposal.actions, //DaoAction[];
     status: vochainStatusToProposalStatus(
+      result,
       vochainProposal,
       SCProposal.executed,
       settings.supportThreshold,
@@ -360,8 +365,14 @@ export function toNewProposal(
     allowFailureMap: SCProposal.allowFailureMap, //number;
     tally: SCProposal.tally, //number[][];
     settings,
-    vochainMetadata: vochainProposal,
-    tallyVochain: vochainProposal.results.map((x) => x.map((y) => BigInt(y))),
-    tallyVochainFinal: vochainProposal.finalResults,
+    vochain: {
+      metadata: vochainProposal,
+      tally: {
+        final: vochainProposal.finalResults,
+        value: vochainProposal.results[0].map((y) => BigInt(y)),
+        parsed: result,
+      },
+    },
+    totalVotingWeight: Object.values(result).reduce((a, b) => a + b),
   } as GaslessVotingProposal;
 }

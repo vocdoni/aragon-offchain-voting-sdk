@@ -1,5 +1,8 @@
 import { IDAO } from '@aragon/osx-ethers';
-import { CreateProposalBaseParams } from '@aragon/sdk-client';
+import {
+  CreateProposalBaseParams,
+  TokenVotingProposalResult,
+} from '@aragon/sdk-client';
 import {
   ContextState,
   OverriddenState,
@@ -170,9 +173,15 @@ export type GaslessVotingProposal = ProposalBase & {
   allowFailureMap: number;
   tally: number[][];
   settings: GaslessPluginVotingSettings;
-  vochainMetadata: PublishedElection;
-  tallyVochain: number[][];
-  tallyVochainFinal: boolean;
+  vochain: {
+    metadata: PublishedElection;
+    tally: {
+      final: boolean;
+      value: bigint[];
+      parsed: TokenVotingProposalResult;
+    };
+  };
+  totalVotingWeight: bigint;
 };
 
 export type CreateGasslessProposalParams = CreateProposalBaseParams &
