@@ -361,7 +361,7 @@ export function toNewProposal(
     tally: SCProposal.tally, //number[][];
     settings,
     vochainMetadata: vochainProposal,
-    tallyVochain: vochainProposal.results.map((x) => x.map((y) => Number(y))),
+    tallyVochain: vochainProposal.results.map((x) => x.map((y) => BigInt(y))),
     tallyVochainFinal: vochainProposal.finalResults,
   } as GaslessVotingProposal;
 }
