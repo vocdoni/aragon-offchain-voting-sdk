@@ -49,7 +49,6 @@ import { isAddress } from '@ethersproject/address';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 import { ErrElectionNotFound } from '@vocdoni/sdk';
 import axios from 'axios';
-import { parse } from 'graphql';
 
 export class OffchainVotingClientMethods
   extends OffchainVotingClientCore
