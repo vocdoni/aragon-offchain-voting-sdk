@@ -25,34 +25,24 @@ import {
   updatePreparationDataForUninstallationPrepared,
   updatePreparationDataForUpdatePrepared,
 } from '../plugin/pluginSetupProcessor';
-import {DataSourceContext, log} from '@graphprotocol/graph-ts';
+import {Address, DataSourceContext, log} from '@graphprotocol/graph-ts';
 
 export function handleInstallationPrepared(event: InstallationPrepared): void {
-  const pluginRepo = event.params.pluginSetupRepo.toHexString();
-
-  if (pluginRepo === PLUGIN_REPO_ADDRESS) {
-    log.warning(
-      '========== FOUND Comparing pluginRepo {} == PLUGIN_REPO_ADDRESS {}',
-      [pluginRepo, PLUGIN_REPO_ADDRESS]
-    );
-  }
+  const pluginRepo = event.params.pluginSetupRepo;
 
   // Check if the prepared plugin is our plugin.
-  const isThisPlugin = pluginRepo === PLUGIN_REPO_ADDRESS;
+  const isThisPlugin =
+    pluginRepo === Address.fromHexString(PLUGIN_REPO_ADDRESS);
 
   if (!isThisPlugin) {
     return;
   }
-
-  log.warning('==========handleInstallationPrepared passed the repo check', []);
 
   //////////////////////////////////////////////////////////////
   // Index DAO
   //////////////////////////////////////////////////////////////
   const dao = event.params.dao;
   const daoId = getDaoId(dao);
-
-  log.warning('==========found a dao {}', [daoId]);
 
   let doaEntity = Dao.load(daoId);
   if (!doaEntity) {

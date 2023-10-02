@@ -62,5 +62,7 @@ templates:
       eventHandlers:
         - event: ProposalCreated(indexed uint256,indexed bytes32,indexed address,uint64,uint64,uint64,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
+        - event: ProposalExecuted(indexed uint256)
+          handler: handleProposalExecuted
       file: ./src/plugin/plugin.ts
 

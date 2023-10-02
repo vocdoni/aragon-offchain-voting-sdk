@@ -88,17 +88,17 @@ type PluginProposal implements IProposal @entity {
   allowFailureMap: BigInt!
   failureMap: BigInt
   plugin: Plugin!
+
   pluginProposalId: BigInt!
+  vochainProposalId: Bytes!
+
   creator: Bytes!
-  metadata: String
   createdAt: BigInt!
   startDate: BigInt!
   endDate: BigInt!
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
-  minApprovals: Int!
-  approvals: Int
-  potentiallyExecutable: Boolean!
+  expirationDate: BigInt!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
