@@ -182,6 +182,13 @@ export type GaslessVotingProposal = ProposalBase & {
     };
   };
   totalVotingWeight: bigint;
+  totalUsedWeight: bigint;
+  participation: {
+    currentParticipation: number;
+    currentPercentage: number;
+    missingParticipation: number;
+  };
+  canBeApproved: boolean;
 };
 
 export type CreateGasslessProposalParams = CreateProposalBaseParams &

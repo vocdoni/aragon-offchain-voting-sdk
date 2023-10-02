@@ -47,12 +47,9 @@ import {
 } from '@aragon/sdk-common';
 import { isAddress } from '@ethersproject/address';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
-import {
-  EnvOptions,
-  ErrElectionNotFound,
-  VocdoniCensus3Client,
-} from '@vocdoni/sdk';
+import { ErrElectionNotFound } from '@vocdoni/sdk';
 import axios from 'axios';
+import { parse } from 'graphql';
 
 export class OffchainVotingClientMethods
   extends OffchainVotingClientCore
@@ -271,6 +268,11 @@ export class OffchainVotingClientMethods
     const vochainProposal = await this.vocdoniSDK.fetchElection(
       parsedSCProposal.vochainProposalId
     );
+
+    const census3token = await this.vocdoniCensus3.getToken(
+      pluginSettings.daoTokenAddress as string
+    );
+
     // TODO
     return toNewProposal(
       proposalId,
@@ -278,7 +280,8 @@ export class OffchainVotingClientMethods
       daoAddress,
       pluginSettings,
       vochainProposal,
-      parsedSCProposal
+      parsedSCProposal,
+      census3token
     );
   }
 
@@ -399,10 +402,9 @@ export class OffchainVotingClientMethods
       return Promise.reject();
     }
     const pluginSettings = await gaslessVotingContract.getPluginSettings();
-    const census3client = new VocdoniCensus3Client({ env: EnvOptions.STG });
     return axios
       .get(
-        census3client.url +
+        this.vocdoniCensus3.url +
           `/debug/token/${pluginSettings.daoTokenAddress}/holders`
       )
       .then((response) =>

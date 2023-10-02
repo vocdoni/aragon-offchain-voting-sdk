@@ -21,7 +21,7 @@ import {
 } from '@aragon/sdk-client-common';
 import { hexToBytes, encodeRatio, decodeRatio } from '@aragon/sdk-common';
 import { Result } from '@ethersproject/abi';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
 import { Contract } from '@ethersproject/contracts';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -31,7 +31,10 @@ import {
   IChoice,
   IQuestion,
   PublishedElection,
+  Token,
 } from '@vocdoni/sdk';
+import Big from 'big.js';
+import { formatUnits as ethersFormatUnits } from 'ethers/lib/utils';
 
 // export function votingModeFromContracts(votingMode: number): VotingMode {
 //   switch (votingMode) {
@@ -242,68 +245,54 @@ export function vochainVoteResultsToProposal(
   return parsedResults as TokenVotingProposalResult;
 }
 
-export function hasSupportThreshold(
-  yes: bigint,
-  no: bigint,
-  supportThreshold: number
-): boolean {
-  return (
-    (BigInt(1) - BigInt(supportThreshold)) * yes > BigInt(supportThreshold) * no
-  );
-}
-
-export function hasMinParticipation(
-  yes: bigint,
-  no: bigint,
-  abstain: bigint,
-  minParticipation: number
-): boolean {
-  //   const calculatedTotal = Object.values(results)
-  //   // .map((x) => results[x])
-  //   .reduce((a, b) => a + b);
-  // // if (calculatedTotal != totalVotes) throw new InvalidResults();
-
-  return yes + no + abstain > BigInt(minParticipation) * (yes + no + abstain);
-}
-
-export function isProposalApproved(
+export function canProposalBeApproved(
   results: TokenVotingProposalResult,
-  supportThreshold: number,
-  minParticipation: number
+  supportThreshold: number | undefined,
+  missingParticipation: number | undefined,
+  totalVotingWeight: bigint,
+  usedVotingWeight: bigint,
+  tokenDecimals: number
 ): boolean {
-  if (!results) return false;
+  if (
+    missingParticipation === undefined ||
+    supportThreshold === undefined || // early execution disabled
+    !results // no mapped data
+  ) {
+    return false;
+  }
+
+  // those who didn't vote (this is NOT voting abstain)
+  const absentee = formatUnits(
+    totalVotingWeight - usedVotingWeight,
+    tokenDecimals
+  );
+
+  if (results.yes === BigInt(0)) return false;
+
   return (
-    hasSupportThreshold(results.yes, results.no, supportThreshold) &&
-    hasMinParticipation(
-      results.yes,
-      results.no,
-      results.abstain,
-      minParticipation
-    )
+    // participation reached
+    missingParticipation === 0 &&
+    // support threshold met even if absentees show up and all vote against, still cannot change outcome
+    results.yes / (results.yes + results.no + BigInt(absentee)) >
+      supportThreshold
   );
 }
 
 export function vochainStatusToProposalStatus(
-  parsedResults: TokenVotingProposalResult,
-  vochainProposal: PublishedElection,
+  vochainStatus: ElectionStatus,
+  finalResults: boolean,
   executed: boolean,
-  supportThreshold: number,
-  minParticipation: number
+  canProposalBeApproved: boolean
 ): ProposalStatus {
   //TODO probably need to check also the state of the contract
-  const vochainStatus = vochainProposal.status;
   if ([ElectionStatus.UPCOMING, ElectionStatus.PAUSED].includes(vochainStatus))
     return ProposalStatus.PENDING;
   if (ElectionStatus.ONGOING === vochainStatus) return ProposalStatus.ACTIVE;
   // if ([].includes[vochainStatus])
   if (ElectionStatus.RESULTS) {
     if (executed) return ProposalStatus.EXECUTED;
-    else if (vochainProposal.finalResults) {
-      return isProposalApproved(
-        parsedResults,
-        supportThreshold,
-        minParticipation
-      )
+    else if (finalResults) {
+      return canProposalBeApproved
         ? ProposalStatus.SUCCEEDED
         : ProposalStatus.DEFEATED;
     } else {
@@ -328,13 +317,29 @@ export function toNewProposal(
   daoAddress: string,
   settings: GaslessPluginVotingSettings,
   vochainProposal: PublishedElection,
-  SCProposal: GaslessVotingProposalFromSC
+  SCProposal: GaslessVotingProposalFromSC,
+  census3Token: Token
 ): GaslessVotingProposal {
   let metadata = EMPTY_PROPOSAL_METADATA_LINK;
   metadata.title = vochainProposal.title.default;
   metadata.description =
     vochainProposal.description?.default || metadata.description;
   const result = vochainVoteResultsToProposal(vochainProposal.questions);
+  const participation = getErc20VotingParticipation(
+    settings.minParticipation,
+    result.abstain + result.no + result.yes,
+    vochainProposal.census.weight as bigint,
+    census3Token.decimals
+  );
+  const totalUsedWeight = result.abstain + result.no + result.yes;
+  const canBeApproved = canProposalBeApproved(
+    result,
+    settings.supportThreshold,
+    participation.minPart,
+    vochainProposal.census.weight || BigInt(0),
+    totalUsedWeight,
+    census3Token.decimals
+  );
   return {
     id: `0x${SCproposalID.toString()}`, // string;
     dao: {
@@ -348,11 +353,10 @@ export function toNewProposal(
     creationDate: vochainProposal.creationTime, //Date;
     actions: SCProposal.actions, //DaoAction[];
     status: vochainStatusToProposalStatus(
-      result,
-      vochainProposal,
+      vochainProposal.status,
+      vochainProposal.finalResults,
       SCProposal.executed,
-      settings.supportThreshold,
-      settings.minParticipation
+      canBeApproved
     ), //ProposalStatus; //TODO
     creationBlockNumber: 0, //number; //TODO
     executionDate: null, //Date | null; //TODO
@@ -373,6 +377,80 @@ export function toNewProposal(
         parsed: result,
       },
     },
-    totalVotingWeight: Object.values(result).reduce((a, b) => a + b),
+    totalVotingWeight: vochainProposal.census.weight,
+    totalUsedWeight,
+    participation: {
+      currentParticipation: participation.currentPart,
+      currentPercentage: participation.currentPercentage,
+      missingParticipation: participation.missingPart,
+    },
+    canBeApproved,
   } as GaslessVotingProposal;
+}
+
+/*    TOKEN     */
+/**
+ * Get formatted minimum participation for an ERC20 proposal
+ * @param minParticipation minimum number of tokens needed to participate in vote
+ * @param totalVotingWeight total number of tokens able to vote
+ * @param tokenDecimals proposal token decimals
+ * @returns
+ */
+function getErc20MinParticipation(
+  minParticipation: number,
+  totalVotingWeight: bigint,
+  tokenDecimals: number
+) {
+  return Big(formatUnits(totalVotingWeight, tokenDecimals))
+    .mul(minParticipation)
+    .toNumber();
+}
+
+function getErc20VotingParticipation(
+  minParticipation: number,
+  usedVotingWeight: bigint,
+  totalVotingWeight: bigint,
+  tokenDecimals: number
+) {
+  // calculate participation summary
+  const totalWeight = Number(formatUnits(totalVotingWeight, tokenDecimals));
+
+  // current participation
+  const currentPart = Number(formatUnits(usedVotingWeight, tokenDecimals));
+
+  const currentPercentage = Big(usedVotingWeight.toString())
+    .mul(100)
+    .div(totalVotingWeight.toString())
+    .toNumber();
+
+  // minimum participation
+  const minPart = getErc20MinParticipation(
+    minParticipation,
+    totalVotingWeight,
+    tokenDecimals
+  );
+
+  // missing participation
+  const missingRaw = Big(formatUnits(usedVotingWeight, tokenDecimals))
+    .minus(
+      Big(formatUnits(totalVotingWeight, tokenDecimals)).mul(minParticipation)
+    )
+    .toNumber();
+
+  let missingPart;
+
+  if (Math.sign(missingRaw) === 1) {
+    // number of votes greater than required minimum participation
+    missingPart = 0;
+  } else missingPart = Math.abs(missingRaw);
+  // const missingPart = Math.sign(Number(missingRaw)) === 1 ? Math.abs(Number(missingRaw));
+
+  return { currentPart, currentPercentage, minPart, missingPart, totalWeight };
+}
+
+function formatUnits(amount: BigNumberish, decimals: number) {
+  if (amount.toString().includes('.') || !decimals) {
+    return amount.toString();
+  }
+  return ethersFormatUnits(amount, decimals);
 }

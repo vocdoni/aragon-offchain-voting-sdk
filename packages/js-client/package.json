@@ -73,8 +73,9 @@
     "graphql": "^16.6.0",
     "graphql-request": "4.3.0",
     "@vocdoni/offchain-voting-ethers": "./vocdoni-offchain-voting-ethers-v0.0.3.tgz",
-    "@vocdoni/sdk": "0.3.0",
-    "axios": "0.27.2"
+    "@vocdoni/sdk": "0.3.1",
+    "axios": "0.27.2",
+    "@types/big.js": "^6.1.5"
   },
   "jest": {
     "testEnvironment": "./test-environment.js",
