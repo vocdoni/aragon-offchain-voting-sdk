@@ -347,7 +347,11 @@ export function toNewProposal(
       name: daoName, //string; TODO
     },
     creatorAddress: vochainProposal.organizationId, //string;
-    metadata: EMPTY_PROPOSAL_METADATA_LINK, //ProposalMetadata; //TODO
+    metadata: {
+      title: vochainProposal.title.default,
+      description: vochainProposal.description?.default || '',
+      summary: vochainProposal.questions[0].title.default,
+    }, //ProposalMetadata; //TODO
     startDate: vochainProposal.startDate, //Date;
     endDate: vochainProposal.endDate, //Date;
     creationDate: vochainProposal.creationTime, //Date;
