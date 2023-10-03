@@ -247,41 +247,46 @@ export class OffchainVotingClientMethods
     pluginAddress: string,
     proposalId: number
   ): Promise<GaslessVotingProposal | null> {
-    const signer = this.web3.getConnectedSigner();
+    try {
+      const signer = this.web3.getConnectedSigner();
 
-    const gaslessVotingContract = VocdoniVoting__factory.connect(
-      pluginAddress,
-      signer
-    );
-    let pluginSettings = votingSettingsfromContract(
-      await gaslessVotingContract.getPluginSettings()
-    );
-    let proposal = await gaslessVotingContract.getProposal(proposalId);
+      const gaslessVotingContract = VocdoniVoting__factory.connect(
+        pluginAddress,
+        signer
+      );
+      let pluginSettings = votingSettingsfromContract(
+        await gaslessVotingContract.getPluginSettings()
+      );
+      let proposal = await gaslessVotingContract.getProposal(proposalId);
 
-    if (!proposal) {
-      return null;
+      if (!proposal) {
+        return null;
+      }
+      let parsedSCProposal = toGaslessVotingProposal(proposal);
+      if (!parsedSCProposal.vochainProposalId)
+        Promise.reject(new ErrElectionNotFound());
+      const vochainProposal = await this.vocdoniSDK.fetchElection(
+        parsedSCProposal.vochainProposalId
+      );
+
+      const census3token = await this.vocdoniCensus3.getToken(
+        pluginSettings.daoTokenAddress as string
+      );
+
+      // TODO
+      return toNewProposal(
+        proposalId,
+        daoName,
+        daoAddress,
+        pluginSettings,
+        vochainProposal,
+        parsedSCProposal,
+        census3token
+      );
+    } catch (error) {
+      if (error instanceof ErrElectionNotFound) return null;
+      throw error;
     }
-    let parsedSCProposal = toGaslessVotingProposal(proposal);
-    if (!parsedSCProposal.vochainProposalId)
-      Promise.reject(new ErrElectionNotFound());
-    const vochainProposal = await this.vocdoniSDK.fetchElection(
-      parsedSCProposal.vochainProposalId
-    );
-
-    const census3token = await this.vocdoniCensus3.getToken(
-      pluginSettings.daoTokenAddress as string
-    );
-
-    // TODO
-    return toNewProposal(
-      proposalId,
-      daoName,
-      daoAddress,
-      pluginSettings,
-      vochainProposal,
-      parsedSCProposal,
-      census3token
-    );
   }
 
   /**
@@ -300,12 +305,7 @@ export class OffchainVotingClientMethods
     let proposal = null;
     let proposals: GaslessVotingProposal[] = [];
     do {
-      let proposal = await this.getProposal(
-        daoName,
-        daoAddress,
-        pluginAddress,
-        id
-      );
+      proposal = await this.getProposal(daoName, daoAddress, pluginAddress, id);
       if (proposal) proposals.push(proposal);
       id += 1;
     } while (proposal != null);
