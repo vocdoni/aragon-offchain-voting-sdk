@@ -112,7 +112,7 @@ export class OffchainVotingClientMethods
       censusBlock: [] as string[],
       startDate: BigInt(params.startDate),
       endDate: BigInt(params.endDate),
-      expirationDate: BigInt(0),
+      expirationDate: BigInt(params.expirationDate || 0),
       securityBlock: BigInt(0),
     };
     const tx = await gaslessVotingContract.createProposal(
@@ -430,11 +430,12 @@ export class OffchainVotingClientMethods
    * @memberof OffchainVotingClientMethods
    */
   public async *setTally(
-    proposalId: string
+    pluginAddress: string,
+    proposalId: number
   ): AsyncGenerator<SetTallyStepValue> {
     const signer = this.web3.getConnectedSigner();
 
-    const { pluginAddress, id } = decodeProposalId(proposalId);
+    // const { pluginAddress, id } = decodeProposalId(proposalId);
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
@@ -448,8 +449,8 @@ export class OffchainVotingClientMethods
       proposalFromSC.vochainProposalId
     );
     const tx = await gaslessVotingContract.setTally(
-      id,
-      vochainProposal.results
+      proposalId,
+      vochainProposal.results.map((x) => x.map((y) => BigInt(y)))
     );
 
     yield {
