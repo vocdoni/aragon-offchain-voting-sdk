@@ -4,6 +4,7 @@ import {
 } from '../../types';
 import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientEstimation } from '../interfaces';
+import { toGaslessVotingProposal } from '../utils';
 import { GasFeeEstimation } from '@aragon/sdk-client-common';
 import {
   SizeMismatchError,
@@ -61,6 +62,36 @@ export class OffchainVotingClientEstimation
     return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
   }
 
+  /**
+   * Estimates the gas fee of creating a proposal on the plugin
+   *
+   * @param {CreateGasslessProposalParams} params
+   * @return {*}  {Promise<GasFeeEstimation>}
+   * @memberof OffchainVotingClientEstimation
+   */
+  public async setTally(
+    pluginAddress: string,
+    proposalId: number
+  ): Promise<GasFeeEstimation> {
+    const signer = this.web3.getConnectedSigner();
+
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
+      pluginAddress,
+      signer
+    );
+
+    const proposalFromSC = toGaslessVotingProposal(
+      await gaslessVotingContract.getProposal(proposalId)
+    );
+    const vochainProposal = await this.vocdoniSDK.fetchElection(
+      proposalFromSC.vochainProposalId
+    );
+    const estimatedGasFee = await gaslessVotingContract.estimateGas.setTally(
+      proposalId,
+      vochainProposal.results.map((x) => x.map((y) => BigInt(y)))
+    );
+    return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
+  }
   // public async prepareInstallation(
   //   params: PrepareInstallationParams
   // ): Promise<GasFeeEstimation> {

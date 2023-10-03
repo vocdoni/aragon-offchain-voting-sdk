@@ -87,6 +87,10 @@ export interface IOffchainVotingClientEstimation {
   createProposal(
     params: CreateGasslessProposalParams
   ): Promise<GasFeeEstimation>;
+  setTally(
+    pluginAddress: string,
+    proposalId: number
+  ): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }
 export interface IOffchainVotingClientEncoding {
