@@ -102,17 +102,13 @@ export class OffchainVotingClientMethods
       throw new SizeMismatchError();
     }
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
-    // const startTimestamp = params.startDate
-    //   ? new Date(params.startDate.toNumber()).getTime()
-    //   : 0;
-    // const endTimestamp = params.endDate
-    //   ? new Date(params.endDate.toNumber()).getTime()
-    //   : 0;
     const votingParams: GaslessProposalParametersContractStruct = {
       censusBlock: [] as string[],
-      startDate: BigInt(params.startDate),
-      endDate: BigInt(params.endDate),
-      expirationDate: BigInt(params.expirationDate || 0),
+      startDate: BigInt(params.startDate / 1000),
+      endDate: BigInt(params.endDate / 1000),
+      expirationDate: params.expirationDate
+        ? BigInt(params.expirationDate / 1000)
+        : BigInt(0),
       securityBlock: BigInt(0),
     };
     const tx = await gaslessVotingContract.createProposal(

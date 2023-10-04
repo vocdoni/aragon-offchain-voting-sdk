@@ -62,6 +62,20 @@ export function mintTokenParamsFromContract(result: Result): MintTokenParams {
   };
 }
 
+/**
+ * Creates an array of proposal voting settings to be sent to the contract.
+ * @param params - The gasless plugin voting settings.
+ * @returns An array of the following values:
+ * - A boolean indicating whether voting is enabled.
+ * - The minimum number of approvals required for a proposal to pass.
+ * - The minimum participation ratio required for a proposal to pass.
+ * - The support threshold ratio required for a proposal to pass.
+ * - The minimum duration for a proposal to be open for voting.
+ * - The expiration time for a proposal in milliseconds.
+ * - The address of the voting strategy contract.
+ * - The minimum voting power required for a proposer to create a proposal.
+ * - The census strategy used for the proposal.
+ */
 export function createProposalVotingSettingsToContract(
   params: GaslessPluginVotingSettings
 ): [
@@ -80,8 +94,8 @@ export function createProposalVotingSettingsToContract(
     params.minTallyApprovals,
     encodeRatio(params.minParticipation, 6),
     encodeRatio(params.supportThreshold, 6),
-    BigNumber.from(params.minDuration),
-    BigNumber.from(0),
+    BigNumber.from(params.minDuration * 1000),
+    BigNumber.from(params.expirationTime * 1000), //convert to milliseconds
     '0x0000000000000000000000000000000000000000',
     BigNumber.from(params.minProposerVotingPower ?? 0),
     params.censusStrategy,
@@ -110,9 +124,9 @@ export function proposalParamsfromContract(
   return {
     censusBlock: params.censusBlock,
     securityBlock: 0,
-    startDate: Number(params.startDate),
-    endDate: Number(params.endDate),
-    expirationDate: Number(params.expirationDate),
+    startDate: Number(params.startDate) * 1000,
+    endDate: Number(params.endDate) * 1000,
+    expirationDate: Number(params.expirationDate) * 1000,
   };
 }
 
