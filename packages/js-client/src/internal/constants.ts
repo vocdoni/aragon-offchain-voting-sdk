@@ -1,6 +1,7 @@
 // import { MetadataAbiInput } from './types';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import { MetadataAbiInput, SupportedNetwork } from '@aragon/sdk-client-common';
+import { BigNumber } from '@ethersproject/bignumber';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 
 export const DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS =
@@ -128,3 +129,5 @@ export const INSTALLATION_ABI: MetadataAbiInput[] = [
     description: '',
   },
 ];
+
+export const MAX_UINT64 = BigNumber.from(2).pow(64).sub(1);

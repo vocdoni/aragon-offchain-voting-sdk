@@ -16,6 +16,7 @@ import {
   initParamsToContract,
   toGaslessVotingProposal,
   toNewProposal,
+  vochainResultsToSCResults,
   votingSettingsfromContract,
 } from '../utils';
 import { GovernanceWrappedERC20__factory } from '@aragon/osx-ethers';
@@ -446,7 +447,7 @@ export class OffchainVotingClientMethods
     );
     const tx = await gaslessVotingContract.setTally(
       proposalId,
-      vochainProposal.results.map((x) => x.map((y) => BigInt(y)))
+      vochainResultsToSCResults(vochainProposal)
     );
 
     yield {

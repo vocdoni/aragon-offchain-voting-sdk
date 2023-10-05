@@ -144,7 +144,7 @@ export type GaslessProposalParametersStruct = {
   securityBlock?: number; // calculated internally in the smart contract
   startDate: number; // UNIX timestamp (ms)
   endDate: number; // UNIX timestamp (ms)
-  expirationDate?: number; // calculated internally in the smart contract based on expirationTime
+  expirationDate: number; // calculated internally in the smart contract based on expirationTime
 };
 
 export type GaslessProposalParametersContractStruct = {
@@ -166,6 +166,7 @@ export type GaslessVotingProposalFromSC = {
 };
 
 export type GaslessVotingProposal = ProposalBase & {
+  expirationDate: Date;
   executed: boolean;
   approvers: string[];
   vochainProposalId: string;
@@ -189,6 +190,13 @@ export type GaslessVotingProposal = ProposalBase & {
     missingParticipation: number;
   };
   canBeApproved: boolean;
+  token: {
+    address: string;
+    name: string;
+    symbol: string;
+    decimals: number;
+    type: string;
+  };
 };
 
 export type CreateGasslessProposalParams = CreateProposalBaseParams &
@@ -303,3 +311,9 @@ export enum ApproveTallyStep {
 export type ApproveTallyStepValue =
   | { key: ApproveTallyStep.EXECUTING; txHash: string }
   | { key: ApproveTallyStep.DONE };
+
+export enum SCVoteValues {
+  yes = 0,
+  no = 1,
+  abstain = 2,
+}

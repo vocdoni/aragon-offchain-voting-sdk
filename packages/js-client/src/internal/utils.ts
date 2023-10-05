@@ -4,10 +4,10 @@ import {
   GaslessVotingProposal,
   OffchainVotingPluginInstall,
   GaslessPluginVotingSettings,
-  VoteOption,
   ProposalFromSC,
   GaslessProposalParametersStruct,
   GaslessVotingProposalFromSC,
+  SCVoteValues,
 } from '../types';
 import {
   MintTokenParams,
@@ -23,8 +23,6 @@ import { hexToBytes, encodeRatio, decodeRatio } from '@aragon/sdk-common';
 import { Result } from '@ethersproject/abi';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
-import { Contract } from '@ethersproject/contracts';
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
 import {
   ElectionStatus,
@@ -94,8 +92,8 @@ export function createProposalVotingSettingsToContract(
     params.minTallyApprovals,
     encodeRatio(params.minParticipation, 6),
     encodeRatio(params.supportThreshold, 6),
-    BigNumber.from(params.minDuration * 1000),
-    BigNumber.from(params.expirationTime * 1000), //convert to milliseconds
+    BigNumber.from(params.minDuration),
+    BigNumber.from(params.expirationTime),
     '0x0000000000000000000000000000000000000000',
     BigNumber.from(params.minProposerVotingPower ?? 0),
     params.censusStrategy,
@@ -154,77 +152,9 @@ export function initParamsToContract(params: OffchainVotingPluginInstall) {
   ];
 }
 
-export const MAX_UINT64 = BigNumber.from(2).pow(64).sub(1);
-
-export async function voteWithSigners(
-  votingContract: Contract,
-  proposalId: number,
-  signers: SignerWithAddress[],
-  signerIds: {
-    yes: number[];
-    no: number[];
-    abstain: number[];
-  }
-) {
-  let promises = signerIds.yes.map((i) =>
-    votingContract.connect(signers[i]).vote(proposalId, VoteOption.Yes, false)
-  );
-
-  promises = promises.concat(
-    signerIds.no.map((i) =>
-      votingContract.connect(signers[i]).vote(proposalId, VoteOption.No, false)
-    )
-  );
-  promises = promises.concat(
-    signerIds.abstain.map((i) =>
-      votingContract
-        .connect(signers[i])
-        .vote(proposalId, VoteOption.Abstain, false)
-    )
-  );
-
-  await Promise.all(promises);
-}
-
-// export async function getTime(): Promise<number> {
-//   const provider = this.web3.getProvider();
-//   return (await provider.getBlock('latest')).timestamp;
-// }
-
-// export async function advanceTime(timmmme: number) {
-//   const provider = this.web3.getProvider();
-//   await provider.send('evm_increaseTime', [time]);
-//   await provider.send('evm_mine', []);
-// }
-
-// export async function advanceTimeTo(timestamp: number) {
-//   const delta = timestamp - (await getTime());
-//   await advanceTime(delta);
-// }
-
-// export async function timestampIn(durationInSec: number): Promise<number> {
-//   const provider = this.web3.getProvider();
-//   return (await provider.getBlock('latest')).timestamp + durationInSec;
-// }
-
-// export async function setTimeForNextBlock(timestamp: number): Promise<void> {
-//   const provider = this.web3.getProvider();
-//   await provider.send('evm_setNextBlockTimestamp', [timestamp]);
-// }
-
-// export function toBytes32(num: number): string {
-//   const hex = num.toString(16);
-//   return `0x${'0'.repeat(64 - hex.length)}${hex}`;
-// }
-
 export function toGaslessVotingProposal(
   proposal: ProposalFromSC
 ): GaslessVotingProposalFromSC {
-  // const startDate = new Date(proposal.parameters.startDate.toString());
-  // const endDate = new Date(proposal.parameters.endDate.toString());
-  // const expirationDate = new Date(
-  //   proposal.parameters.expirationDate.toString()
-  // );
   return {
     executed: proposal.executed,
     // TODO FIX
@@ -292,6 +222,28 @@ export function canProposalBeApproved(
   );
 }
 
+export function computeProposalStatus(
+  executed: boolean,
+  earlyExecutable: boolean,
+  startDate: Date,
+  endDate: Date
+): ProposalStatus {
+  const now = new Date();
+  if (executed) {
+    return ProposalStatus.EXECUTED;
+  }
+  if (startDate >= now) {
+    return ProposalStatus.PENDING;
+  }
+  if (earlyExecutable) {
+    return ProposalStatus.SUCCEEDED;
+  }
+  if (endDate >= now) {
+    return ProposalStatus.ACTIVE;
+  }
+  return ProposalStatus.DEFEATED;
+}
+
 export function vochainStatusToProposalStatus(
   vochainStatus: ElectionStatus,
   finalResults: boolean,
@@ -354,28 +306,39 @@ export function toNewProposal(
     totalUsedWeight,
     census3Token.decimals
   );
+  const startDate = new Date(SCProposal.parameters.startDate);
+  const endDate = new Date(SCProposal.parameters.endDate);
+
   return {
     id: `0x${SCproposalID.toString()}`, // string;
     dao: {
       address: daoAddress, //string;
       name: daoName, //string; TODO
     },
+    token: {
+      address: census3Token.id,
+      name: census3Token.name,
+      symbol: census3Token.symbol,
+      decimals: census3Token.decimals,
+      type: census3Token.type,
+    },
     creatorAddress: vochainProposal.organizationId, //string;
     metadata: {
       title: vochainProposal.title.default,
       description: vochainProposal.description?.default || '',
       summary: vochainProposal.questions[0].title.default,
-    }, //ProposalMetadata; //TODO
-    startDate: vochainProposal.startDate, //Date;
-    endDate: vochainProposal.endDate, //Date;
+    }, //ProposalMetadata;
+    startDate, //Date;
+    endDate, //Date;
     creationDate: vochainProposal.creationTime, //Date;
+    expirationDate: new Date(SCProposal.parameters.expirationDate),
     actions: SCProposal.actions, //DaoAction[];
-    status: vochainStatusToProposalStatus(
-      vochainProposal.status,
-      vochainProposal.finalResults,
+    status: computeProposalStatus(
       SCProposal.executed,
-      canBeApproved
-    ), //ProposalStatus; //TODO
+      canBeApproved,
+      startDate,
+      endDate
+    ),
     creationBlockNumber: 0, //number; //TODO
     executionDate: null, //Date | null; //TODO
     executionBlockNumber: null, //number | null; //TODO
@@ -471,4 +434,17 @@ function formatUnits(amount: BigNumberish, decimals: number) {
     return amount.toString();
   }
   return ethersFormatUnits(amount, decimals);
+}
+
+export function vochainResultsToSCResults(
+  proposal: PublishedElection
+): bigint[][] {
+  let results: bigint[][] = [[BigInt(0), BigInt(0), BigInt(0)]];
+  const appResults = vochainVoteResultsToProposal(proposal.questions);
+  Object.keys(SCVoteValues)
+    .filter((key) => isNaN(Number(key)))
+    .map((value, index) => {
+      results[0][index] = appResults[value as keyof TokenVotingProposalResult];
+    });
+  return results;
 }
