@@ -72,7 +72,8 @@ export interface IOffchainVotingClientMethods {
   ): Promise<boolean>;
   setTally(
     pluginAddress: string,
-    proposalId: number
+    proposalId: number,
+    tryExecution?: boolean
   ): AsyncGenerator<SetTallyStepValue>;
   approveTally(
     proposalId: string,

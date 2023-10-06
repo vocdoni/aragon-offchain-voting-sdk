@@ -47,6 +47,7 @@ import {
   hexToBytes,
 } from '@aragon/sdk-common';
 import { isAddress } from '@ethersproject/address';
+import { ContractTransaction } from '@ethersproject/contracts';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 import { ErrElectionNotFound } from '@vocdoni/sdk';
 import axios from 'axios';
@@ -270,7 +271,6 @@ export class OffchainVotingClientMethods
         pluginSettings.daoTokenAddress as string
       );
 
-      // TODO
       return toNewProposal(
         proposalId,
         daoName,
@@ -428,7 +428,8 @@ export class OffchainVotingClientMethods
    */
   public async *setTally(
     pluginAddress: string,
-    proposalId: number
+    proposalId: number,
+    tryExecution = false
   ): AsyncGenerator<SetTallyStepValue> {
     const signer = this.web3.getConnectedSigner();
 
@@ -445,10 +446,15 @@ export class OffchainVotingClientMethods
     const vochainProposal = await this.vocdoniSDK.fetchElection(
       proposalFromSC.vochainProposalId
     );
-    const tx = await gaslessVotingContract.setTally(
-      proposalId,
-      vochainResultsToSCResults(vochainProposal)
-    );
+    let tx: ContractTransaction;
+    if (proposalFromSC.tally.length === 0) {
+      tx = await gaslessVotingContract.setTally(
+        proposalId,
+        vochainResultsToSCResults(vochainProposal)
+      );
+    } else {
+      tx = await gaslessVotingContract.approveTally(proposalId, tryExecution);
+    }
 
     yield {
       key: SetTallyStep.EXECUTING,

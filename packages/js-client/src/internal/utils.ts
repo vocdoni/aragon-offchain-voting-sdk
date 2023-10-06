@@ -24,13 +24,7 @@ import { Result } from '@ethersproject/abi';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
 import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
-import {
-  ElectionStatus,
-  IChoice,
-  IQuestion,
-  PublishedElection,
-  Token,
-} from '@vocdoni/sdk';
+import { IChoice, IQuestion, PublishedElection, Token } from '@vocdoni/sdk';
 import Big from 'big.js';
 import { formatUnits as ethersFormatUnits } from 'ethers/lib/utils';
 
@@ -157,9 +151,7 @@ export function toGaslessVotingProposal(
 ): GaslessVotingProposalFromSC {
   return {
     executed: proposal.executed,
-    // TODO FIX
-    // approvers: proposal.approvals,
-    approvers: [],
+    approvers: proposal.approvers,
     vochainProposalId: proposal.vochainProposalId,
     parameters: proposalParamsfromContract(proposal.parameters),
     allowFailureMap: proposal.allowFailureMap.toNumber(),
@@ -194,8 +186,8 @@ export function canProposalBeApproved(
   supportThreshold: number | undefined,
   missingParticipation: number | undefined,
   totalVotingWeight: bigint,
-  usedVotingWeight: bigint,
-  tokenDecimals: number
+  usedVotingWeight: bigint
+  // tokenDecimals: number
 ): boolean {
   if (
     missingParticipation === undefined ||
@@ -206,19 +198,28 @@ export function canProposalBeApproved(
   }
 
   // those who didn't vote (this is NOT voting abstain)
-  const absentee = formatUnits(
-    totalVotingWeight - usedVotingWeight,
-    tokenDecimals
-  );
+  // const absentee = formatUnits(
+  //   totalVotingWeight - usedVotingWeight,
+  //   tokenDecimals
+  // );
 
   if (results.yes === BigInt(0)) return false;
-
+  Big.DP = 2;
   return (
     // participation reached
     missingParticipation === 0 &&
     // support threshold met even if absentees show up and all vote against, still cannot change outcome
-    results.yes / (results.yes + results.no + BigInt(absentee)) >
-      supportThreshold
+    Big(results.yes.toString())
+      .div(
+        Big(
+          BigInt(
+            results.yes + results.no + totalVotingWeight - usedVotingWeight
+          ).toString()
+        )
+      )
+      .gte(supportThreshold)
+    // (results.yes + results.no + (totalVotingWeight - usedVotingWeight)) >
+    // supportThreshold
   );
 }
 
@@ -229,53 +230,53 @@ export function computeProposalStatus(
   endDate: Date
 ): ProposalStatus {
   const now = new Date();
-  if (executed) {
-    return ProposalStatus.EXECUTED;
-  }
   if (startDate >= now) {
     return ProposalStatus.PENDING;
-  }
-  if (earlyExecutable) {
-    return ProposalStatus.SUCCEEDED;
   }
   if (endDate >= now) {
     return ProposalStatus.ACTIVE;
   }
+  if (executed) {
+    return ProposalStatus.EXECUTED;
+  }
+  if (earlyExecutable) {
+    return ProposalStatus.SUCCEEDED;
+  }
   return ProposalStatus.DEFEATED;
 }
 
-export function vochainStatusToProposalStatus(
-  vochainStatus: ElectionStatus,
-  finalResults: boolean,
-  executed: boolean,
-  canProposalBeApproved: boolean
-): ProposalStatus {
-  //TODO probably need to check also the state of the contract
-  if ([ElectionStatus.UPCOMING, ElectionStatus.PAUSED].includes(vochainStatus))
-    return ProposalStatus.PENDING;
-  if (ElectionStatus.ONGOING === vochainStatus) return ProposalStatus.ACTIVE;
-  // if ([].includes[vochainStatus])
-  if (ElectionStatus.RESULTS) {
-    if (executed) return ProposalStatus.EXECUTED;
-    else if (finalResults) {
-      return canProposalBeApproved
-        ? ProposalStatus.SUCCEEDED
-        : ProposalStatus.DEFEATED;
-    } else {
-      //TODO decide how to handle this cases
-      return ProposalStatus.PENDING;
-    }
-  }
-  // TODO decide how to handle this cases
-  if (
-    [ElectionStatus.CANCELED, ElectionStatus.PROCESS_UNKNOWN].includes(
-      vochainStatus
-    )
-  )
-    return ProposalStatus.PENDING;
-  // TODO decide which is the generic one
-  return ProposalStatus.PENDING;
-}
+// export function vochainStatusToProposalStatus(
+//   vochainStatus: ElectionStatus,
+//   finalResults: boolean,
+//   executed: boolean,
+//   canProposalBeApproved: boolean
+// ): ProposalStatus {
+//   //TODO probably need to check also the state of the contract
+//   if ([ElectionStatus.UPCOMING, ElectionStatus.PAUSED].includes(vochainStatus))
+//     return ProposalStatus.PENDING;
+//   if (ElectionStatus.ONGOING === vochainStatus) return ProposalStatus.ACTIVE;
+//   // if ([].includes[vochainStatus])
+//   if (ElectionStatus.RESULTS) {
+//     if (executed) return ProposalStatus.EXECUTED;
+//     else if (finalResults) {
+//       return canProposalBeApproved
+//         ? ProposalStatus.SUCCEEDED
+//         : ProposalStatus.DEFEATED;
+//     } else {
+//       //TODO decide how to handle this cases
+//       return ProposalStatus.PENDING;
+//     }
+//   }
+//   // TODO decide how to handle this cases
+//   if (
+//     [ElectionStatus.CANCELED, ElectionStatus.PROCESS_UNKNOWN].includes(
+//       vochainStatus
+//     )
+//   )
+//     return ProposalStatus.PENDING;
+//   // TODO decide which is the generic one
+//   return ProposalStatus.PENDING;
+// }
 
 export function toNewProposal(
   SCproposalID: number,
@@ -301,10 +302,10 @@ export function toNewProposal(
   const canBeApproved = canProposalBeApproved(
     result,
     settings.supportThreshold,
-    participation.minPart,
+    participation.missingPart,
     vochainProposal.census.weight || BigInt(0),
-    totalUsedWeight,
-    census3Token.decimals
+    totalUsedWeight
+    // census3Token.decimals
   );
   const startDate = new Date(SCProposal.parameters.startDate);
   const endDate = new Date(SCProposal.parameters.endDate);
