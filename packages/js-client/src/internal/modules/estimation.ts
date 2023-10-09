@@ -4,7 +4,7 @@ import {
 } from '../../types';
 import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientEstimation } from '../interfaces';
-import { toGaslessVotingProposal } from '../utils';
+import { toGaslessVotingProposal, vochainResultsToSCResults } from '../utils';
 import { GasFeeEstimation } from '@aragon/sdk-client-common';
 import {
   SizeMismatchError,
@@ -94,6 +94,72 @@ export class OffchainVotingClientEstimation
     );
     return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
   }
+
+  /**
+   * Estimates the gas fee of creating a proposal on the plugin
+   *
+   * @param {CreateGasslessProposalParams} params
+   * @return {*}  {Promise<GasFeeEstimation>}
+   * @memberof OffchainVotingClientEstimation
+   */
+  public async approve(
+    pluginAddress: string,
+    proposalId: number
+  ): Promise<GasFeeEstimation> {
+    const signer = this.web3.getConnectedSigner();
+
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
+      pluginAddress,
+      signer
+    );
+
+    const proposalFromSC = toGaslessVotingProposal(
+      await gaslessVotingContract.getProposal(proposalId)
+    );
+    const vochainProposal = await this.vocdoniSDK.fetchElection(
+      proposalFromSC.vochainProposalId
+    );
+
+    let estimatedGasFee;
+    if (proposalFromSC.approvers.length == 0) {
+      estimatedGasFee = await gaslessVotingContract.estimateGas.setTally(
+        proposalId,
+        vochainResultsToSCResults(vochainProposal)
+      );
+    } else {
+      estimatedGasFee = await gaslessVotingContract.estimateGas.approveTally(
+        proposalId,
+        false
+      );
+    }
+
+    return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
+  }
+
+  /**
+   * Estimates the gas fee of creating a proposal on the plugin
+   *
+   * @param {ExecuteParams} params
+   * @return {*}  {Promise<GasFeeEstimation>}
+   * @memberof OffchainVotingClientEstimation
+   */
+  public async execute(
+    pluginAddress: string,
+    proposalId: number
+  ): Promise<GasFeeEstimation> {
+    const signer = this.web3.getConnectedSigner();
+
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
+      pluginAddress,
+      signer
+    );
+
+    const estimatedGasFee =
+      await gaslessVotingContract.estimateGas.executeProposal(proposalId);
+
+    return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
+  }
+
   // public async prepareInstallation(
   //   params: PrepareInstallationParams
   // ): Promise<GasFeeEstimation> {

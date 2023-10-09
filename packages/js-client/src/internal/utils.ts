@@ -181,7 +181,7 @@ export function vochainVoteResultsToProposal(
   return parsedResults as TokenVotingProposalResult;
 }
 
-export function canProposalBeApproved(
+export function hasProposalSucceeded(
   results: TokenVotingProposalResult,
   supportThreshold: number | undefined,
   missingParticipation: number | undefined,
@@ -225,7 +225,7 @@ export function canProposalBeApproved(
 
 export function computeProposalStatus(
   executed: boolean,
-  earlyExecutable: boolean,
+  hasSucceeded: boolean,
   startDate: Date,
   endDate: Date
 ): ProposalStatus {
@@ -239,7 +239,7 @@ export function computeProposalStatus(
   if (executed) {
     return ProposalStatus.EXECUTED;
   }
-  if (earlyExecutable) {
+  if (hasSucceeded) {
     return ProposalStatus.SUCCEEDED;
   }
   return ProposalStatus.DEFEATED;
@@ -249,7 +249,7 @@ export function computeProposalStatus(
 //   vochainStatus: ElectionStatus,
 //   finalResults: boolean,
 //   executed: boolean,
-//   canProposalBeApproved: boolean
+//   hasProposalSucceeded: boolean
 // ): ProposalStatus {
 //   //TODO probably need to check also the state of the contract
 //   if ([ElectionStatus.UPCOMING, ElectionStatus.PAUSED].includes(vochainStatus))
@@ -259,7 +259,7 @@ export function computeProposalStatus(
 //   if (ElectionStatus.RESULTS) {
 //     if (executed) return ProposalStatus.EXECUTED;
 //     else if (finalResults) {
-//       return canProposalBeApproved
+//       return hasProposalSucceeded
 //         ? ProposalStatus.SUCCEEDED
 //         : ProposalStatus.DEFEATED;
 //     } else {
@@ -299,7 +299,7 @@ export function toNewProposal(
     census3Token.decimals
   );
   const totalUsedWeight = result.abstain + result.no + result.yes;
-  const canBeApproved = canProposalBeApproved(
+  const hasSucceeded = hasProposalSucceeded(
     result,
     settings.supportThreshold,
     participation.missingPart,
@@ -336,7 +336,7 @@ export function toNewProposal(
     actions: SCProposal.actions, //DaoAction[];
     status: computeProposalStatus(
       SCProposal.executed,
-      canBeApproved,
+      hasSucceeded,
       startDate,
       endDate
     ),
@@ -366,7 +366,6 @@ export function toNewProposal(
       currentPercentage: participation.currentPercentage,
       missingParticipation: participation.missingPart,
     },
-    canBeApproved,
   } as GaslessVotingProposal;
 }
 

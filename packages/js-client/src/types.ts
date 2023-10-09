@@ -189,7 +189,6 @@ export type GaslessVotingProposal = ProposalBase & {
     currentPercentage: number;
     missingParticipation: number;
   };
-  canBeApproved: boolean;
   token: {
     address: string;
     name: string;
@@ -293,15 +292,6 @@ export class InvalidResults extends SdkError {
     super(message ? message : 'Invalid results', cause);
   }
 }
-
-export enum SetTallyStep {
-  EXECUTING = 'executing',
-  DONE = 'done',
-}
-
-export type SetTallyStepValue =
-  | { key: SetTallyStep.EXECUTING; txHash: string }
-  | { key: SetTallyStep.DONE };
 
 export enum ApproveTallyStep {
   EXECUTING = 'executing',

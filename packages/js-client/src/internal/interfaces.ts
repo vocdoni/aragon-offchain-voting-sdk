@@ -3,7 +3,6 @@ import {
   GaslessVotingProposal,
   PrepareInstallationParams,
   GaslessPluginVotingSettings,
-  SetTallyStepValue,
   ApproveTallyStepValue,
 } from '../types';
 import {
@@ -14,6 +13,7 @@ import {
   Erc721TokenDetails,
   Erc20WrapperTokenDetails,
   TokenVotingMember,
+  ExecuteProposalStepValue,
 } from '@aragon/sdk-client';
 import {
   GasFeeEstimation,
@@ -73,12 +73,17 @@ export interface IOffchainVotingClientMethods {
   setTally(
     pluginAddress: string,
     proposalId: number,
-    tryExecution?: boolean
-  ): AsyncGenerator<SetTallyStepValue>;
+    results: bigint[][]
+  ): AsyncGenerator<ApproveTallyStepValue>;
   approveTally(
-    proposalId: string,
+    pluginAddress: string,
+    proposalId: number,
     tryExecution: boolean
   ): AsyncGenerator<ApproveTallyStepValue>;
+  execute(
+    pluginAddress: string,
+    proposalId: number
+  ): AsyncGenerator<ExecuteProposalStepValue>;
 }
 export interface IOffchainVotingClientEstimation {
   // prepareInstallation(
@@ -92,6 +97,8 @@ export interface IOffchainVotingClientEstimation {
     pluginAddress: string,
     proposalId: number
   ): Promise<GasFeeEstimation>;
+  approve(pluginAddress: string, proposalId: number): Promise<GasFeeEstimation>;
+  execute(pluginAddress: string, proposalId: number): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }
 export interface IOffchainVotingClientEncoding {
