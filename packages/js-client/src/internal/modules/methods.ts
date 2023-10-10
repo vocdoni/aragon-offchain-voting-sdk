@@ -246,9 +246,9 @@ export class OffchainVotingClientMethods
   ): Promise<GaslessVotingProposal | null> {
     try {
       if (!isAddress(pluginAddress) || !isAddress(daoAddress)) {
-        throw new InvalidAddressError();
+        Promise.reject(new InvalidAddressError());
       }
-      if (isNaN(proposalId)) throw new InvalidProposalIdError();
+      if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
 
       const signer = this.web3.getConnectedSigner();
 
@@ -303,7 +303,7 @@ export class OffchainVotingClientMethods
     pluginAddress: string
   ): Promise<GaslessVotingProposal[]> {
     if (!isAddress(pluginAddress) || !isAddress(daoAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
     let id = 0;
     let proposal = null;
@@ -329,7 +329,7 @@ export class OffchainVotingClientMethods
     blockNumber?: number
   ): Promise<GaslessPluginVotingSettings | null> {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
     const signer = this.web3.getConnectedSigner();
 
@@ -358,7 +358,7 @@ export class OffchainVotingClientMethods
     Erc20TokenDetails | Erc721TokenDetails | Erc20WrapperTokenDetails | null
   > {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
     const signer = this.web3.getConnectedSigner();
 
@@ -393,7 +393,7 @@ export class OffchainVotingClientMethods
    */
   public async getMembers(pluginAddress: string): Promise<TokenVotingMember[]> {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
     const signer = this.web3.getConnectedSigner();
 
@@ -433,14 +433,14 @@ export class OffchainVotingClientMethods
    * @return {*}  {AsyncGenerator<ExecuteProposalStepValue>}
    * @memberof OffchainVotingClientMethods
    */
-  public async *approve(
+  public async approve(
     pluginAddress: string,
     proposalId: number
-  ): AsyncGenerator<ApproveTallyStepValue> {
+  ): Promise<AsyncGenerator<ApproveTallyStepValue>> {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) throw new InvalidProposalIdError();
+    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
 
     const signer = this.web3.getConnectedSigner();
 
@@ -448,7 +448,7 @@ export class OffchainVotingClientMethods
       pluginAddress,
       await signer.getAddress()
     );
-    if (!isCommitteeMember) throw new Error('Not a committee member');
+    if (!isCommitteeMember) Promise.reject(new Error('Not a committee member'));
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
@@ -461,7 +461,7 @@ export class OffchainVotingClientMethods
     const vochainProposal = await this.vocdoniSDK.fetchElection(
       proposalFromSC.vochainProposalId
     );
-    if (!vochainProposal.finalResults) throw Error('No results yet');
+    if (!vochainProposal.finalResults) Promise.reject(Error('No results yet'));
 
     if (proposalFromSC.approvers.length == 0) {
       return this.setTally(
@@ -487,9 +487,9 @@ export class OffchainVotingClientMethods
     results: bigint[][]
   ): AsyncGenerator<ApproveTallyStepValue> {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) throw new InvalidProposalIdError();
+    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
     const signer = this.web3.getConnectedSigner();
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
@@ -524,9 +524,9 @@ export class OffchainVotingClientMethods
     tryExecution = false
   ): AsyncGenerator<ApproveTallyStepValue> {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) throw new InvalidProposalIdError();
+    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
 
     Error('Invalid proposal id');
 
@@ -566,9 +566,9 @@ export class OffchainVotingClientMethods
     proposalId: number
   ): AsyncGenerator<ExecuteProposalStepValue> {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) throw new InvalidProposalIdError();
+    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
     const signer = this.web3.getConnectedSigner();
 
     // const { pluginAddress, id } = decodeProposalId(proposalId);
@@ -602,10 +602,10 @@ export class OffchainVotingClientMethods
     memberAddress: string
   ): Promise<boolean> {
     if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
     if (!isAddress(memberAddress)) {
-      throw new InvalidAddressError();
+      Promise.reject(new InvalidAddressError());
     }
     const signer = this.web3.getConnectedSigner();
 

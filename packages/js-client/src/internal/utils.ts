@@ -245,39 +245,6 @@ export function computeProposalStatus(
   return ProposalStatus.DEFEATED;
 }
 
-// export function vochainStatusToProposalStatus(
-//   vochainStatus: ElectionStatus,
-//   finalResults: boolean,
-//   executed: boolean,
-//   hasProposalSucceeded: boolean
-// ): ProposalStatus {
-//   //TODO probably need to check also the state of the contract
-//   if ([ElectionStatus.UPCOMING, ElectionStatus.PAUSED].includes(vochainStatus))
-//     return ProposalStatus.PENDING;
-//   if (ElectionStatus.ONGOING === vochainStatus) return ProposalStatus.ACTIVE;
-//   // if ([].includes[vochainStatus])
-//   if (ElectionStatus.RESULTS) {
-//     if (executed) return ProposalStatus.EXECUTED;
-//     else if (finalResults) {
-//       return hasProposalSucceeded
-//         ? ProposalStatus.SUCCEEDED
-//         : ProposalStatus.DEFEATED;
-//     } else {
-//       //TODO decide how to handle this cases
-//       return ProposalStatus.PENDING;
-//     }
-//   }
-//   // TODO decide how to handle this cases
-//   if (
-//     [ElectionStatus.CANCELED, ElectionStatus.PROCESS_UNKNOWN].includes(
-//       vochainStatus
-//     )
-//   )
-//     return ProposalStatus.PENDING;
-//   // TODO decide which is the generic one
-//   return ProposalStatus.PENDING;
-// }
-
 export function toNewProposal(
   SCproposalID: number,
   daoName: string,

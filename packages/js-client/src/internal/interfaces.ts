@@ -6,7 +6,6 @@ import {
   ApproveTallyStepValue,
 } from '../types';
 import {
-  VotingSettings,
   MintTokenParams,
   ProposalCreationStepValue,
   Erc20TokenDetails,
@@ -70,6 +69,10 @@ export interface IOffchainVotingClientMethods {
     pluginAddress: string,
     memberAddress: string
   ): Promise<boolean>;
+  approve(
+    pluginAddress: string,
+    proposalId: number
+  ): Promise<AsyncGenerator<ApproveTallyStepValue>>;
   setTally(
     pluginAddress: string,
     proposalId: number,
@@ -104,20 +107,14 @@ export interface IOffchainVotingClientEstimation {
 export interface IOffchainVotingClientEncoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(params: Params): DaoAction;
+  mintTokenAction: (
+    minterAddress: string,
+    params: MintTokenParams
+  ) => DaoAction;
 }
 export interface IOffchainVotingClientDecoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(data: Uint8Array): params;
   findInterface(data: Uint8Array): InterfaceParams | null;
-}
-
-export interface ITokenVotingClientEncoding {
-  updatePluginSettingsAction: (
-    pluginAddress: string,
-    params: VotingSettings
-  ) => DaoAction;
-  mintTokenAction: (
-    minterAddress: string,
-    params: MintTokenParams
-  ) => DaoAction;
+  mintTokenAction(data: Uint8Array): MintTokenParams;
 }

@@ -5,11 +5,7 @@ import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientEncoding } from '../interfaces';
 import { mintTokenParamsToContract, initParamsToContract } from '../utils';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
-import {
-  MintTokenParams,
-  encodeUpdateVotingSettingsAction,
-  VotingSettings,
-} from '@aragon/sdk-client';
+import { MintTokenParams } from '@aragon/sdk-client';
 import {
   DaoAction,
   getNamedTypesFromMetadata,
@@ -44,7 +40,7 @@ export class OffchainVotingClientEncoding
    * @param {TokenVotingPluginInstall} params
    * @param {Networkish} network
    * @return {*}  {PluginInstallItem}
-   * @memberof TokenVotingClientEncoding
+   * @memberof OffchainVotingClientEncoding
    */
   static getPluginInstallItem(
     params: OffchainVotingPluginInstall,
@@ -63,28 +59,29 @@ export class OffchainVotingClientEncoding
       data: hexToBytes(hexBytes),
     };
   }
+
   /**
    * Computes the parameters to be given when creating a proposal that updates the governance configuration
    *
    * @param {string} pluginAddress
    * @param {VotingSettings} params
    * @return {*}  {DaoAction}
-   * @memberof TokenVotingClientEncoding
+   * @memberof OffchainVotingClientEncoding
    */
-  public updatePluginSettingsAction(
-    pluginAddress: string,
-    params: VotingSettings
-  ): DaoAction {
-    if (!isAddress(pluginAddress)) {
-      throw new InvalidAddressError();
-    }
-    // TODO: check if to and value are correct
-    return {
-      to: pluginAddress,
-      value: BigInt(0),
-      data: encodeUpdateVotingSettingsAction(params),
-    };
-  }
+  // public updatePluginSettingsAction(
+  //   pluginAddress: string,
+  //   params: VotingSettings
+  // ): DaoAction {
+  //   if (!isAddress(pluginAddress)) {
+  //     throw new InvalidAddressError();
+  //   }
+  //   // TODO: check if to and value are correct
+  //   return {
+  //     to: pluginAddress,
+  //     value: BigInt(0),
+  //     data: encodeUpdateVotingSettingsAction(params),
+  //   };
+  // }
 
   /**
    * Computes the parameters to be given when creating a proposal that mints an amount of ERC-20 tokens to an address
@@ -92,7 +89,7 @@ export class OffchainVotingClientEncoding
    * @param {string} minterAddress
    * @param {MintTokenParams} params
    * @return {*}  {DaoAction}
-   * @memberof TokenVotingClientEncoding
+   * @memberof OffchainVotingClientEncoding
    */
   public mintTokenAction(
     minterAddress: string,
