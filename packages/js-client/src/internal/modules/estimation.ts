@@ -54,7 +54,9 @@ export class OffchainVotingClientEstimation
     const estimatedGasFee =
       await gaslessVotingContract.estimateGas.createProposal(
         // toUtf8Bytes(params.metadataUri),
-        hexToBytes(params.vochainProposalId),
+        hexToBytes(
+          '0000000000000000000000000000000000000000000000000000000000000000'
+        ),
         allowFailureMap,
         votingParams,
         params.actions || []
