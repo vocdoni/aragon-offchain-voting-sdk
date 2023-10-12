@@ -32,6 +32,7 @@ import {
   findLog,
   prepareGenericInstallation,
   PrepareInstallationStepValue,
+  ProposalMetadata,
   SupportedNetwork,
   SupportedNetworksArray,
   TokenType,
@@ -39,6 +40,7 @@ import {
 import {
   InvalidAddressError,
   InvalidProposalIdError,
+  IpfsPinError,
   ProposalCreationError,
   SizeMismatchError,
   UnsupportedNetworkError,
@@ -105,10 +107,10 @@ export class OffchainVotingClientMethods
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
     const votingParams: GaslessProposalParametersContractStruct = {
       censusBlock: [] as string[],
-      startDate: BigInt(params.startDate / 1000),
-      endDate: BigInt(params.endDate / 1000),
+      startDate: BigInt(Math.floor(params.startDate / 1000)),
+      endDate: BigInt(Math.floor(params.endDate / 1000)),
       expirationDate: params.expirationDate
-        ? BigInt(params.expirationDate / 1000)
+        ? BigInt(Math.floor(params.expirationDate / 1000))
         : BigInt(0),
       securityBlock: BigInt(0),
     };
@@ -636,4 +638,21 @@ export class OffchainVotingClientMethods
 
   //   return tokenVotingContract.canExecute(id);
   // }
+
+  /**
+   * Pins a metadata object into IPFS and retruns the generated hash
+   *
+   * @param {ProposalMetadata} params
+   * @return {*}  {Promise<string>}
+   * @memberof ClientMethods
+   */
+  public async pinMetadata(params: ProposalMetadata): Promise<string> {
+    try {
+      const cid = await this.ipfs.add(JSON.stringify(params));
+      await this.ipfs.pin(cid);
+      return `ipfs://${cid}`;
+    } catch (e) {
+      throw new IpfsPinError(e);
+    }
+  }
 }

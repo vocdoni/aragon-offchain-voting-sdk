@@ -19,6 +19,7 @@ import {
   PrepareInstallationStepValue,
   DaoAction,
   InterfaceParams,
+  ProposalMetadata,
 } from '@aragon/sdk-client-common';
 
 export interface IOffchainVotingClient {
@@ -87,6 +88,7 @@ export interface IOffchainVotingClientMethods {
     pluginAddress: string,
     proposalId: number
   ): AsyncGenerator<ExecuteProposalStepValue>;
+  pinMetadata(params: ProposalMetadata): Promise<string>;
 }
 export interface IOffchainVotingClientEstimation {
   // prepareInstallation(
@@ -111,10 +113,15 @@ export interface IOffchainVotingClientEncoding {
     minterAddress: string,
     params: MintTokenParams
   ) => DaoAction;
+  updatePluginSettingsAction(
+    pluginAddress: string,
+    params: GaslessPluginVotingSettings
+  ): DaoAction;
 }
 export interface IOffchainVotingClientDecoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(data: Uint8Array): params;
   findInterface(data: Uint8Array): InterfaceParams | null;
+  updatePluginSettingsAction(data: Uint8Array): GaslessPluginVotingSettings;
   mintTokenAction(data: Uint8Array): MintTokenParams;
 }

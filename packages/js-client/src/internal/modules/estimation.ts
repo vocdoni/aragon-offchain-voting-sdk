@@ -44,10 +44,12 @@ export class OffchainVotingClientEstimation
 
     const votingParams: GaslessProposalParametersContractStruct = {
       censusBlock: [] as string[],
-      startDate: BigInt(params.startDate / 1000),
-      endDate: BigInt(params.endDate / 1000),
+      startDate: params.startDate
+        ? BigInt(Math.floor(params.startDate / 1000))
+        : BigInt(0),
+      endDate: BigInt(Math.floor(params.endDate / 1000)),
       expirationDate: params.expirationDate
-        ? BigInt(params.expirationDate / 1000)
+        ? BigInt(Math.floor(params.expirationDate / 1000))
         : BigInt(0),
       securityBlock: BigInt(0),
     };

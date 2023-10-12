@@ -1,7 +1,11 @@
+import { GaslessPluginVotingSettings } from '../../types';
 import { AVAILABLE_FUNCTION_SIGNATURES } from '../constants';
 import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientDecoding } from '../interfaces';
-import { mintTokenParamsFromContract } from '../utils';
+import {
+  mintTokenParamsFromContract,
+  votingSettingsfromContract,
+} from '../utils';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import { MintTokenParams } from '@aragon/sdk-client';
 import {
@@ -9,6 +13,10 @@ import {
   getFunctionFragment,
 } from '@aragon/sdk-client-common';
 import { bytesToHex } from '@aragon/sdk-common';
+import {
+  VocdoniVoting,
+  VocdoniVoting__factory,
+} from '@vocdoni/offchain-voting-ethers';
 
 export class OffchainVotingClientDecoding
   extends OffchainVotingClientCore
@@ -22,9 +30,27 @@ export class OffchainVotingClientDecoding
    * @return {*}  {VotingSettings}
    * @memberof OffchainVotingClientDecoding
    */
-  // public updatePluginSettingsAction(data: Uint8Array): VotingSettings {
-  //   return decodeUpdatePluginSettingsAction(data);
-  // }
+  public updatePluginSettingsAction(
+    data: Uint8Array
+  ): GaslessPluginVotingSettings {
+    return this.decodeUpdatePluginSettingsAction(data);
+  }
+
+  private decodeUpdatePluginSettingsAction(
+    data: Uint8Array
+  ): GaslessPluginVotingSettings {
+    const votingInterface = VocdoniVoting__factory.createInterface();
+    const hexBytes = bytesToHex(data);
+    const expectedfunction = votingInterface.getFunction(
+      'updatePluginSettings'
+    );
+    const result = votingInterface.decodeFunctionData(
+      expectedfunction,
+      hexBytes
+    ) as VocdoniVoting.PluginSettingsStructOutput;
+
+    return votingSettingsfromContract(result);
+  }
 
   /**
    * Decodes the mint token params from an encoded mint token action

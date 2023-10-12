@@ -68,7 +68,7 @@ export function mintTokenParamsFromContract(result: Result): MintTokenParams {
  * - The minimum voting power required for a proposer to create a proposal.
  * - The census strategy used for the proposal.
  */
-export function createProposalVotingSettingsToContract(
+export function gaslessVotingSettingsToContract(
   params: GaslessPluginVotingSettings
 ): [
   boolean,
@@ -82,7 +82,7 @@ export function createProposalVotingSettingsToContract(
   string
 ] {
   return [
-    true,
+    params.onlyCommitteeProposalCreation || true,
     params.minTallyApprovals,
     encodeRatio(params.minParticipation, 6),
     encodeRatio(params.supportThreshold, 6),
@@ -138,9 +138,10 @@ export function initParamsToContract(params: OffchainVotingPluginInstall) {
       params.useToken.wrappedToken.symbol,
     ];
   }
+  params.votingSettings.onlyCommitteeProposalCreation = true;
   return [
     params.committee,
-    createProposalVotingSettingsToContract(params.votingSettings),
+    gaslessVotingSettingsToContract(params.votingSettings),
     token,
     balances,
   ];
