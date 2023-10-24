@@ -13,6 +13,7 @@ import {
   Erc20WrapperTokenDetails,
   TokenVotingMember,
   ExecuteProposalStepValue,
+  ProposalQueryParams,
 } from '@aragon/sdk-client';
 import {
   GasFeeEstimation,
@@ -51,9 +52,7 @@ export interface IOffchainVotingClientMethods {
   ): Promise<GaslessVotingProposal | null>;
   //
   getProposals(
-    daoName: string,
-    daoAddress: string,
-    pluginAddress: string
+    params: ProposalQueryParams & { pluginAddress: string }
   ): Promise<GaslessVotingProposal[]>;
   //
   getVotingSettings(

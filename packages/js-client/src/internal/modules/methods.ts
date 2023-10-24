@@ -26,10 +26,13 @@ import {
   ExecuteProposalStepValue,
   ProposalCreationStepValue,
   ProposalCreationSteps,
+  ProposalQueryParams,
   TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
   findLog,
+  InvalidAddressOrEnsError,
+  NoProviderError,
   prepareGenericInstallation,
   PrepareInstallationStepValue,
   ProposalMetadata,
@@ -78,6 +81,9 @@ export class OffchainVotingClientMethods
       version: params.versionTag,
       installationAbi: INSTALLATION_ABI,
       installationParams: initParamsToContract(params.settings),
+      pluginSetupProcessorAddress: this.web3.getAddress(
+        'pluginSetupProcessorAddress'
+      ),
     });
   }
 
@@ -247,7 +253,7 @@ export class OffchainVotingClientMethods
     proposalId: number
   ): Promise<GaslessVotingProposal | null> {
     try {
-      if (!isAddress(pluginAddress) || !isAddress(daoAddress)) {
+      if (!isAddress(pluginAddress)) {
         Promise.reject(new InvalidAddressError());
       }
       if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
@@ -299,19 +305,50 @@ export class OffchainVotingClientMethods
    * @return {*}  {Promise<TokenVotingProposalListItem[]>}
    * @memberof OffchainVotingClientMethods
    */
-  public async getProposals(
-    daoName: string,
-    daoAddress: string,
-    pluginAddress: string
-  ): Promise<GaslessVotingProposal[]> {
-    if (!isAddress(pluginAddress) || !isAddress(daoAddress)) {
+  public async getProposals({
+    daoAddressOrEns,
+    pluginAddress,
+  }: // limit = 10,
+  // status,
+  // skip = 0,
+  // direction = SortDirection.ASC,
+  // sortBy = ProposalSortBy.CREATED_AT,
+  ProposalQueryParams & { pluginAddress: string }): Promise<
+    GaslessVotingProposal[]
+  > {
+    if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
+    }
+
+    let address = daoAddressOrEns;
+    if (address) {
+      if (!isAddress(address)) {
+        await this.web3.ensureOnline();
+        const provider = this.web3.getProvider();
+        if (!provider) {
+          throw new NoProviderError();
+        }
+        try {
+          const resolvedAddress = await provider.resolveName(address);
+          if (!resolvedAddress) {
+            throw new InvalidAddressOrEnsError();
+          }
+          address = resolvedAddress;
+        } catch (e) {
+          throw new InvalidAddressOrEnsError(e);
+        }
+      }
     }
     let id = 0;
     let proposal = null;
     let proposals: GaslessVotingProposal[] = [];
     do {
-      proposal = await this.getProposal(daoName, daoAddress, pluginAddress, id);
+      proposal = await this.getProposal(
+        daoAddressOrEns || '',
+        address || '',
+        pluginAddress,
+        id
+      );
       if (proposal) proposals.push(proposal);
       id += 1;
     } while (proposal != null);

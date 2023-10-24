@@ -25,6 +25,22 @@ export const DEFAULT_ADDRESSES: {
     setupAddress: '0x5A6E29875cCa6eb7a9c39938720e6096468a8917',
     repoAddress: '0x5BD8F8Dc73476d24F37c4d885c4528d5abB8cBe6',
   },
+  base: {
+    setupAddress: '',
+    repoAddress: '',
+  },
+  baseGoerli: {
+    setupAddress: '',
+    repoAddress: '',
+  },
+  local: {
+    setupAddress: '',
+    repoAddress: '',
+  },
+  sepolia: {
+    setupAddress: '',
+    repoAddress: '',
+  },
 };
 
 export const DEFAULT_OFFCHAIN_VOTING_BACKEND_URL =
