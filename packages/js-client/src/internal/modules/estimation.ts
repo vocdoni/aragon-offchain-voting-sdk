@@ -5,12 +5,12 @@ import {
 import { OffchainVotingClientCore } from '../core';
 import { IOffchainVotingClientEstimation } from '../interfaces';
 import { toGaslessVotingProposal, vochainResultsToSCResults } from '../utils';
-import { GasFeeEstimation } from '@aragon/sdk-client-common';
 import {
+  GasFeeEstimation
   SizeMismatchError,
   boolArrayToBitmap,
   hexToBytes,
-} from '@aragon/sdk-common';
+} from '@aragon/sdk-client-common';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 
 export class OffchainVotingClientEstimation
@@ -38,7 +38,7 @@ export class OffchainVotingClientEstimation
       params.failSafeActions?.length &&
       params.failSafeActions.length !== params.actions?.length
     ) {
-      throw new SizeMismatchError();
+      throw new SizeMismatchError(`Expected failsafeactions ${params.failSafeActions?.length}`, `Found actions ${params.actions?.length}`);
     }
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
 

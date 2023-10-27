@@ -39,8 +39,6 @@ import {
   SupportedNetwork,
   SupportedNetworksArray,
   TokenType,
-} from '@aragon/sdk-client-common';
-import {
   InvalidAddressError,
   InvalidProposalIdError,
   IpfsPinError,
@@ -50,7 +48,7 @@ import {
   boolArrayToBitmap, // decodeProposalId,
   encodeProposalId,
   hexToBytes,
-} from '@aragon/sdk-common';
+} from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
 import { ErrElectionNotFound } from '@vocdoni/sdk';
@@ -108,7 +106,10 @@ export class OffchainVotingClientMethods
       params.failSafeActions?.length &&
       params.failSafeActions.length !== params.actions?.length
     ) {
-      throw new SizeMismatchError();
+      throw new SizeMismatchError(
+        `Length failSafeActions:${params.failSafeActions.length}`,
+        `Length actions:${params.actions?.length || 0}`
+      );
     }
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
     const votingParams: GaslessProposalParametersContractStruct = {

@@ -19,12 +19,13 @@ import {
   PluginInstallItem,
   SupportedNetwork,
   SupportedNetworksArray,
-} from '@aragon/sdk-client-common';
-import {
   hexToBytes,
   InvalidAddressError,
   UnsupportedNetworkError,
-} from '@aragon/sdk-common';
+} from '@aragon/sdk-client-common';
+import {
+  
+} from '@aragon/sdk-client-common';
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import { Networkish, getNetwork } from '@ethersproject/providers';

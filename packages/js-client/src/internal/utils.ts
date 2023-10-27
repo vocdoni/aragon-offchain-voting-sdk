@@ -18,8 +18,10 @@ import {
   DaoAction,
   EMPTY_PROPOSAL_METADATA_LINK,
   ProposalStatus,
+  hexToBytes,
+  encodeRatio,
+  decodeRatio
 } from '@aragon/sdk-client-common';
-import { hexToBytes, encodeRatio, decodeRatio } from '@aragon/sdk-common';
 import { Result } from '@ethersproject/abi';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
