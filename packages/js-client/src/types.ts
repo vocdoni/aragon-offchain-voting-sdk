@@ -142,9 +142,9 @@ export type GaslessPluginVotingSettings = {
 export type GaslessProposalParametersStruct = {
   censusBlock?: string[]; // following the multichain notation https://eips.ethereum.org/EIPS/eip-3770
   securityBlock?: number; // calculated internally in the smart contract
-  startDate: number; // UNIX timestamp (ms)
-  endDate: number; // UNIX timestamp (ms)
-  expirationDate: number; // calculated internally in the smart contract based on expirationTime
+  startDate?: Date; // UNIX timestamp (ms)
+  endDate: Date; // UNIX timestamp (ms)
+  expirationDate: Date; // calculated internally in the smart contract based on expirationTime
 };
 
 export type GaslessProposalParametersContractStruct = {

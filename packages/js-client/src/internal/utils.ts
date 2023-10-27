@@ -118,9 +118,9 @@ export function proposalParamsfromContract(
   return {
     censusBlock: params.censusBlock,
     securityBlock: 0,
-    startDate: Number(params.startDate) * 1000,
-    endDate: Number(params.endDate) * 1000,
-    expirationDate: Number(params.expirationDate) * 1000,
+    startDate: new Date(Number(params.startDate) * 1000),
+    endDate: new Date(Number(params.endDate) * 1000),
+    expirationDate: new Date(Number(params.expirationDate) * 1000),
   };
 }
 
@@ -277,7 +277,7 @@ export function toNewProposal(
     totalUsedWeight
     // census3Token.decimals
   );
-  const startDate = new Date(SCProposal.parameters.startDate);
+  const startDate = SCProposal.parameters.startDate as Date;
   const endDate = new Date(SCProposal.parameters.endDate);
 
   return {
