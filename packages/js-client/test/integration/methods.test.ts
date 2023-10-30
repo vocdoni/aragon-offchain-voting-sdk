@@ -3,8 +3,8 @@ import * as mockedGraphqlRequest from '../mocks/graphql-request';
 import {
   // NumbersQueryParams,
   // NumbersSortBy,
-  OffchainVotingContext,
-  OffchainVotingClient,
+  GaslessVotingContext,
+  GaslessVotingClient,
 } from '../../src';
 // import { QueryNumber, QueryNumbers } from '../../src/internal/graphql-queries';
 // import {
@@ -38,7 +38,7 @@ describe('Methods', () => {
     // server = await ganacheSetup.start();
     // deployment = await deployContracts.deploy();
     dao = await buildVocdoniVotingDao(deployment);
-    contextParamsLocalChain.offchainVotingRepoAddress =
+    contextParamsLocalChain.gaslessVotingRepoAddress =
       deployment.vocdoniVotingRepo.address;
     contextParamsLocalChain.ensRegistryAddress = deployment.ensRegistry.address;
     LIVE_CONTRACTS.goerli.pluginSetupProcessor =
@@ -50,8 +50,8 @@ describe('Methods', () => {
   });
 
   it('Should prepare an installation', async () => {
-    const context = new OffchainVotingContext(contextParamsLocalChain);
-    const client = new OffchainVotingClient(context);
+    const context = new GaslessVotingContext(contextParamsLocalChain);
+    const client = new GaslessVotingClient(context);
     client.methods.prepareInstallation(
       {
 

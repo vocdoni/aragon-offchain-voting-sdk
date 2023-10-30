@@ -1,7 +1,7 @@
 import { GaslessPluginVotingSettings } from '../../types';
 import { AVAILABLE_FUNCTION_SIGNATURES } from '../constants';
-import { OffchainVotingClientCore } from '../core';
-import { IOffchainVotingClientDecoding } from '../interfaces';
+import { GaslessVotingClientCore } from '../core';
+import { IGaslessVotingClientDecoding } from '../interfaces';
 import {
   mintTokenParamsFromContract,
   votingSettingsfromContract,
@@ -16,11 +16,11 @@ import { bytesToHex } from '@aragon/sdk-common';
 import {
   VocdoniVoting,
   VocdoniVoting__factory,
-} from '@vocdoni/offchain-voting-ethers';
+} from '@vocdoni/gasless-voting-ethers';
 
-export class OffchainVotingClientDecoding
-  extends OffchainVotingClientCore
-  implements IOffchainVotingClientDecoding
+export class GaslessVotingClientDecoding
+  extends GaslessVotingClientCore
+  implements IGaslessVotingClientDecoding
 {
   // add your action decoders here
   /**
@@ -28,7 +28,7 @@ export class OffchainVotingClientDecoding
    *
    * @param {Uint8Array} data
    * @return {*}  {VotingSettings}
-   * @memberof OffchainVotingClientDecoding
+   * @memberof GaslessVotingClientDecoding
    */
   public updatePluginSettingsAction(
     data: Uint8Array
@@ -57,7 +57,7 @@ export class OffchainVotingClientDecoding
    *
    * @param {Uint8Array} data
    * @return {*}  {MintTokenParams}
-   * @memberof OffchainVotingClientDecoding
+   * @memberof GaslessVotingClientDecoding
    */
   public mintTokenAction(data: Uint8Array): MintTokenParams {
     const votingInterface =
@@ -76,7 +76,7 @@ export class OffchainVotingClientDecoding
    *
    * @param {Uint8Array} data
    * @return {*}  {(InterfaceParams | null)}
-   * @memberof OffchainVotingClientDecoding
+   * @memberof GaslessVotingClientDecoding
    */
   public findInterface(data: Uint8Array): InterfaceParams | null {
     try {

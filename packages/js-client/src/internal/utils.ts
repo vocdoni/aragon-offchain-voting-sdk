@@ -2,7 +2,7 @@
 import {
   ContractMintTokenParams,
   GaslessVotingProposal,
-  OffchainVotingPluginInstall,
+  GaslessVotingPluginInstall,
   GaslessPluginVotingSettings,
   ProposalFromSC,
   GaslessProposalParametersStruct,
@@ -25,7 +25,7 @@ import {
 import { Result } from '@ethersproject/abi';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { AddressZero } from '@ethersproject/constants';
-import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
+import { VocdoniVoting } from '@vocdoni/gasless-voting-ethers';
 import { IChoice, IQuestion, PublishedElection, Token } from '@vocdoni/sdk';
 import Big from 'big.js';
 import { formatUnits as ethersFormatUnits } from 'ethers/lib/utils';
@@ -84,7 +84,7 @@ export function gaslessVotingSettingsToContract(
   string
 ] {
   return [
-    params.onlyCommitteeProposalCreation || true,
+    params.onlyMultisigProposalCreation || true,
     params.minTallyApprovals,
     encodeRatio(params.minParticipation, 6),
     encodeRatio(params.supportThreshold, 6),
@@ -100,7 +100,7 @@ export function votingSettingsfromContract(
   settings: VocdoniVoting.PluginSettingsStructOutput
 ): GaslessPluginVotingSettings {
   return {
-    onlyCommitteeProposalCreation: settings[0],
+    onlyMultisigProposalCreation: settings[0],
     minTallyApprovals: settings[1],
     minParticipation: decodeRatio(settings[2], 6),
     supportThreshold: decodeRatio(settings[3], 6),
@@ -124,7 +124,7 @@ export function proposalParamsfromContract(
   };
 }
 
-export function initParamsToContract(params: OffchainVotingPluginInstall) {
+export function initParamsToContract(params: GaslessVotingPluginInstall) {
   let token: [string, string, string] = ['', '', ''];
   let balances: [string[], BigNumber[]] = [[], []];
   if (params.newToken) {
@@ -140,9 +140,9 @@ export function initParamsToContract(params: OffchainVotingPluginInstall) {
       params.useToken.wrappedToken.symbol,
     ];
   }
-  params.votingSettings.onlyCommitteeProposalCreation = true;
+  params.votingSettings.onlyMultisigProposalCreation = true;
   return [
-    params.committee,
+    params.multisig,
     gaslessVotingSettingsToContract(params.votingSettings),
     token,
     balances,

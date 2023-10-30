@@ -2,9 +2,9 @@
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
 import { MetadataAbiInput, SupportedNetwork } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
-import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
+import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 
-export const DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS =
+export const DEFAULT_GASLESS_VOTING_REPO_ADDRESS =
   '0x0000000000000000000000000000000000000000';
 export const DEFAULT_ADDRESSES: {
   [K in SupportedNetwork]: { repoAddress: string; setupAddress: string };
@@ -43,8 +43,8 @@ export const DEFAULT_ADDRESSES: {
   },
 };
 
-export const DEFAULT_OFFCHAIN_VOTING_BACKEND_URL =
-  'https://example.otg/offchain-voting/rpc';
+export const DEFAULT_GASLESS_VOTING_BACKEND_URL =
+  'https://example.otg/gasless-voting/rpc';
 
 const majorityVotingInterface = VocdoniVoting__factory.createInterface();
 

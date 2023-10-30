@@ -1,17 +1,17 @@
-import { DEFAULT_OFFCHAIN_VOTING_BACKEND_URL, DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS } from "./internal";
+import { DEFAULT_GASLESS_VOTING_BACKEND_URL, DEFAULT_GASLESS_VOTING_REPO_ADDRESS } from "./internal";
 import {
-  OffchainVotingContextState,
-  OffchainVotingOverriddenState,
+  GaslessVotingContextState as GaslessVotingContextState,
+  GaslessVotingOverriddenState as GaslessVotingOverriddenState,
 } from "./types";
-import { OffchainVotingContextParams } from "./types";
+import { GaslessVotingContextParams } from "./types";
 import { Context, ContextCore } from "@aragon/sdk-client-common";
-export class OffchainVotingContext extends ContextCore {
+export class GaslessVotingContext extends ContextCore {
   // This variable keeps track of the state of the context and is an extension of the Base Context State
-  protected state: OffchainVotingContextState = this.state;
+  protected state: GaslessVotingContextState = this.state;
   // This variable keeps track of the properties that were manually overriden by the user
-  protected overriden: OffchainVotingOverriddenState = this.overriden;
+  protected overriden: GaslessVotingOverriddenState = this.overriden;
   constructor(
-    contextParams?: Partial<OffchainVotingContextParams>,
+    contextParams?: Partial<GaslessVotingContextParams>,
     aragonContext?: Context,
   ) {
     // call the parent constructor to be able to have access to this
@@ -29,7 +29,7 @@ export class OffchainVotingContext extends ContextCore {
     }
   }
 
-  public set(contextParams: OffchainVotingContextParams) {
+  public set(contextParams: GaslessVotingContextParams) {
     // so we need to call the parent set first
     super.set(contextParams);
 
@@ -37,39 +37,39 @@ export class OffchainVotingContext extends ContextCore {
     this.setDefaults();
 
     // override default params if specified in the contexcParams
-    if (contextParams.offchainVotingBackendUrl) {
-      // override the offchainVotingBackendUrl value
-      this.state.offchainVotingBackendUrl =
-        contextParams.offchainVotingBackendUrl;
+    if (contextParams.gaslessVotingBackendUrl) {
+      // override the gaslessVotingBackendUrl value
+      this.state.gaslessVotingBackendUrl =
+        contextParams.gaslessVotingBackendUrl;
       // set the overriden flag to true in case set is called again
-      this.overriden.offchainVotingBackendUrl = true;
+      this.overriden.gaslessVotingBackendUrl = true;
     }
 
-    if(contextParams.offchainVotingRepoAddress) {
-      this.state.offchainVotingRepoAddress = contextParams.offchainVotingRepoAddress;
-      this.overriden.offchainVotingRepoAddress = true;
+    if(contextParams.gaslessVotingRepoAddress) {
+      this.state.gaslessVotingRepoAddress = contextParams.gaslessVotingRepoAddress;
+      this.overriden.gaslessVotingRepoAddress = true;
     }
   }
 
   // Use this space to set the default values for the properties that you need
   // in the context
   private setDefaults() {
-    if (!this.overriden.offchainVotingRepoAddress) {
-      this.state.offchainVotingRepoAddress = DEFAULT_OFFCHAIN_VOTING_REPO_ADDRESS;
+    if (!this.overriden.gaslessVotingRepoAddress) {
+      this.state.gaslessVotingRepoAddress = DEFAULT_GASLESS_VOTING_REPO_ADDRESS;
     }
-    if (!this.overriden.offchainVotingBackendUrl) {
-      this.state.offchainVotingBackendUrl = DEFAULT_OFFCHAIN_VOTING_BACKEND_URL;
+    if (!this.overriden.gaslessVotingBackendUrl) {
+      this.state.gaslessVotingBackendUrl = DEFAULT_GASLESS_VOTING_BACKEND_URL;
     }
   }
 
   // here add getters for the properies that you need the user to pass in the context
   // This can be used to specify a contract addres or and endpoint to a service
-  get offchainVotingRepoAddress(): string {
-    return this.state.offchainVotingRepoAddress;
+  get gaslessVotingRepoAddress(): string {
+    return this.state.gaslessVotingRepoAddress;
   }
   // here add getters for the properies that you need the user to pass in the context
   // This can be used to specify a contract addres or and endpoint to a service
-  get offchainVotingBackendUrl(): string {
-    return this.state.offchainVotingBackendUrl;
+  get gaslessVotingBackendUrl(): string {
+    return this.state.gaslessVotingBackendUrl;
   }
 }

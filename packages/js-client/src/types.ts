@@ -12,14 +12,14 @@ import {
   ProposalBase,
 } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
-import { VocdoniVoting } from '@vocdoni/offchain-voting-ethers';
+import { VocdoniVoting } from '@vocdoni/gasless-voting-ethers';
 import { PublishedElection } from '@vocdoni/sdk';
 
 // extend the ContextParams interface with the params that you need
-export type OffchainVotingContextParams = ContextParams & {
+export type GaslessVotingContextParams = ContextParams & {
   // add any parameter that you need
-  offchainVotingRepoAddress?: string;
-  offchainVotingBackendUrl?: string;
+  gaslessVotingRepoAddress?: string;
+  gaslessVotingBackendUrl?: string;
 };
 
 type NewTokenParams = {
@@ -38,28 +38,27 @@ type ExistingTokenParams = {
   };
 };
 
-// export type OffchainVotingPluginInstall = TokenVotingPluginInstall;
-export type OffchainVotingPluginInstall = {
-  committee: string[];
+export type GaslessVotingPluginInstall = {
+  multisig: string[];
   votingSettings: GaslessPluginVotingSettings;
   newToken?: NewTokenParams;
   useToken?: ExistingTokenParams;
 };
 
 export type PrepareInstallationParams = {
-  settings: OffchainVotingPluginInstall;
+  settings: GaslessVotingPluginInstall;
   daoAddressOrEns: string;
   versionTag?: VersionTag;
 };
 
 // extend the state of the client with the properties that you need
-export type OffchainVotingContextState = ContextState & {
-  offchainVotingRepoAddress: string;
-  offchainVotingBackendUrl: string;
+export type GaslessVotingContextState = ContextState & {
+  gaslessVotingRepoAddress: string;
+  gaslessVotingBackendUrl: string;
 };
 
-export type OffchainVotingOverriddenState = OverriddenState & {
-  [key in keyof OffchainVotingContextState]: boolean;
+export type GaslessVotingOverriddenState = OverriddenState & {
+  [key in keyof GaslessVotingContextState]: boolean;
 };
 export type ContractMintTokenParams = [string, bigint];
 export type ContractTokenVotingInitParams = [
@@ -120,7 +119,7 @@ export type GaslessPluginVotingSettings = {
   minProposerVotingPower: bigint;
   censusStrategy: string;
   daoTokenAddress?: string; // calculated during the DAO installation
-  onlyCommitteeProposalCreation?: boolean;
+  onlyMultisigProposalCreation?: boolean;
 };
 
 // export type GaslessProposalParamsOut = {

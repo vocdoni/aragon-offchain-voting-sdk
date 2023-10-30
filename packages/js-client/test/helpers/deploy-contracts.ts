@@ -13,7 +13,7 @@ import { parseEther } from '@ethersproject/units';
 import {
   VocdoniVotingSetup,
   VocdoniVotingSetup__factory,
-} from '@vocdoni/offchain-voting-ethers';
+} from '@vocdoni/gasless-voting-ethers';
 
 export type Deployment = OsxDeployment &
   VocdoniVotingDeployment &
@@ -44,7 +44,7 @@ export async function deploy(): Promise<Deployment> {
   const deployOwnerWallet = provider.getSigner();
   const ens = await deployEnsContracts(deployOwnerWallet);
   const osx = await deployOsxContracts(deployOwnerWallet, ens);
-  const offchainVoting = await deployvocdoniVotingContracts(
+  const gaslessVoting = await deployvocdoniVotingContracts(
     deployOwnerWallet,
     osx
   );
@@ -56,7 +56,7 @@ export async function deploy(): Promise<Deployment> {
   });
   return {
     ...osx,
-    ...offchainVoting,
+    ...gaslessVoting,
     ...ens,
   };
 }

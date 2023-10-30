@@ -7,11 +7,11 @@ import {
   SupportedNetworksArray,
 } from "@aragon/sdk-client-common";
 import { Server } from "ganache";
-import { OffchainVotingClient } from "../../src";
-import { GaslessPluginVotingSettings } from "../../src/internal/types";
+import { GaslessVotingClient } from "../../src";
+import { GaslessPluginVotingSettings } from "../../src/types";
 import { AddressZero } from "@ethersproject/constants";
 import { BigNumber } from "@ethersproject/bignumber";
-import { encodeRatio } from "@aragon/sdk-common";
+import { encodeRatio } from "@aragon/sdk-client-common";
 import { Client, DaoCreationSteps } from "@aragon/sdk-client";
 import { Wallet } from "@ethersproject/wallet";
 
@@ -51,7 +51,7 @@ describe("Encoding", () => {
     };
 
     const GaslessPluginVotingSettings: GaslessPluginVotingSettings = {
-      onlyCommitteeProposalCreation: true,
+      onlyMultisigProposalCreation: true,
       minTallyApprovals: 1,
       minDuration: 3600,
       minParticipation: BigInt(encodeRatio(0.2, 6)),
@@ -61,10 +61,10 @@ describe("Encoding", () => {
       censusStrategy: "",
     };
 
-    const pluginInstallItem = OffchainVotingClient.encoding
+    const pluginInstallItem = GaslessVotingClient.encoding
       .getPluginInstallItem(
         {
-          committee: [TEST_WALLET_ADDRESS],
+          multisig: [TEST_WALLET_ADDRESS],
           votingSettings: GaslessPluginVotingSettings,
           newToken: token,
         },

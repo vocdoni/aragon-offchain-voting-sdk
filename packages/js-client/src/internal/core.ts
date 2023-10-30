@@ -1,4 +1,4 @@
-import { OffchainVotingContext } from '../context';
+import { GaslessVotingContext } from '../context';
 import { ClientCore } from '@aragon/sdk-client-common';
 import {
   EnvOptions,
@@ -6,17 +6,17 @@ import {
   VocdoniSDKClient,
 } from '@vocdoni/sdk';
 
-export class OffchainVotingClientCore extends ClientCore {
-  public offchainVotingContext: string;
-  public offchainVotingRepoAddress: string;
+export class GaslessVotingClientCore extends ClientCore {
+  public gaslessVotingContext: string;
+  public gaslessVotingRepoAddress: string;
   protected vocdoniSDK: VocdoniSDKClient;
   protected vocdoniCensus3: VocdoniCensus3Client;
 
-  constructor(pluginContext: OffchainVotingContext, vocdoniEnv: EnvOptions) {
+  constructor(pluginContext: GaslessVotingContext, vocdoniEnv: EnvOptions) {
     super(pluginContext);
     this.vocdoniSDK = new VocdoniSDKClient({ env: vocdoniEnv });
     this.vocdoniCensus3 = new VocdoniCensus3Client({ env: vocdoniEnv });
-    this.offchainVotingContext = pluginContext.offchainVotingBackendUrl;
-    this.offchainVotingRepoAddress = pluginContext.offchainVotingRepoAddress;
+    this.gaslessVotingContext = pluginContext.gaslessVotingBackendUrl;
+    this.gaslessVotingRepoAddress = pluginContext.gaslessVotingRepoAddress;
   }
 }

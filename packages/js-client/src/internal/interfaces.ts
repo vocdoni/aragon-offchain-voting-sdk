@@ -23,14 +23,14 @@ import {
   ProposalMetadata,
 } from '@aragon/sdk-client-common';
 
-export interface IOffchainVotingClient {
-  methods: IOffchainVotingClientMethods;
-  estimation: IOffchainVotingClientEstimation;
-  encoding: IOffchainVotingClientEncoding;
-  decoding: IOffchainVotingClientDecoding;
+export interface IGaslessVotingClient {
+  methods: IGaslessVotingClientMethods;
+  estimation: IGaslessVotingClientEstimation;
+  encoding: IGaslessVotingClientEncoding;
+  decoding: IGaslessVotingClientDecoding;
 }
 
-export interface IOffchainVotingClientMethods {
+export interface IGaslessVotingClientMethods {
   // Generic prepareInstallation method
   // it should receive the parameters in the
   // prepareInstallation of plugin that you are installing,
@@ -65,7 +65,7 @@ export interface IOffchainVotingClientMethods {
     Erc20TokenDetails | Erc721TokenDetails | Erc20WrapperTokenDetails | null
   >;
   getMembers(pluginAddress: string): Promise<TokenVotingMember[]>;
-  isCommitteeMember(
+  isMultisigMember(
     pluginAddress: string,
     memberAddress: string
   ): Promise<boolean>;
@@ -85,7 +85,7 @@ export interface IOffchainVotingClientMethods {
   ): AsyncGenerator<ExecuteProposalStepValue>;
   pinMetadata(params: ProposalMetadata): Promise<string>;
 }
-export interface IOffchainVotingClientEstimation {
+export interface IGaslessVotingClientEstimation {
   // prepareInstallation(
   //   params: PrepareInstallationParams
   // ): Promise<GasFeeEstimation>;
@@ -101,7 +101,7 @@ export interface IOffchainVotingClientEstimation {
   execute(pluginAddress: string, proposalId: number): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }
-export interface IOffchainVotingClientEncoding {
+export interface IGaslessVotingClientEncoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(params: Params): DaoAction;
   mintTokenAction: (
@@ -113,7 +113,7 @@ export interface IOffchainVotingClientEncoding {
     params: GaslessPluginVotingSettings
   ): DaoAction;
 }
-export interface IOffchainVotingClientDecoding {
+export interface IGaslessVotingClientDecoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(data: Uint8Array): params;
   findInterface(data: Uint8Array): InterfaceParams | null;

@@ -8,8 +8,8 @@ import {
   ApproveTallyStepValue,
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
-import { OffchainVotingClientCore } from '../core';
-import { IOffchainVotingClientMethods } from '../interfaces';
+import { GaslessVotingClientCore } from '../core';
+import { IGaslessVotingClientMethods } from '../interfaces';
 import {
   initParamsToContract,
   toGaslessVotingProposal,
@@ -51,20 +51,20 @@ import {
   decodeProposalId,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
-import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
+import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 import { ErrElectionNotFound } from '@vocdoni/sdk';
 import axios from 'axios';
 
-export class OffchainVotingClientMethods
-  extends OffchainVotingClientCore
-  implements IOffchainVotingClientMethods
+export class GaslessVotingClientMethods
+  extends GaslessVotingClientCore
+  implements IGaslessVotingClientMethods
 {
   /**
    * Prepares the installation of a token voting plugin in a given dao
    *
    * @param {PrepareInstallationParams} params
    * @return {*}  {AsyncGenerator<PrepareInstallationStepValue>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async *prepareInstallation(
     params: PrepareInstallationParams
@@ -76,7 +76,7 @@ export class OffchainVotingClientMethods
     }
     yield* prepareGenericInstallation(this.web3, {
       daoAddressOrEns: params.daoAddressOrEns,
-      pluginRepo: this.offchainVotingRepoAddress,
+      pluginRepo: this.gaslessVotingRepoAddress,
       version: params.versionTag,
       installationAbi: INSTALLATION_ABI,
       installationParams: initParamsToContract(params.settings),
@@ -91,7 +91,7 @@ export class OffchainVotingClientMethods
    *
    * @param {CreateGasslessProposalParams} params
    * @return {*}  {AsyncGenerator<ProposalCreationStepValue>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async *createProposal(
     params: CreateGasslessProposalParams
@@ -196,7 +196,7 @@ export class OffchainVotingClientMethods
    *
    * @param {string} proposalId
    * @return {*}  {Promise<boolean>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   // public async canExecute(proposalId: string): Promise<boolean> {
   //   const signer = this.web3.getConnectedSigner();
@@ -218,7 +218,7 @@ export class OffchainVotingClientMethods
    * @param {string} pluginAddress
    * @param {number} blockNumber
    * @return {*}  {Promise<string[]>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   // public async getMembers(
   //   pluginAddress: string,
@@ -250,7 +250,7 @@ export class OffchainVotingClientMethods
    * @param {string} pluginAdress
    * @param {string} proposalId
    * @return {*}  {Promise<TokenVotingProposal>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async getProposal(
     proposalId: string,
@@ -308,7 +308,7 @@ export class OffchainVotingClientMethods
    *
    * @param {ProposalQueryParams} params
    * @return {*}  {Promise<TokenVotingProposalListItem[]>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async getProposals({
     daoAddressOrEns,
@@ -365,7 +365,7 @@ export class OffchainVotingClientMethods
    * @param {string} pluginAddress
    * @param {number} blockNumber
    * @return {*}  {Promise<VotingSettings>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async getVotingSettings(
     pluginAddress: string,
@@ -393,7 +393,7 @@ export class OffchainVotingClientMethods
    *
    * @param {string} pluginAddress
    * @return {*}  {Promise<Erc20TokenDetails | null>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async getToken(
     pluginAddress: string
@@ -432,7 +432,7 @@ export class OffchainVotingClientMethods
    *
    * @param {string} pluginAddress
    * @return {*}  {Promise<Erc20TokenDetails | null>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async getMembers(pluginAddress: string): Promise<TokenVotingMember[]> {
     if (!isAddress(pluginAddress)) {
@@ -474,7 +474,7 @@ export class OffchainVotingClientMethods
    * @param {string} pluginAddress
    * @param {string} proposalId
    * @return {*}  {AsyncGenerator<ExecuteProposalStepValue>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async approve(
     proposalId: string,
@@ -489,11 +489,11 @@ export class OffchainVotingClientMethods
     if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
 
 
-    let isCommitteeMember = await this.isCommitteeMember(
+    let isMultisigMember = await this.isMultisigMember(
       pluginAddress,
       await signer.getAddress()
     );
-    if (!isCommitteeMember) Promise.reject(new Error('Not a committee member'));
+    if (!isMultisigMember) Promise.reject(new Error('Not a multisig member'));
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
@@ -523,7 +523,7 @@ export class OffchainVotingClientMethods
    * @param {string} pluginAddress
    * @param {string} proposalId
    * @return {*}  {AsyncGenerator<ExecuteProposalStepValue>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async *setTally(
     proposalId: string,
@@ -562,7 +562,7 @@ export class OffchainVotingClientMethods
    * @param {string} proposalId
    * @param {boolean} tryExecution
    * @return {*}  {AsyncGenerator<ExecuteProposalStepValue>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async *approveTally(
     proposalId: string,
@@ -603,7 +603,7 @@ export class OffchainVotingClientMethods
    *
    * @param {string} proposalId
    * @return {*}  {AsyncGenerator<ExecuteProposalStepValue>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   public async *execute(
     proposalId: string
@@ -637,9 +637,9 @@ export class OffchainVotingClientMethods
    * @param {string} pluginAddress
    * @param {string} memberAddress
    * @return {*}  {Promise<boolean>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
-  public async isCommitteeMember(
+  public async isMultisigMember(
     pluginAddress: string,
     memberAddress: string
   ): Promise<boolean> {
@@ -664,7 +664,7 @@ export class OffchainVotingClientMethods
    *
    * @param {string} proposalId
    * @return {*}  {Promise<boolean>}
-   * @memberof OffchainVotingClientMethods
+   * @memberof GaslessVotingClientMethods
    */
   // public async canExecute(proposalId: string): Promise<boolean> {
   //   const signer = this.web3.getConnectedSigner();

@@ -4,7 +4,7 @@ import { buildMyPluginDao } from '../helpers/build-daos';
 import * as deployContracts from '../helpers/deploy-contracts';
 import * as ganacheSetup from '../helpers/ganache-setup';
 import { ContextCore, SupportedNetworksArray } from '@aragon/sdk-client-common';
-import { hexToBytes } from '@aragon/sdk-common';
+import { hexToBytes } from '@aragon/sdk-client-common';
 import { Server } from 'ganache';
 
 jest.spyOn(SupportedNetworksArray, 'includes').mockReturnValue(true);

@@ -2,8 +2,8 @@ import {
   CreateGasslessProposalParams,
   GaslessProposalParametersContractStruct,
 } from '../../types';
-import { OffchainVotingClientCore } from '../core';
-import { IOffchainVotingClientEstimation } from '../interfaces';
+import { GaslessVotingClientCore } from '../core';
+import { IGaslessVotingClientEstimation } from '../interfaces';
 import { toGaslessVotingProposal, vochainResultsToSCResults } from '../utils';
 import {
   GasFeeEstimation,
@@ -11,18 +11,18 @@ import {
   boolArrayToBitmap,
   hexToBytes,
 } from '@aragon/sdk-client-common';
-import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
+import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 
-export class OffchainVotingClientEstimation
-  extends OffchainVotingClientCore
-  implements IOffchainVotingClientEstimation
+export class GaslessVotingClientEstimation
+  extends GaslessVotingClientCore
+  implements IGaslessVotingClientEstimation
 {
   /**
    * Estimates the gas fee of creating a proposal on the plugin
    *
    * @param {CreateGasslessProposalParams} params
    * @return {*}  {Promise<GasFeeEstimation>}
-   * @memberof OffchainVotingClientEstimation
+   * @memberof GaslessVotingClientEstimation
    */
   public async createProposal(
     params: CreateGasslessProposalParams
@@ -74,7 +74,7 @@ export class OffchainVotingClientEstimation
    *
    * @param {CreateGasslessProposalParams} params
    * @return {*}  {Promise<GasFeeEstimation>}
-   * @memberof OffchainVotingClientEstimation
+   * @memberof GaslessVotingClientEstimation
    */
   public async setTally(
     pluginAddress: string,
@@ -105,7 +105,7 @@ export class OffchainVotingClientEstimation
    *
    * @param {CreateGasslessProposalParams} params
    * @return {*}  {Promise<GasFeeEstimation>}
-   * @memberof OffchainVotingClientEstimation
+   * @memberof GaslessVotingClientEstimation
    */
   public async approve(
     pluginAddress: string,
@@ -146,7 +146,7 @@ export class OffchainVotingClientEstimation
    *
    * @param {ExecuteParams} params
    * @return {*}  {Promise<GasFeeEstimation>}
-   * @memberof OffchainVotingClientEstimation
+   * @memberof GaslessVotingClientEstimation
    */
   public async execute(
     pluginAddress: string,
@@ -175,7 +175,7 @@ export class OffchainVotingClientEstimation
   //     const signer = this.web3.getConnectedSigner();
   //     // connect to the plugin repo
   //     const pluginRepo = PluginRepo__factory.connect(
-  //       this.offchainVotingRepoAddress,
+  //       this.gaslessVotingRepoAddress,
   //       signer
   //     );
   //     // get latest release
@@ -189,7 +189,7 @@ export class OffchainVotingClientEstimation
 
   //   return prepareGenericInstallationEstimation(this.web3, {
   //     daoAddressOrEns: params.daoAddressOrEns,
-  //     pluginRepo: this.offchainVotingRepoAddress,
+  //     pluginRepo: this.gaslessVotingRepoAddress,
   //     version,
   //     installationAbi: BUILD_METADATA.pluginSetup.prepareInstallation.inputs,
   //     // installationParams: [params.settings],

@@ -1,11 +1,11 @@
 import metadata from '../../../../contracts/src/build-metadata.json';
 import {
   GaslessPluginVotingSettings,
-  OffchainVotingPluginInstall,
+  GaslessVotingPluginInstall,
 } from '../../types';
 import { DEFAULT_ADDRESSES } from '../constants';
-import { OffchainVotingClientCore } from '../core';
-import { IOffchainVotingClientEncoding } from '../interfaces';
+import { GaslessVotingClientCore } from '../core';
+import { IGaslessVotingClientEncoding } from '../interfaces';
 import {
   mintTokenParamsToContract,
   initParamsToContract,
@@ -24,12 +24,12 @@ import {
   UnsupportedNetworkError,
 } from '@aragon/sdk-client-common';
 import {
-  
+
 } from '@aragon/sdk-client-common';
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import { Networkish, getNetwork } from '@ethersproject/providers';
-import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
+import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 
 const prepareInstallationDataTypes = getNamedTypesFromMetadata(
   metadata.pluginSetup.prepareInstallation.inputs
@@ -38,9 +38,9 @@ const prepareInstallationDataTypes = getNamedTypesFromMetadata(
 /**
  * Encoding module the SDK TokenVoting Client
  */
-export class OffchainVotingClientEncoding
-  extends OffchainVotingClientCore
-  implements IOffchainVotingClientEncoding
+export class GaslessVotingClientEncoding
+  extends GaslessVotingClientCore
+  implements IGaslessVotingClientEncoding
 {
   /**
    * Computes the parameters to be given when creating the DAO,
@@ -49,10 +49,10 @@ export class OffchainVotingClientEncoding
    * @param {TokenVotingPluginInstall} params
    * @param {Networkish} network
    * @return {*}  {PluginInstallItem}
-   * @memberof OffchainVotingClientEncoding
+   * @memberof GaslessVotingClientEncoding
    */
   static getPluginInstallItem(
-    params: OffchainVotingPluginInstall,
+    params: GaslessVotingPluginInstall,
     network: Networkish
   ): PluginInstallItem {
     const networkName = getNetwork(network).name as SupportedNetwork;
@@ -75,7 +75,7 @@ export class OffchainVotingClientEncoding
    * @param {string} pluginAddress
    * @param {GaslessPluginVotingSettings} params
    * @return {*}  {DaoAction}
-   * @memberof OffchainVotingClientEncoding
+   * @memberof GaslessVotingClientEncoding
    */
   public updatePluginSettingsAction(
     pluginAddress: string,
@@ -124,7 +124,7 @@ export class OffchainVotingClientEncoding
    * @param {string} minterAddress
    * @param {MintTokenParams} params
    * @return {*}  {DaoAction}
-   * @memberof OffchainVotingClientEncoding
+   * @memberof GaslessVotingClientEncoding
    */
   public mintTokenAction(
     minterAddress: string,
