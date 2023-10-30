@@ -250,12 +250,12 @@ export function computeProposalStatus(
 
 export function toNewProposal(
   SCproposalID: number,
-  daoName: string,
-  daoAddress: string,
   settings: GaslessPluginVotingSettings,
   vochainProposal: PublishedElection,
   SCProposal: GaslessVotingProposalFromSC,
-  census3Token: Token
+  census3Token: Token,
+  daoName= '',
+  daoAddress= '',
 ): GaslessVotingProposal {
   let metadata = EMPTY_PROPOSAL_METADATA_LINK;
   metadata.title = vochainProposal.title.default;

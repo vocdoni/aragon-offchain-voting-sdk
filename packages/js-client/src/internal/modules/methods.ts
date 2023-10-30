@@ -48,6 +48,7 @@ import {
   boolArrayToBitmap, // decodeProposalId,
   encodeProposalId,
   hexToBytes,
+  decodeProposalId,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
 import { VocdoniVoting__factory } from '@vocdoni/offchain-voting-ethers';
@@ -252,16 +253,15 @@ export class OffchainVotingClientMethods
    * @memberof OffchainVotingClientMethods
    */
   public async getProposal(
-    daoName: string,
-    daoAddress: string,
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string,
+    daoName?: string,
+    daoAddress?: string,
   ): Promise<GaslessVotingProposal | null> {
     try {
+      const { pluginAddress, id } = decodeProposalId(proposalId);
       if (!isAddress(pluginAddress)) {
         Promise.reject(new InvalidAddressError());
       }
-      if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
 
       const signer = this.web3.getConnectedSigner();
 
@@ -289,13 +289,13 @@ export class OffchainVotingClientMethods
       );
 
       return toNewProposal(
-        proposalId,
-        daoName,
-        daoAddress,
+        id,
         pluginSettings,
         vochainProposal,
         parsedSCProposal,
-        census3token
+        census3token,
+        daoName,
+        daoAddress,
       );
     } catch (error) {
       if (error instanceof ErrElectionNotFound) return null;
@@ -349,10 +349,9 @@ export class OffchainVotingClientMethods
     let proposals: GaslessVotingProposal[] = [];
     do {
       proposal = await this.getProposal(
+        encodeProposalId(pluginAddress, id),
         daoAddressOrEns || '',
         address || '',
-        pluginAddress,
-        id
       );
       if (proposal) proposals.push(proposal);
       id += 1;
@@ -478,15 +477,17 @@ export class OffchainVotingClientMethods
    * @memberof OffchainVotingClientMethods
    */
   public async approve(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string,
   ): Promise<AsyncGenerator<ApproveTallyStepValue>> {
+    const signer = this.web3.getConnectedSigner();
+
+
+    const { pluginAddress, id } = decodeProposalId(proposalId);
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
+    if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
 
-    const signer = this.web3.getConnectedSigner();
 
     let isCommitteeMember = await this.isCommitteeMember(
       pluginAddress,
@@ -509,12 +510,11 @@ export class OffchainVotingClientMethods
 
     if (proposalFromSC.approvers.length == 0) {
       return this.setTally(
-        pluginAddress,
-        proposalId,
+        encodeProposalId(pluginAddress,id),
         vochainResultsToSCResults(vochainProposal)
       );
     }
-    return this.approveTally(pluginAddress, proposalId, false);
+    return this.approveTally(proposalId, false);
   }
 
   /**
@@ -526,15 +526,17 @@ export class OffchainVotingClientMethods
    * @memberof OffchainVotingClientMethods
    */
   public async *setTally(
-    pluginAddress: string,
-    proposalId: number,
+    proposalId: string,
     results: bigint[][]
   ): AsyncGenerator<ApproveTallyStepValue> {
+    const signer = this.web3.getConnectedSigner();
+
+    const { pluginAddress, id } = decodeProposalId(proposalId);
+
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
-    const signer = this.web3.getConnectedSigner();
+    if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
@@ -563,20 +565,18 @@ export class OffchainVotingClientMethods
    * @memberof OffchainVotingClientMethods
    */
   public async *approveTally(
-    pluginAddress: string,
-    proposalId: number,
+    proposalId: string,
     tryExecution = false
   ): AsyncGenerator<ApproveTallyStepValue> {
+    const { pluginAddress, id } = decodeProposalId(proposalId);
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
+    if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
 
     Error('Invalid proposal id');
 
     const signer = this.web3.getConnectedSigner();
-
-    // const { pluginAddress, id } = decodeProposalId(proposalId);
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
@@ -584,7 +584,7 @@ export class OffchainVotingClientMethods
     );
 
     const tx = await gaslessVotingContract.approveTally(
-      proposalId,
+      id,
       tryExecution
     );
 
@@ -606,22 +606,20 @@ export class OffchainVotingClientMethods
    * @memberof OffchainVotingClientMethods
    */
   public async *execute(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string
   ): AsyncGenerator<ExecuteProposalStepValue> {
+    const { pluginAddress, id } = decodeProposalId(proposalId);
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(proposalId)) Promise.reject(new InvalidProposalIdError());
+    if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
     const signer = this.web3.getConnectedSigner();
-
-    // const { pluginAddress, id } = decodeProposalId(proposalId);
 
     const tokenVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
       signer
     );
-    const tx = await tokenVotingContract.executeProposal(proposalId);
+    const tx = await tokenVotingContract.executeProposal(id);
 
     yield {
       key: ExecuteProposalStep.EXECUTING,

@@ -70,22 +70,18 @@ export interface IOffchainVotingClientMethods {
     memberAddress: string
   ): Promise<boolean>;
   approve(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string,
   ): Promise<AsyncGenerator<ApproveTallyStepValue>>;
   setTally(
-    pluginAddress: string,
-    proposalId: number,
+    proposalId: string,
     results: bigint[][]
   ): AsyncGenerator<ApproveTallyStepValue>;
   approveTally(
-    pluginAddress: string,
-    proposalId: number,
-    tryExecution: boolean
+    proposalId: string,
+    tryExecutio: boolean
   ): AsyncGenerator<ApproveTallyStepValue>;
   execute(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string
   ): AsyncGenerator<ExecuteProposalStepValue>;
   pinMetadata(params: ProposalMetadata): Promise<string>;
 }
