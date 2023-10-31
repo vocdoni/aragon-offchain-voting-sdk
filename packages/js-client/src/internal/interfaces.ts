@@ -45,10 +45,9 @@ export interface IGaslessVotingClientMethods {
   ): AsyncGenerator<ProposalCreationStepValue>;
   //
   getProposal(
-    daoName: string,
-    daoAddress: string,
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string,
+    daoName?: string,
+    daoAddress?: string,
   ): Promise<GaslessVotingProposal | null>;
   //
   getProposals(
@@ -94,11 +93,11 @@ export interface IGaslessVotingClientEstimation {
     params: CreateGasslessProposalParams
   ): Promise<GasFeeEstimation>;
   setTally(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string,
+    results: bigint[][]
   ): Promise<GasFeeEstimation>;
-  approve(pluginAddress: string, proposalId: number): Promise<GasFeeEstimation>;
-  execute(pluginAddress: string, proposalId: number): Promise<GasFeeEstimation>;
+  approve(proposalId: string): Promise<GasFeeEstimation>;
+  execute(proposalId: string): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }
 export interface IGaslessVotingClientEncoding {

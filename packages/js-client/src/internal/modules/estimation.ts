@@ -9,6 +9,7 @@ import {
   GasFeeEstimation,
   SizeMismatchError,
   boolArrayToBitmap,
+  decodeProposalId,
   hexToBytes,
 } from '@aragon/sdk-client-common';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
@@ -77,25 +78,21 @@ export class GaslessVotingClientEstimation
    * @memberof GaslessVotingClientEstimation
    */
   public async setTally(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string,
+    results: bigint[][]
   ): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
+    const { pluginAddress, id } = decodeProposalId(proposalId);
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
       signer
     );
 
-    const proposalFromSC = toGaslessVotingProposal(
-      await gaslessVotingContract.getProposal(proposalId)
-    );
-    const vochainProposal = await this.vocdoniSDK.fetchElection(
-      proposalFromSC.vochainProposalId
-    );
+  
     const estimatedGasFee = await gaslessVotingContract.estimateGas.setTally(
-      proposalId,
-      vochainProposal.results.map((x) => x.map((y) => BigInt(y)))
+      id,
+      results
     );
     return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
   }
@@ -108,10 +105,10 @@ export class GaslessVotingClientEstimation
    * @memberof GaslessVotingClientEstimation
    */
   public async approve(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string
   ): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
+    const { pluginAddress, id } = decodeProposalId(proposalId);
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
@@ -128,12 +125,12 @@ export class GaslessVotingClientEstimation
     let estimatedGasFee;
     if (proposalFromSC.approvers.length == 0) {
       estimatedGasFee = await gaslessVotingContract.estimateGas.setTally(
-        proposalId,
+        id,
         vochainResultsToSCResults(vochainProposal)
       );
     } else {
       estimatedGasFee = await gaslessVotingContract.estimateGas.approveTally(
-        proposalId,
+        id,
         false
       );
     }
@@ -149,10 +146,10 @@ export class GaslessVotingClientEstimation
    * @memberof GaslessVotingClientEstimation
    */
   public async execute(
-    pluginAddress: string,
-    proposalId: number
+    proposalId: string
   ): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
+    const { pluginAddress, id } = decodeProposalId(proposalId);
 
     const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
@@ -160,7 +157,7 @@ export class GaslessVotingClientEstimation
     );
 
     const estimatedGasFee =
-      await gaslessVotingContract.estimateGas.executeProposal(proposalId);
+      await gaslessVotingContract.estimateGas.executeProposal(id);
 
     return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
   }
