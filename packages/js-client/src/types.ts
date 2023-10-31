@@ -143,7 +143,7 @@ export type GaslessProposalParametersStruct = {
   securityBlock?: number; // calculated internally in the smart contract
   startDate?: Date; // UNIX timestamp (ms)
   endDate: Date; // UNIX timestamp (ms)
-  expirationDate: Date; // calculated internally in the smart contract based on expirationTime
+  expirationDate?: Date; // calculated internally in the smart contract based on expirationTime
 };
 
 export type GaslessProposalParametersContractStruct = {
@@ -195,6 +195,7 @@ export type GaslessVotingProposal = ProposalBase & {
     decimals: number;
     type: string;
   };
+  voters?:  string[];
 };
 
 export type CreateGasslessProposalParams = CreateProposalBaseParams &

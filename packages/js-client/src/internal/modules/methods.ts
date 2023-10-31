@@ -52,7 +52,7 @@ import {
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
-import { ErrElectionNotFound } from '@vocdoni/sdk';
+import { ErrElectionNotFound, ElectionAPI } from '@vocdoni/sdk';
 import axios from 'axios';
 
 export class GaslessVotingClientMethods
@@ -272,7 +272,7 @@ export class GaslessVotingClientMethods
       let pluginSettings = votingSettingsfromContract(
         await gaslessVotingContract.getPluginSettings()
       );
-      let proposal = await gaslessVotingContract.getProposal(proposalId);
+      let proposal = await gaslessVotingContract.getProposal(id);
 
       if (!proposal) {
         return null;
@@ -283,6 +283,8 @@ export class GaslessVotingClientMethods
       const vochainProposal = await this.vocdoniSDK.fetchElection(
         parsedSCProposal.vochainProposalId
       );
+      const votesList = await ElectionAPI.votesList(this.vocdoniSDK.url,parsedSCProposal.vochainProposalId)
+      const voters = votesList.votes.map((vote) => vote.voterID);
 
       const census3token = await this.vocdoniCensus3.getToken(
         pluginSettings.daoTokenAddress as string
@@ -294,6 +296,7 @@ export class GaslessVotingClientMethods
         vochainProposal,
         parsedSCProposal,
         census3token,
+        voters,
         daoName,
         daoAddress,
       );
