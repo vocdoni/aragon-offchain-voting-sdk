@@ -46,8 +46,20 @@ type Plugin implements PluginInstallation @entity {
   dao: Dao!
 
   "Set plugin specific related data below:"
+  onlyCommitteeProposalCreation: Boolean
+  minTallyApprovals: Int
+  minParticipation: BigInt
+  supportThreshold: BigInt
+  minDuration: BigInt
+  expirationTime: BigInt
+  daoTokenAddress: String
+  minProposerVotingPower: BigInt
+  censusStrategy: String
+
   proposals: [PluginProposal!]! @derivedFrom(field: "plugin")
   members: [PluginMember!]! @derivedFrom(field: "plugin")
+  committeeMembers: [String!]
+  cmBytes: Bytes
 }
 
 type PluginMember @entity {
@@ -84,6 +96,7 @@ interface IProposal {
 type PluginProposal implements IProposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
+  metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
   failureMap: BigInt
@@ -104,4 +117,13 @@ type PluginProposal implements IProposal @entity {
   executionBlockNumber: BigInt
   executionTxHash: Bytes
   approvers: [PluginProposalMember!]! @derivedFrom(field: "proposal")
+
+  tally: [TallyElement!] @derivedFrom(field: "proposal")
+  tallyApproved: Boolean!
+}
+
+type TallyElement @entity {
+  id: ID!
+  proposal: PluginProposal!
+  values: [BigInt!]
 }
