@@ -117,7 +117,7 @@ export function proposalParamsfromContract(
 ): GaslessProposalParametersStruct {
   return {
     censusBlock: params.censusBlock,
-    securityBlock: 0,
+    securityBlock: params.securityBlock.toNumber(),
     startDate: new Date(Number(params.startDate) * 1000),
     endDate: new Date(Number(params.endDate) * 1000),
     expirationDate: new Date(Number(params.expirationDate) * 1000),
@@ -311,7 +311,7 @@ export function toNewProposal(
       startDate,
       endDate
     ),
-    creationBlockNumber: 0, //number; //TODO
+    creationBlockNumber: SCProposal.parameters?.securityBlock || 0, //number; //TODO
     executionDate: null, //Date | null; //TODO
     executionBlockNumber: null, //number | null; //TODO
     executionTxHash: null, //string | null;
