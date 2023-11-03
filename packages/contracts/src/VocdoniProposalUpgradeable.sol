@@ -8,7 +8,7 @@ import {IVocdoniProposal} from "./IVocdoniProposal.sol";
 import {IDAO} from "@aragon/osx/core/dao/IDAO.sol";
 
 /// @title VocdoniProposalUpgradeable
-/// @notice An abstract contract containing the traits and internal functionality to create and execute off-chain proposals that can be inherited by upgradeable DAO plugins.
+/// @notice An abstract contract containing the traits and internal functionality to create and execute gasless proposals that can be inherited by upgradeable DAO plugins.
 /// @dev Slighly modified from the original Aragon OSx ProposalUpgradeable contract.
 abstract contract VocdoniProposalUpgradeable is IVocdoniProposal, ERC165Upgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
@@ -25,7 +25,9 @@ abstract contract VocdoniProposalUpgradeable is IVocdoniProposal, ERC165Upgradea
     /// @param _interfaceId The ID of the interface.
     /// @return Returns `true` if the interface is supported.
     function supportsInterface(bytes4 _interfaceId) public view virtual override returns (bool) {
-        return _interfaceId == type(IVocdoniProposal).interfaceId || super.supportsInterface(_interfaceId);
+        return
+            _interfaceId == type(IVocdoniProposal).interfaceId ||
+            super.supportsInterface(_interfaceId);
     }
 
     /// @notice Creates a proposal ID.

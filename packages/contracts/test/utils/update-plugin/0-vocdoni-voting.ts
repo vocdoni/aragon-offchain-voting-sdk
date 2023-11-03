@@ -7,7 +7,7 @@ import vocdoniVotingSetupArtifact from '../../../artifacts/contracts/VocdoniVoti
 
 import vocdoniVotingReleaseMetadata from '../../../contracts/release-metadata.json';
 import vocdoniVotingBuildMetadata from '../../../contracts/build-metadata.json';
-import {UPDATE_INFOS} from '../types';
+import {UPDATE_INFOS} from '../../../utils/types';
 
 const TARGET_RELEASE = 1;
 
@@ -33,7 +33,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
-  const vocdoniVotingRepoAddress = await getContractAddress('vocdoniVoting-repo', hre);
+  const vocdoniVotingRepoAddress = await getContractAddress(
+    'vocdoniVoting-repo',
+    hre
+  );
   const vocdoniVotingRepo = PluginRepo__factory.connect(
     vocdoniVotingRepoAddress,
     ethers.provider

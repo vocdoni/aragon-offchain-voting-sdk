@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.8.17;
 
-import {IDAO} from "@aragon/osx/core/dao/IDAO.sol";
-
 /// @title IVocdoniVoting
 /// @author Vocdoni
-/// @notice The Vocdoni off-chain voting contract interface for the OSX plugin.
-/// @notice The voting Proposal is managed off-chain on the Vocdoni blockchain.
+/// @notice The Vocdoni gasless voting contract interface for the OSX plugin.
+/// @notice The voting Proposal is managed gasless on the Vocdoni blockchain.
 interface IVocdoniVoting {
-    /// @notice Emitted when one or more committee members are added.
-    /// @param newMembers The addresses of the new committee members.
-    event CommitteeMembersAdded(address[] indexed newMembers);
+    /// @notice Emitted when one or more execution multisig members are added.
+    /// @param newMembers The addresses of the new execution multisig members.
+    event ExecutionMultisigMembersAdded(address[] newMembers);
 
-    /// @notice Emitted when one or more committee member are removed.
-    /// @param removedMembers The addresses of the removed committee members.
-    event CommitteeMembersRemoved(address[] indexed removedMembers);
+    /// @notice Emitted when one or more execution multisig member are removed.
+    /// @param removedMembers The addresses of the removed execution multisig members.
+    event ExecutionMultisigMembersRemoved(address[] removedMembers);
 
     /// @notice Emitted when the tally of a proposal is set.
     /// @param proposalId The ID of the proposal.
@@ -25,7 +23,7 @@ interface IVocdoniVoting {
     /// @param proposalId The ID of the proposal.
     event TallyApproval(uint256 indexed proposalId, address indexed approver);
 
-        /// @notice Thrown if the address list length is out of bounds.
+    /// @notice Thrown if the address list length is out of bounds.
     /// @param limit The limit value.
     /// @param actual The actual value.
     error AddresslistLengthOutOfBounds(uint16 limit, uint256 actual);
@@ -35,15 +33,15 @@ interface IVocdoniVoting {
     /// @param actual The actual value.
     error MinApprovalsOutOfBounds(uint16 limit, uint16 actual);
 
-    /// @notice Thrown if the minimal duration value is out of bounds (less than one hour or greater than 1 year).
+    /// @notice Thrown if the vote phase duration is out of bounds (more than 1 year or less than 1 hour).
     /// @param limit The limit value.
     /// @param actual The actual value.
-    error MinDurationOutOfBounds(uint64 limit, uint64 actual);
+    error VoteDurationOutOfBounds(uint64 limit, uint64 actual);
 
-    /// @notice Trown if the maximum proposal expiration time is out of bounds (more than 1 year).
+    /// @notice Trown if the tally phase duration is out of bounds (more than 1 year or less than 1 hour).
     /// @param limit The limit value.
     /// @param actual The actual value.
-    error ExpirationTimeOutOfBounds(uint64 limit, uint64 actual);
+    error TallyDurationOutOfBounds(uint64 limit, uint64 actual);
 
     /// @notice Thrown if the start date is invalid.
     /// @param limit The limit value.
@@ -53,20 +51,20 @@ interface IVocdoniVoting {
     /// @notice Thrown if the end date is invalid.
     /// @param limit The limit value.
     /// @param actual The actual value.
-    error InvalidEndDate(uint64 limit, uint64 actual);
+    error InvalidVoteEndDate(uint64 limit, uint64 actual);
 
-    /// @notice Thrown if the expiration date is invalid.
-    /// @param limit The expiration date.
+    /// @notice Thrown if the tally end date is invalid.
+    /// @param limit The tally end date.
     /// @param actual The actual value.
-    error InvalidExpirationDate(uint64 limit, uint64 actual);
+    error InvalidTallyEndDate(uint64 limit, uint64 actual);
 
     /// @notice Thrown if the plugin settings are updated too recently.
     /// @param lastUpdate The block number of the last update.
     error PluginSettingsUpdatedTooRecently(uint64 lastUpdate);
 
-    /// @notice Thrown if the committee is updated too recently.
+    /// @notice Thrown if the execution multisig is updated too recently.
     /// @param lastUpdate The block number of the last update.
-    error CommitteeUpdatedTooRecently(uint64 lastUpdate);
+    error ExecutionMultisigUpdatedTooRecently(uint64 lastUpdate);
 
     /// @notice Thrown if the proposal is already executed.
     /// @param proposalId The ID of the proposal.
@@ -85,7 +83,7 @@ interface IVocdoniVoting {
     /// @param sender The sender.
     error TallyAlreadyApprovedBySender(address sender);
 
-    /// @notice Thrown if the proposal tally is not approved by enough committee members.
+    /// @notice Thrown if the proposal tally is not approved by enough execution multisig members.
     /// @param minApprovals The minimum number of approvals required.
     /// @param actualApprovals The actual number of approvals.
     error NotEnoughApprovals(uint16 minApprovals, uint16 actualApprovals);
@@ -94,19 +92,23 @@ interface IVocdoniVoting {
     /// @param addr The address
     error InvalidAddress(address addr);
 
-    /// @notice Thrown if the prosal is not in the tally phase
-    /// @param endDate The end date of the proposal
-    /// @param expirationDate The expiration date of the proposal
+    /// @notice Thrown if the proposal is not in the tally phase
+    /// @param voteEndDate The end date of the proposal
+    /// @param tallyEndDate The tally end date of the proposal
     /// @param currentTimestamp The current timestamp
-    error ProposalNotInTallyPhase(uint64 endDate, uint64 expirationDate, uint256 currentTimestamp);
+    error ProposalNotInTallyPhase(
+        uint64 voteEndDate,
+        uint64 tallyEndDate,
+        uint256 currentTimestamp
+    );
 
     /// @notice Thrown if the msg.sender does not have enough voting power
     /// @param required The required voting power
     error NotEnoughVotingPower(uint256 required);
 
-    /// @notice Thrown if the msg.sender is not a committee member
+    /// @notice Thrown if the msg.sender is not a execution multisig member
     /// @param sender The sender
-    error OnlyCommittee(address sender);
+    error OnlyExecutionMultisig(address sender);
 
     /// @notice Thrown if the support threshold is not reached
     /// @param currentSupport The current support
@@ -114,22 +116,30 @@ interface IVocdoniVoting {
     error SupportThresholdNotReached(uint256 currentSupport, uint32 supportThreshold);
 
     /// @notice Thrown if the minimum participation is not reached
-    /// @param currentParticipation The current participation
-    /// @param minParticipation The minimum participation
-    error MinParticipationNotReached(uint256 currentParticipation,uint32 minParticipation);
+    /// @param currentVotingPower The current voting power
+    /// @param minVotingPower The minimum voting power to reach
+    error MinParticipationNotReached(uint256 currentVotingPower, uint256 minVotingPower);
 
-    /// @notice Adds new committee members.
-    /// @param _members The addresses of the new committee members.
-    function addCommitteeMembers(address[] calldata _members) external;
+    /// @notice Thrown if the total voting power is invalid
+    /// @param totalVotingPower The total voting power
+    error InvalidTotalVotingPower(uint256 totalVotingPower);
 
-    /// @notice Removes committee members.
-    /// @param _members The addresses of the committee members to remove.
-    function removeCommitteeMembers(address[] calldata _members) external;
+    /// @notice Thrown if invalid list length
+    /// @param length The actual length
+    error InvalidListLength(uint256 length);
 
-    /// @notice Returns whether an address is a committee member.
+    /// @notice Adds new execution multisig members.
+    /// @param _members The addresses of the new execution multisig members.
+    function addExecutionMultisigMembers(address[] calldata _members) external;
+
+    /// @notice Removes execution multisig members.
+    /// @param _members The addresses of the execution multisig members to remove.
+    function removeExecutionMultisigMembers(address[] calldata _members) external;
+
+    /// @notice Returns whether an address is a execution ultisig member.
     /// @param _member The address to check.
-    /// @return Whether the address is a committee member.
-    function isCommitteeMember(address _member) external view returns (bool);
+    /// @return Whether the address is a execution multisig member.
+    function isExecutionMultisigMember(address _member) external view returns (bool);
 
     /// @notice Sets the tally of a given proposal.
     /// @param _proposalId The ID of the proposal to set the tally of.
@@ -138,6 +148,7 @@ interface IVocdoniVoting {
 
     /// @notice Approves a proposal tally.
     /// @param _proposalId The ID of the proposal to approve.
+    /// @param _tryExecution Whether to try to execute the proposal if the tally is approved.
     function approveTally(uint256 _proposalId, bool _tryExecution) external;
 
     /// @notice Executes a proposal.
