@@ -3506,9 +3506,9 @@
     "@typescript-eslint/types" "5.60.0"
     eslint-visitor-keys "^3.3.0"
 
-"@vocdoni/offchain-voting-ethers@./vocdoni-offchain-voting-ethers-v0.0.4.tgz":
-  version "0.0.4"
-  resolved "./vocdoni-offchain-voting-ethers-v0.0.4.tgz#437b6672417deee4f4dfcd899bdaea00ff11eabf"
+"@vocdoni/gasless-voting-ethers@./vocdoni-gasless-voting-ethers-v0.0.1-rc1.tgz":
+  version "0.0.1-rc1"
+  resolved "./vocdoni-gasless-voting-ethers-v0.0.1-rc1.tgz#1894038992f64a79cafa67c12baae96b4203facd"
   dependencies:
     ethers "^5.6.2"
 

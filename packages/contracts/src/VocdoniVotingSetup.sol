@@ -28,7 +28,7 @@ contract VocdoniVotingSetup is PluginSetup {
     /// @notice The address of `VocdoniVoting` plugin logic contract to be used in creating proxy contracts.
     VocdoniVoting private immutable vocdoniVoting;
 
-        /// @notice The address of the `GovernanceERC20` base contract.
+    /// @notice The address of the `GovernanceERC20` base contract.
     address public immutable governanceERC20Base;
 
     /// @notice The address of the `GovernanceWrappedERC20` base contract.
@@ -60,26 +60,25 @@ contract VocdoniVotingSetup is PluginSetup {
     constructor(
         GovernanceERC20 _governanceERC20Base,
         GovernanceWrappedERC20 _governanceWrappedERC20Base
-    ) {    
+    ) {
         governanceERC20Base = address(_governanceERC20Base);
         governanceWrappedERC20Base = address(_governanceWrappedERC20Base);
         vocdoniVoting = new VocdoniVoting();
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareInstallation(address _dao, bytes calldata _data)
-        external
-        returns (address plugin, PreparedSetupData memory preparedSetupData)
-    {
+    function prepareInstallation(
+        address _dao,
+        bytes calldata _data
+    ) external returns (address plugin, PreparedSetupData memory preparedSetupData) {
         // Decode `_data` to extract the params needed for deploying and initializing `VocdoniVoting` plugin.
         (
-            address[] memory committee,
+            address[] memory executionMultisig,
             VocdoniVoting.PluginSettings memory pluginSettings,
             TokenSettings memory tokenSettings,
             // only used for GovernanceERC20(token is not passed)
             GovernanceERC20.MintSettings memory mintSettings
-        ) =
-            abi.decode(
+        ) = abi.decode(
                 _data,
                 (
                     address[],
@@ -87,7 +86,7 @@ contract VocdoniVotingSetup is PluginSetup {
                     TokenSettings,
                     GovernanceERC20.MintSettings
                 )
-        );
+            );
 
         address token = tokenSettings.addr;
 
@@ -142,11 +141,14 @@ contract VocdoniVotingSetup is PluginSetup {
         // Prepare and Deploy the plugin proxy.
         plugin = createERC1967Proxy(
             address(vocdoniVoting),
-            abi.encodeWithSelector(VocdoniVoting.initialize.selector, _dao, committee, pluginSettings)
+            abi.encodeCall(
+                VocdoniVoting.initialize,
+                (IDAO(_dao), executionMultisig, pluginSettings)
+            )
         );
 
         // Prepare permissions
-         PermissionLib.MultiTargetPermission[]
+        PermissionLib.MultiTargetPermission[]
             memory permissions = new PermissionLib.MultiTargetPermission[](
                 tokenSettings.addr != address(0) ? 4 : 5
             );
@@ -166,7 +168,7 @@ contract VocdoniVotingSetup is PluginSetup {
             plugin,
             _dao,
             PermissionLib.NO_CONDITION,
-            vocdoniVoting.UPDATE_PLUGIN_COMMITTEE_PERMISSION_ID()
+            vocdoniVoting.UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.MultiTargetPermission(
@@ -203,12 +205,11 @@ contract VocdoniVotingSetup is PluginSetup {
     }
 
     /// @inheritdoc IPluginSetup
-    function prepareUninstallation(address _dao, SetupPayload calldata _payload)
-        external
-        view
-        returns (PermissionLib.MultiTargetPermission[] memory permissions)
-    {
-         // Prepare permissions.
+    function prepareUninstallation(
+        address _dao,
+        SetupPayload calldata _payload
+    ) external view returns (PermissionLib.MultiTargetPermission[] memory permissions) {
+        // Prepare permissions.
         uint256 helperLength = _payload.currentHelpers.length;
         if (helperLength != 1) {
             revert WrongHelpersArrayLength({length: helperLength});
@@ -233,12 +234,12 @@ contract VocdoniVotingSetup is PluginSetup {
             vocdoniVoting.UPDATE_PLUGIN_SETTINGS_PERMISSION_ID()
         );
 
-         permissions[1] = PermissionLib.MultiTargetPermission(
+        permissions[1] = PermissionLib.MultiTargetPermission(
             PermissionLib.Operation.Revoke,
             _payload.plugin,
             _dao,
             PermissionLib.NO_CONDITION,
-            vocdoniVoting.UPDATE_PLUGIN_COMMITTEE_PERMISSION_ID()
+            vocdoniVoting.UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID()
         );
 
         permissions[2] = PermissionLib.MultiTargetPermission(
@@ -276,7 +277,7 @@ contract VocdoniVotingSetup is PluginSetup {
         return address(vocdoniVoting);
     }
 
-     /// @notice Retrieves the interface identifiers supported by the token contract.
+    /// @notice Retrieves the interface identifiers supported by the token contract.
     /// @dev It is crucial to verify if the provided token address represents a valid contract before using the below.
     /// @param token The token address
     function _getTokenInterfaceIds(address token) private view returns (bool[] memory) {
@@ -292,7 +293,7 @@ contract VocdoniVotingSetup is PluginSetup {
     /// @param token The token address
     function _isERC20(address token) private view returns (bool) {
         (bool success, bytes memory data) = token.staticcall(
-            abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, address(this))
+            abi.encodeCall(IERC20Upgradeable.balanceOf, (address(this)))
         );
         return success && data.length == 0x20;
     }

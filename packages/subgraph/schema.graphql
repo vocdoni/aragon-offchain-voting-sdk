@@ -46,20 +46,20 @@ type Plugin implements PluginInstallation @entity {
   dao: Dao!
 
   "Set plugin specific related data below:"
-  onlyCommitteeProposalCreation: Boolean
+  onlyExecutionMultisigProposalCreation: Boolean
   minTallyApprovals: Int
   minParticipation: BigInt
   supportThreshold: BigInt
-  minDuration: BigInt
-  expirationTime: BigInt
+  minVoteDuration: BigInt
+  minTallyDuration: BigInt
   daoTokenAddress: String
+  censusStrategyURI: Bytes
   minProposerVotingPower: BigInt
-  censusStrategy: String
+
+  executionMultisigMembers: [String!]
 
   proposals: [PluginProposal!]! @derivedFrom(field: "plugin")
   members: [PluginMember!]! @derivedFrom(field: "plugin")
-  committeeMembers: [String!]
-  cmBytes: Bytes
 }
 
 type PluginMember @entity {
@@ -89,7 +89,6 @@ interface IProposal {
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
-  endDate: BigInt!
   executionTxHash: Bytes
 }
 
@@ -106,12 +105,13 @@ type PluginProposal implements IProposal @entity {
   vochainProposalId: Bytes!
 
   creator: Bytes!
-  createdAt: BigInt!
   startDate: BigInt!
-  endDate: BigInt!
+  createdAt: BigInt!
+  voteEndDate: BigInt!
+  tallyEndDate: BigInt!
+
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
-  expirationDate: BigInt!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt

@@ -60,26 +60,19 @@ templates:
         - name: VocdoniVoting
           file: $PLUGIN_MODULE/artifacts/src/VocdoniVoting.sol/VocdoniVoting.json
       eventHandlers:
-        - event: PluginSettingsUpdated(bool,uint16,uint64,uint64,uint32,uint32,address,string,uint256)
+        - event: PluginSettingsUpdated(bool,indexed uint16,uint32,uint32,uint64,uint64,indexed address,indexed string,uint256)
           handler: handlePluginSettingsUpdated
         - event: ProposalCreated(indexed uint256,indexed bytes32,indexed address,uint64,uint64,uint64,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256)
           handler: handleProposalExecuted
-        # - event: CommitteeMembersAdded(indexed address[])
-        #   handler:  handleCommitteeMembersAdded
-        #   receipt: true
-        # - event: CommitteeMembersRemoved(indexed address[])
-        #   handler: handleCommitteeMembersRemoved
+        - event: ExecutionMultisigMembersAdded(address[])
+          handler:  handleExecutionMultisigMembersAdded
+        - event: ExecutionMultisigMembersRemoved(address[])
+          handler: handleExecutionMultisigMembersRemoved
         - event: TallySet(indexed uint256,uint256[][])
           handler: handleTallySet
         - event: TallyApproval(indexed uint256,indexed address)
           handler: handleTallyApproval
-      # Note: Call handlers are not supported on Rinkeby, Goerli, or Ganache. Call handlers currently depend on the Parity tracing API and these networks do not support it.
-      # callHandlers:
-      #   - function: addCommitteeMembers(address[])
-      #     handler: handleAddCommitteeMembers
-      #   - function: initialize(IDAO, address[], PluginSettings)
-      #     handler: handleInitialize
       file: ./src/plugin/plugin.ts
 

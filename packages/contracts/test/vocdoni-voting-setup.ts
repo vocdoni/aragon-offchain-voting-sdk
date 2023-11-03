@@ -15,17 +15,13 @@ import {
 } from '../typechain';
 import {deployNewDAO} from './utils/dao';
 import {getInterfaceID} from './utils/helpers';
-import {Operation} from './utils/types';
+import {Operation} from '../utils/types';
 import metadata from '../contracts/build-metadata.json';
 
-import {
-  VocdoniVotingSettings,
-  VotingMode,
-  pctToRatio,
-  ONE_HOUR,
-} from './utils/voting';
+import {VocdoniVotingSettings, pctToRatio, ONE_HOUR} from './utils/voting';
 import {vocdoniVotingInterface} from './vocdoni-voting';
 import {getNamedTypesFromMetadata} from './utils/metadata';
+import {BigNumber} from 'ethers';
 
 let defaultData: any;
 let defaultVocdoniVotingSettings: VocdoniVotingSettings;
@@ -50,9 +46,9 @@ const UPDATE_PLUGIN_SETTINGS_PERMISSION_ID = ethers.utils.id(
   'UPDATE_PLUGIN_SETTINGS_PERMISSION'
 );
 
-const UPDATE_PLUGIN_COMMITTEE_PERMISSION_ID = ethers.utils.id(
-    'UPDATE_PLUGIN_COMMITTEE_PERMISSION'
-  );
+const UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID = ethers.utils.id(
+  'UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION'
+);
 const UPGRADE_PERMISSION_ID = ethers.utils.id('UPGRADE_PLUGIN_PERMISSION');
 const EXECUTE_PERMISSION_ID = ethers.utils.id('EXECUTE_PERMISSION');
 const MINT_PERMISSION_ID = ethers.utils.id('MINT_PERMISSION');
@@ -71,14 +67,15 @@ describe('VocdoniVotingSetup', function () {
     targetDao = await deployNewDAO(signers[0]);
 
     defaultVocdoniVotingSettings = {
-      onlyCommitteeProposalCreation: true,
+      onlyExecutionMultisigProposalCreation: true,
       minTallyApprovals: 1,
-      minDuration: ONE_HOUR,
-      minParticipation: pctToRatio(20),
-      supportThreshold: pctToRatio(50),
+      minParticipation: 20,
+      supportThreshold: 50,
+      minVoteDuration: ONE_HOUR,
+      minTallyDuration: ONE_HOUR,
       daoTokenAddress: AddressZero,
-      minProposerVotingPower: 0,
-      censusStrategy: "",
+      minProposerVotingPower: BigNumber.from(10),
+      censusStrategyURI: '',
     };
 
     const emptyName = '';
@@ -130,7 +127,8 @@ describe('VocdoniVotingSetup', function () {
   });
 
   it('does not support the empty interface', async () => {
-    expect(await vocdoniVotingSetup.supportsInterface('0xffffffff')).to.be.false;
+    expect(await vocdoniVotingSetup.supportsInterface('0xffffffff')).to.be
+      .false;
   });
 
   it('stores the bases provided through the constructor', async () => {
@@ -147,7 +145,9 @@ describe('VocdoniVotingSetup', function () {
     const vocdoniVoting = factory.attach(implementationAddress);
 
     expect(
-      await vocdoniVoting.supportsInterface(getInterfaceID(vocdoniVotingInterface))
+      await vocdoniVoting.supportsInterface(
+        getInterfaceID(vocdoniVotingInterface)
+      )
     ).to.be.eq(true);
   });
 
@@ -168,7 +168,7 @@ describe('VocdoniVotingSetup', function () {
         vocdoniVotingSetup.prepareInstallation(targetDao.address, defaultData)
       ).not.to.be.reverted;
     });
-    
+
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const receivers: string[] = [AddressZero];
       const amounts: number[] = [];
@@ -200,7 +200,6 @@ describe('VocdoniVotingSetup', function () {
         )
         .withArgs(1, 0);
     });
-
 
     it('fails if passed token address is not a contract', async () => {
       const tokenAddress = signers[0].address;
@@ -279,7 +278,7 @@ describe('VocdoniVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_PLUGIN_COMMITTEE_PERMISSION_ID,
+          UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -384,7 +383,7 @@ describe('VocdoniVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_PLUGIN_COMMITTEE_PERMISSION_ID,
+          UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -442,7 +441,7 @@ describe('VocdoniVotingSetup', function () {
           plugin,
           targetDao.address,
           AddressZero,
-          UPDATE_PLUGIN_COMMITTEE_PERMISSION_ID,
+          UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID,
         ],
         [
           Operation.Grant,
@@ -580,11 +579,11 @@ describe('VocdoniVotingSetup', function () {
           UPDATE_PLUGIN_SETTINGS_PERMISSION_ID,
         ],
         [
-            Operation.Revoke,
-            plugin,
-            targetDao.address,
-            AddressZero,
-            UPDATE_PLUGIN_COMMITTEE_PERMISSION_ID,
+          Operation.Revoke,
+          plugin,
+          targetDao.address,
+          AddressZero,
+          UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID,
         ],
         [
           Operation.Revoke,
