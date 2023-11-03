@@ -79,7 +79,7 @@ export interface IGaslessVotingClientMethods {
     proposalId: string,
     tryExecutio: boolean
   ): AsyncGenerator<ApproveTallyStepValue>;
-  execute(
+  executeProposal(
     proposalId: string
   ): AsyncGenerator<ExecuteProposalStepValue>;
   pinMetadata(params: ProposalMetadata): Promise<string>;
@@ -97,7 +97,7 @@ export interface IGaslessVotingClientEstimation {
     results: bigint[][]
   ): Promise<GasFeeEstimation>;
   approve(proposalId: string): Promise<GasFeeEstimation>;
-  execute(proposalId: string): Promise<GasFeeEstimation>;
+  executeProposal(proposalId: string): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }
 export interface IGaslessVotingClientEncoding {

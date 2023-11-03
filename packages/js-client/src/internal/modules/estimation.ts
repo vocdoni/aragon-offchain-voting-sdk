@@ -89,7 +89,6 @@ export class GaslessVotingClientEstimation
       signer
     );
 
-  
     const estimatedGasFee = await gaslessVotingContract.estimateGas.setTally(
       id,
       results
@@ -116,7 +115,7 @@ export class GaslessVotingClientEstimation
     );
 
     const proposalFromSC = toGaslessVotingProposal(
-      await gaslessVotingContract.getProposal(proposalId)
+      await gaslessVotingContract.getProposal(id)
     );
     const vochainProposal = await this.vocdoniSDK.fetchElection(
       proposalFromSC.vochainProposalId
@@ -145,7 +144,7 @@ export class GaslessVotingClientEstimation
    * @return {*}  {Promise<GasFeeEstimation>}
    * @memberof GaslessVotingClientEstimation
    */
-  public async execute(
+  public async executeProposal(
     proposalId: string
   ): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();

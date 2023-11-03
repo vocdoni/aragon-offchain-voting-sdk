@@ -510,7 +510,7 @@ export class GaslessVotingClientMethods
     );
 
     const proposalFromSC = toGaslessVotingProposal(
-      await gaslessVotingContract.getProposal(proposalId)
+      await gaslessVotingContract.getProposal(id)
     );
     const vochainProposal = await this.vocdoniSDK.fetchElection(
       proposalFromSC.vochainProposalId
@@ -519,7 +519,7 @@ export class GaslessVotingClientMethods
 
     if (proposalFromSC.approvers.length == 0) {
       return this.setTally(
-        encodeProposalId(pluginAddress,id),
+        proposalId,
         vochainResultsToSCResults(vochainProposal)
       );
     }
@@ -552,7 +552,7 @@ export class GaslessVotingClientMethods
       signer
     );
 
-    let tx = await gaslessVotingContract.setTally(proposalId, results);
+    let tx = await gaslessVotingContract.setTally(id, results);
 
     yield {
       key: ApproveTallyStep.EXECUTING,
@@ -614,7 +614,7 @@ export class GaslessVotingClientMethods
    * @return {*}  {AsyncGenerator<ExecuteProposalStepValue>}
    * @memberof GaslessVotingClientMethods
    */
-  public async *execute(
+  public async *executeProposal(
     proposalId: string
   ): AsyncGenerator<ExecuteProposalStepValue> {
     const { pluginAddress, id } = decodeProposalId(proposalId);
