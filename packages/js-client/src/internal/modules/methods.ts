@@ -30,10 +30,10 @@ import {
   TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
-  findLog,
+ findLog,
   InvalidAddressOrEnsError,
   NoProviderError,
-  prepareGenericInstallation,
+prepareGenericInstallation,
   PrepareInstallationStepValue,
   ProposalMetadata,
   SupportedNetwork,
@@ -49,6 +49,7 @@ import {
   encodeProposalId,
   hexToBytes,
   decodeProposalId,
+  SortDirection,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
@@ -316,10 +317,11 @@ export class GaslessVotingClientMethods
   public async getProposals({
     daoAddressOrEns,
     pluginAddress,
-  }: // limit = 10,
-  // status,
-  // skip = 0,
-  // direction = SortDirection.ASC,
+    skip= 0,
+    limit = 10,
+    status=undefined,
+    direction = SortDirection.ASC,
+  }:
   // sortBy = ProposalSortBy.CREATED_AT,
   ProposalQueryParams & { pluginAddress: string }): Promise<
     GaslessVotingProposal[]
@@ -347,7 +349,7 @@ export class GaslessVotingClientMethods
         }
       }
     }
-    let id = 0;
+    let id = skip;
     let proposal = null;
     let proposals: GaslessVotingProposal[] = [];
     do {
@@ -358,7 +360,11 @@ export class GaslessVotingClientMethods
       );
       if (proposal) proposals.push(proposal);
       id += 1;
-    } while (proposal != null);
+    } while ((proposal != null) && (id < limit)) ;
+    if (direction == SortDirection.DESC) proposals.reverse();
+    if (status) {
+      return proposals.filter(prop => prop.status == status)
+    }
     return proposals;
   }
 
