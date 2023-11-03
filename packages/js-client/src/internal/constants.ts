@@ -41,6 +41,14 @@ export const DEFAULT_ADDRESSES: {
     setupAddress: '',
     repoAddress: '',
   },
+  arbitrum: {
+    setupAddress: '',
+    repoAddress: '',
+  },
+  arbitrumGoerli: {
+    setupAddress: '',
+    repoAddress: '',
+  }
 };
 
 export const DEFAULT_GASLESS_VOTING_BACKEND_URL =
