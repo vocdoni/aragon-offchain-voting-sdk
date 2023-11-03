@@ -4,7 +4,7 @@ import buildMetadataJson from '../../../../contracts/build-metadata.json';
 import {findEvent} from '../../event';
 
 import {checkPermission, getContractAddress, hashHelpers} from '../../helpers';
-import {Operation} from '../../types';
+import {Operation} from '../../../../utils/types';
 import {
   DAO__factory,
   VocdoniVotingSetup__factory,
@@ -98,7 +98,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   // Adding plugin to verify array
-  const vocdoniVotingSetupAddress = await getContractAddress('VocdoniVotingSetup', hre);
+  const vocdoniVotingSetupAddress = await getContractAddress(
+    'VocdoniVotingSetup',
+    hre
+  );
   const vocdoniVotingSetup = VocdoniVotingSetup__factory.connect(
     vocdoniVotingSetupAddress,
     deployer
@@ -135,7 +138,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await checkPermission(managingDaoContract, {
     operation: Operation.Grant,
     where: {name: 'ManagingDAO', address: managingDAOAddress},
-    who: {name: 'VocdoniVoting plugin', address: installationPreparedEvent.plugin},
+    who: {
+      name: 'VocdoniVoting plugin',
+      address: installationPreparedEvent.plugin,
+    },
     permission: 'EXECUTE_PERMISSION',
   });
 
