@@ -14,7 +14,8 @@ import {
   TallyApproval,
   TallySet,
 } from '../../generated/templates/Plugin/VocdoniVoting';
-import {Address, dataSource} from '@graphprotocol/graph-ts';
+import {Address, Bytes, dataSource} from '@graphprotocol/graph-ts';
+import {log} from 'matchstick-as';
 
 export function handlePluginSettingsUpdated(
   event: PluginSettingsUpdated
