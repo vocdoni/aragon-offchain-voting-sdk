@@ -25,7 +25,7 @@ export const QueryTokenVotingProposal = gql`
       votingMode
       supportThreshold
       startDate
-      endDate
+      voteEndDate
       executed
       earlyExecutable
       potentiallyExecutable
@@ -89,7 +89,7 @@ export const QueryTokenVotingProposals = gql`
       no
       abstain
       startDate
-      endDate
+      voteEndDate
       executed
       earlyExecutable
       potentiallyExecutable

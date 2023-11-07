@@ -74,7 +74,7 @@ export const INSTALLATION_ABI: MetadataAbiInput[] = [
     components: [
       {
         internalType: 'bool',
-        name: 'onlyCommitteeProposalCreation',
+        name: 'onlyExecutionMultisigProposalCreation',
         type: 'bool',
         description: '',
       },
@@ -98,7 +98,7 @@ export const INSTALLATION_ABI: MetadataAbiInput[] = [
       },
       {
         internalType: 'uint64',
-        name: 'minDuration',
+        name: 'minVoteDuration',
         type: 'uint64',
         description: '',
       },
@@ -116,7 +116,7 @@ export const INSTALLATION_ABI: MetadataAbiInput[] = [
       },
       {
         internalType: 'string',
-        name: 'censusStrategy',
+        name: 'censusStrategyURI',
         type: 'string',
         description: '',
       },
