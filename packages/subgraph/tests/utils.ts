@@ -1,9 +1,8 @@
 import { getPluginInstallationId } from '../commons/ids';
 import { Plugin } from '../generated/schema';
-import {PluginSettingsUpdated} from '../generated/templates/Plugin/VocdoniVoting';
-import {handlePluginSettingsUpdated} from '../src/plugin/plugin';
-import {Address, Bytes, DataSourceContext, Value, ethereum} from '@graphprotocol/graph-ts';
-import {dataSourceMock, newMockEvent} from 'matchstick-as';
+import {PluginSettingsUpdated, ProposalCreated} from '../generated/templates/Plugin/VocdoniVoting';
+import {Address, BigInt, Bytes, DataSourceContext, Value, ethereum} from '@graphprotocol/graph-ts';
+import {dataSourceMock, log, newMockEvent} from 'matchstick-as';
 
 export function createPlugin(dao: Address, plugin: Address): Bytes{
     const installationId = getPluginInstallationId(dao, plugin);
@@ -90,4 +89,48 @@ export function pluginSettingsUpdatedEvent(
     newPluginSettingsUpdatedEvent.parameters.push(minProposerVotingPowerParam);
 
     return newPluginSettingsUpdatedEvent;
+}
+
+export function pluginProposalCreatedEvent(
+    eventAddress: string,
+    daoAddress: string,
+    proposalId: number,
+    // allowFailureMap: number,
+    // vochainProposalId: string,
+    creator: string,
+    // startDate: number,
+    // voteEndDate: number,
+    // tallyEndDate: number,
+    // createdAt: number,
+    // creationBlockNumber: number,
+    // snapshotBlock: number
+): ProposalCreated {
+    let newPluginProposalCreatedEvent = changetype<ProposalCreated>(
+        newMockEvent()
+    );
+    newPluginProposalCreatedEvent.address = Address.fromString(eventAddress);
+
+    // Set the data context for the event
+    let context = new DataSourceContext()
+    context.set('daoAddress', Value.fromString(daoAddress));
+    dataSourceMock.setContext(context);
+
+    let proposalIdParam = new ethereum.EventParam(
+        'proposalId',
+        ethereum.Value.fromI32(<i32>proposalId)
+    );
+    // let creatorParam = new ethereum.EventParam(
+    //     'creator',
+    //     ethereum.Value.fromAddress(Address.fromString(creator))
+    // );
+    // let allowFailureMapParam = new ethereum.EventParam(
+    //     'allowFailureMap',
+    //     ethereum.Value.fromI32(0)
+    // );
+
+    newPluginProposalCreatedEvent.parameters = new Array();
+    newPluginProposalCreatedEvent.parameters.push(proposalIdParam);
+    // newPluginProposalCreatedEvent.parameters.push(allowFailureMapParam);
+
+    return newPluginProposalCreatedEvent;
 }

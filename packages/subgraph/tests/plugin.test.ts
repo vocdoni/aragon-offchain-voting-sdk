@@ -1,6 +1,13 @@
-import {handlePluginSettingsUpdated} from '../src/plugin/plugin';
-import {createPlugin, pluginSettingsUpdatedEvent} from './utils';
-import {Address, log} from '@graphprotocol/graph-ts';
+import {
+  handlePluginSettingsUpdated,
+  handleProposalCreated,
+} from '../src/plugin/plugin';
+import {
+  createPlugin,
+  pluginProposalCreatedEvent,
+  pluginSettingsUpdatedEvent,
+} from './utils';
+import {Address, BigInt, ethereum, log} from '@graphprotocol/graph-ts';
 import {
   describe,
   test,
@@ -11,13 +18,14 @@ import {
 } from 'matchstick-as/assembly/index';
 
 const PLUGIN_ENTITY_TYPE = 'Plugin';
+const PROPOSAL_ENTITY_TYPE = 'PluginProposal';
 
-describe('Events', () => {
+describe('Plugin Events', () => {
   afterEach(() => {
     clearStore();
   });
 
-  test('Plugin Creation and update', () => {
+  test('Plugin entity creation and update', () => {
     const firstDaoAString = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
     const firstPluginAString = '0x758b8178A9A4B7206D1f648c4a77C515CbaC7000';
     const firstDaoTokenAString = '0xa66ab9d321273fb415ff2539d38dd1a6e8b78a25';
@@ -90,4 +98,45 @@ describe('Events', () => {
       'false'
     );
   });
+
+  test('Proposal creation', () => {
+    const firstDaoAString = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+    const firstPluginAString = '0x758b8178A9A4B7206D1f648c4a77C515CbaC7000';
+    const firstDaoTokenAString = '0xa66ab9d321273fb415ff2539d38dd1a6e8b78a25';
+    const firstPluginId = createPlugin(
+      Address.fromString(firstDaoAString),
+      Address.fromString(firstPluginAString)
+    );
+
+    let newPluginEvent = pluginSettingsUpdatedEvent(
+      firstPluginAString,
+      firstDaoAString,
+      true,
+      1,
+      1,
+      1,
+      1,
+      1,
+      firstDaoTokenAString,
+      '0x2a1290d5d0Dd792Ad8e1C257a691F24E97675644',
+      1
+    );
+    handlePluginSettingsUpdated(newPluginEvent);
+
+    let newProposalEvent = pluginProposalCreatedEvent(
+      firstPluginAString,
+      firstDaoAString,
+      1,
+      '0x2a1290d5d0dd792ad8e1c257a691f24e97675644'
+    );
+
+    handleProposalCreated(newProposalEvent);
+    logStore();
+  });
+
+  //   test('Proposal execution', () => {});
+  //   test('Committee members added', () => {});
+  //   test('Committee members removed', () => {});
+  //   test('Tally set', () => {});
+  //   test('Tally approve', () => {});
 });
