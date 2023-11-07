@@ -23,11 +23,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Upload the metadata to IPFS
   const releaseMetadataURI = `ipfs://${await uploadToIPFS(
     JSON.stringify(METADATA.release),
-    false
   )}`;
   const buildMetadataURI = `ipfs://${await uploadToIPFS(
     JSON.stringify(METADATA.build),
-    false
   )}`;
 
   console.log(`Uploaded release metadata: ${releaseMetadataURI}`);
@@ -46,7 +44,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const latestRelease = await pluginRepo.latestRelease();
   if (VERSION.release > latestRelease + 1) {
     throw Error(
-      `Publishing with release number ${VERSION.release} is not possible. 
+      `Publishing with release number ${VERSION.release} is not possible.
       The latest release is ${latestRelease} and the next release you can publish is release number ${
         latestRelease + 1
       }.`
@@ -57,13 +55,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const latestBuild = (await pluginRepo.buildCount(VERSION.release)).toNumber();
   if (VERSION.build <= latestBuild) {
     throw Error(
-      `Publishing with build number ${VERSION.build} is not possible. 
+      `Publishing with build number ${VERSION.build} is not possible.
       The latest build is ${latestBuild} and build ${VERSION.build} has been deployed already.`
     );
   }
   if (VERSION.build > latestBuild + 1) {
     throw Error(
-      `Publishing with build number ${VERSION.build} is not possible. 
+      `Publishing with build number ${VERSION.build} is not possible.
       The latest build is ${latestBuild} and the next release you can publish is release number ${
         latestBuild + 1
       }.`
