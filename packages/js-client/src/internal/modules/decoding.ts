@@ -11,8 +11,8 @@ import { MintTokenParams } from '@aragon/sdk-client';
 import {
   InterfaceParams,
   getFunctionFragment,
+  bytesToHex
 } from '@aragon/sdk-client-common';
-import { bytesToHex } from '@aragon/sdk-common';
 import {
   VocdoniVoting,
   VocdoniVoting__factory,

@@ -168,7 +168,6 @@ describe('VocdoniVotingSetup', function () {
         vocdoniVotingSetup.prepareInstallation(targetDao.address, defaultData)
       ).not.to.be.reverted;
     });
-
     it('fails if `MintSettings` arrays do not have the same length', async () => {
       const receivers: string[] = [AddressZero];
       const amounts: number[] = [];

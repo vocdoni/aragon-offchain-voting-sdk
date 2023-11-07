@@ -258,7 +258,6 @@ contract VocdoniVoting is
                 actual: _pluginSettings.supportThreshold
             });
         }
-
         // Require the minimum participation value to be in the interval [0, 10^6], because `>=` comparision is used in the participation criterion.
         if (_pluginSettings.minParticipation > RATIO_BASE) {
             revert RatioOutOfBounds({limit: RATIO_BASE, actual: _pluginSettings.minParticipation});

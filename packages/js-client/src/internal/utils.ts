@@ -117,7 +117,7 @@ export function proposalParamsfromContract(
 ): GaslessProposalParametersStruct {
   return {
     censusBlock: params.censusBlock,
-    securityBlock: 0,
+    securityBlock: params.securityBlock.toNumber(),
     startDate: new Date(Number(params.startDate) * 1000),
     endDate: new Date(Number(params.endDate) * 1000),
     expirationDate: new Date(Number(params.expirationDate) * 1000),
@@ -254,6 +254,7 @@ export function toNewProposal(
   vochainProposal: PublishedElection,
   SCProposal: GaslessVotingProposalFromSC,
   census3Token: Token,
+  voters: string[],
   daoName= '',
   daoAddress= '',
 ): GaslessVotingProposal {
@@ -302,7 +303,7 @@ export function toNewProposal(
     startDate, //Date;
     endDate, //Date;
     creationDate: vochainProposal.creationTime, //Date;
-    expirationDate: new Date(SCProposal.parameters.expirationDate),
+    expirationDate: new Date(SCProposal.parameters.expirationDate as Date),
     actions: SCProposal.actions, //DaoAction[];
     status: computeProposalStatus(
       SCProposal.executed,
@@ -310,7 +311,7 @@ export function toNewProposal(
       startDate,
       endDate
     ),
-    creationBlockNumber: 0, //number; //TODO
+    creationBlockNumber: SCProposal.parameters?.securityBlock || 0, //number; //TODO
     executionDate: null, //Date | null; //TODO
     executionBlockNumber: null, //number | null; //TODO
     executionTxHash: null, //string | null;
@@ -336,6 +337,7 @@ export function toNewProposal(
       currentPercentage: participation.currentPercentage,
       missingParticipation: participation.missingPart,
     },
+    voters
   } as GaslessVotingProposal;
 }
 

@@ -30,10 +30,10 @@ import {
   TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
-  findLog,
+ findLog,
   InvalidAddressOrEnsError,
   NoProviderError,
-  prepareGenericInstallation,
+prepareGenericInstallation,
   PrepareInstallationStepValue,
   ProposalMetadata,
   SupportedNetwork,
@@ -49,10 +49,11 @@ import {
   encodeProposalId,
   hexToBytes,
   decodeProposalId,
+  SortDirection,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
-import { ErrElectionNotFound } from '@vocdoni/sdk';
+import { ErrElectionNotFound, ElectionAPI } from '@vocdoni/sdk';
 import axios from 'axios';
 
 export class GaslessVotingClientMethods
@@ -272,7 +273,7 @@ export class GaslessVotingClientMethods
       let pluginSettings = votingSettingsfromContract(
         await gaslessVotingContract.getPluginSettings()
       );
-      let proposal = await gaslessVotingContract.getProposal(proposalId);
+      let proposal = await gaslessVotingContract.getProposal(id);
 
       if (!proposal) {
         return null;
@@ -283,6 +284,8 @@ export class GaslessVotingClientMethods
       const vochainProposal = await this.vocdoniSDK.fetchElection(
         parsedSCProposal.vochainProposalId
       );
+      const votesList = await ElectionAPI.votesList(this.vocdoniSDK.url,parsedSCProposal.vochainProposalId)
+      const voters = votesList.votes.map((vote) => vote.voterID);
 
       const census3token = await this.vocdoniCensus3.getToken(
         pluginSettings.daoTokenAddress as string
@@ -294,6 +297,7 @@ export class GaslessVotingClientMethods
         vochainProposal,
         parsedSCProposal,
         census3token,
+        voters,
         daoName,
         daoAddress,
       );
@@ -313,10 +317,11 @@ export class GaslessVotingClientMethods
   public async getProposals({
     daoAddressOrEns,
     pluginAddress,
-  }: // limit = 10,
-  // status,
-  // skip = 0,
-  // direction = SortDirection.ASC,
+    skip= 0,
+    limit = 10,
+    status=undefined,
+    direction = SortDirection.ASC,
+  }:
   // sortBy = ProposalSortBy.CREATED_AT,
   ProposalQueryParams & { pluginAddress: string }): Promise<
     GaslessVotingProposal[]
@@ -344,7 +349,7 @@ export class GaslessVotingClientMethods
         }
       }
     }
-    let id = 0;
+    let id = skip;
     let proposal = null;
     let proposals: GaslessVotingProposal[] = [];
     do {
@@ -355,7 +360,11 @@ export class GaslessVotingClientMethods
       );
       if (proposal) proposals.push(proposal);
       id += 1;
-    } while (proposal != null);
+    } while ((proposal != null) && (id < limit)) ;
+    if (direction == SortDirection.DESC) proposals.reverse();
+    if (status) {
+      return proposals.filter(prop => prop.status == status)
+    }
     return proposals;
   }
 
@@ -501,7 +510,7 @@ export class GaslessVotingClientMethods
     );
 
     const proposalFromSC = toGaslessVotingProposal(
-      await gaslessVotingContract.getProposal(proposalId)
+      await gaslessVotingContract.getProposal(id)
     );
     const vochainProposal = await this.vocdoniSDK.fetchElection(
       proposalFromSC.vochainProposalId
@@ -510,7 +519,7 @@ export class GaslessVotingClientMethods
 
     if (proposalFromSC.approvers.length == 0) {
       return this.setTally(
-        encodeProposalId(pluginAddress,id),
+        proposalId,
         vochainResultsToSCResults(vochainProposal)
       );
     }
@@ -543,7 +552,7 @@ export class GaslessVotingClientMethods
       signer
     );
 
-    let tx = await gaslessVotingContract.setTally(proposalId, results);
+    let tx = await gaslessVotingContract.setTally(id, results);
 
     yield {
       key: ApproveTallyStep.EXECUTING,
@@ -605,7 +614,7 @@ export class GaslessVotingClientMethods
    * @return {*}  {AsyncGenerator<ExecuteProposalStepValue>}
    * @memberof GaslessVotingClientMethods
    */
-  public async *execute(
+  public async *executeProposal(
     proposalId: string
   ): AsyncGenerator<ExecuteProposalStepValue> {
     const { pluginAddress, id } = decodeProposalId(proposalId);
