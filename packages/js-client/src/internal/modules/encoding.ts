@@ -98,19 +98,22 @@ export class GaslessVotingClientEncoding
     const votingInterface = VocdoniVoting__factory.createInterface();
     const args = gaslessVotingSettingsToContract(params);
     // get hex bytes
+    // const expectedfunction = votingInterface.getFunction(
+    //   'updatePluginSettings((bool,uint16,uint32,uint32,uint64,uint64,address,uint256,string))'
+    // );
     const hexBytes = votingInterface.encodeFunctionData(
-      'updatePluginSettings',
+      "updatePluginSettings",
       [
         {
-          onlyCommitteeProposalCreation: args[0],
+          onlyExecutionMultisigProposalCreation: args[0],
           minTallyApprovals: args[1],
           minParticipation: args[2],
           supportThreshold: args[3],
-          minDuration: args[4],
-          expirationTime: args[5],
+          minVoteDuration: args[4],
+          minTallyDuration: args[5],
           daoTokenAddress: args[6],
           minProposerVotingPower: args[7],
-          censusStrategy: args[8],
+          censusStrategyURI: args[8],
         },
       ]
     );

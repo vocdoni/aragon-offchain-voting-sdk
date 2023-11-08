@@ -1,54 +1,77 @@
 import { gql } from 'graphql-request';
 
-export const QueryPluginProposal = gql`
-  query PluginProposal($proposalId: ID!) {
+export const QueryTokenVotingProposal = gql`
+  query TokenVotingProposal($proposalId: ID!) {
     tokenVotingProposal(id: $proposalId) {
       id
       dao {
         id
+        subdomain
       }
+      creator
       metadata
+      createdAt
+      creationBlockNumber
+      executionDate
+      executionBlockNumber
       actions {
-        id
+        to
         value
         data
       }
-      allowFailureMap
-      failureMap
-      pluginProposalId
-      vochainProposalId
-      creator
+      yes
+      no
+      abstain
+      votingMode
+      supportThreshold
       startDate
-      createdAt
       voteEndDate
-      tallyEndDate
-      creationBlockNumber
-      snapshotBlock
       executed
-      executionDate
-      executionBlockNumber
+      earlyExecutable
+      potentiallyExecutable
       executionTxHash
-      approvers {
-        id
+      voters {
+        voter {
+          address
+        }
+        voteReplaced
+        voteOption
+        votingPower
       }
-      tally {
-        id
-        values
+      plugin {
+        token {
+          id
+          name
+          symbol
+          __typename
+          ... on ERC20Contract {
+            decimals
+          }
+          ... on ERC20WrapperContract {
+            decimals
+            underlyingToken {
+              id
+              name
+              symbol
+              decimals
+            }
+          }
+        }
       }
-      tallyApproved
+      totalVotingPower
+      minVotingPower
     }
   }
 `;
-
-export const QueryPluginProposals = gql`
-  query QueryPluginProposals(
-    $where: PluginProposal_filter!
+export const QueryTokenVotingProposals = gql`
+  query TokenVotingProposals(
+    $where: TokenVotingProposal_filter!
     $limit: Int!
     $skip: Int!
     $direction: OrderDirection!
-    $sortBy: TPluginProposal_orderBy!
+    $sortBy: TokenVotingProposal_orderBy!
   ) {
-    pluginProposals(
+    tokenVotingProposals(
       where: $where
       first: $limit
       skip: $skip
@@ -58,36 +81,50 @@ export const QueryPluginProposals = gql`
       id
       dao {
         id
+        subdomain
       }
-      metadata
-      actions {
-        id
-        value
-        data
-      }
-      allowFailureMap
-      failureMap
-      pluginProposalId
-      vochainProposalId
       creator
+      metadata
+      yes
+      no
+      abstain
       startDate
-      createdAt
       voteEndDate
-      tallyEndDate
-      creationBlockNumber
-      snapshotBlock
       executed
-      executionDate
-      executionBlockNumber
-      executionTxHash
-      approvers {
-        id
+      earlyExecutable
+      potentiallyExecutable
+      votingMode
+      supportThreshold
+      minVotingPower
+      totalVotingPower
+      voters {
+        voter {
+          address
+        }
+        voteReplaced
+        voteOption
+        votingPower
       }
-      tally {
-        id
-        values
+      plugin {
+        token {
+          id
+          name
+          symbol
+          __typename
+          ... on ERC20Contract {
+            decimals
+          }
+          ... on ERC20WrapperContract {
+            decimals
+            underlyingToken {
+              id
+              name
+              symbol
+              decimals
+            }
+          }
+        }
       }
-      tallyApproved
     }
   }
 `;

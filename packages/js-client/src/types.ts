@@ -99,7 +99,7 @@ export type VotingSettings = {
   votingMode: number;
   supportThreshold: number;
   minParticipation: number;
-  minDuration: bigint;
+  minVoteDuration: bigint;
   minProposerVotingPower: bigint;
 };
 
@@ -112,46 +112,33 @@ export const ONE_YEAR = 365 * ONE_DAY;
 
 export type GaslessPluginVotingSettings = {
   minTallyApprovals: number;
-  minDuration: number;
-  expirationTime: number;
+  minVoteDuration: number;
+  minTallyDuration: number;
   minParticipation: number;
   supportThreshold: number;
   minProposerVotingPower: bigint;
   censusStrategy: string;
   daoTokenAddress?: string; // calculated during the DAO installation
-  onlyMultisigProposalCreation?: boolean;
+  onlyExecutionMultisigProposalCreation?: boolean;
 };
-
-// export type GaslessProposalParamsOut = {
-//   censusBlock: number;
-//   securityBlock: number;
-//   startDate: Date;
-//   endDate: Date;
-//   expirationDate: Date;
-// };
-
-// export type GaslessProposalParams = {
-//   censusBlock: string[]; // following the multichain notation https://eips.ethereum.org/EIPS/eip-3770
-//   securityBlock: number; // calculated internally in the smart contract
-//   startDate: number;
-//   endDate: number;
-//   expirationDate: number; // calculated internally in the smart contract based on expirationTime
-// };
-
 export type GaslessProposalParametersStruct = {
-  censusBlock?: string[]; // following the multichain notation https://eips.ethereum.org/EIPS/eip-3770
   securityBlock?: number; // calculated internally in the smart contract
   startDate?: Date; // UNIX timestamp (ms)
-  endDate: Date; // UNIX timestamp (ms)
-  expirationDate?: Date; // calculated internally in the smart contract based on expirationTime
+  voteEndDate: Date; // UNIX timestamp (ms)
+  tallyEndDate?: Date; // calculated internally in the smart contract based on minTallyDuration
+  totalVotingPower: bigint; // the total census voting power provided by the weight of the census in census3
+  censusURI: string; // the URI of the census as provided by census3
+  censusRoot: string; // the hex census root as provided by census3
 };
 
 export type GaslessProposalParametersContractStruct = {
-  censusBlock: string[];
   securityBlock: bigint;
   startDate: bigint;
-  endDate: bigint;
-  expirationDate: bigint;
+  voteEndDate: bigint;
+  tallyEndDate: bigint;
+  totalVotingPower: bigint;
+  censusURI: string;
+  censusRoot: Uint8Array;
 };
 
 export type GaslessVotingProposalFromSC = {
@@ -165,7 +152,7 @@ export type GaslessVotingProposalFromSC = {
 };
 
 export type GaslessVotingProposal = ProposalBase & {
-  expirationDate: Date;
+  tallyEndDate: Date;
   executed: boolean;
   approvers: string[];
   vochainProposalId: string;

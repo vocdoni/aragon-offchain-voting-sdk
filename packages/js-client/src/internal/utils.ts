@@ -84,12 +84,12 @@ export function gaslessVotingSettingsToContract(
   string
 ] {
   return [
-    params.onlyMultisigProposalCreation || true,
+    params.onlyExecutionMultisigProposalCreation || true,
     params.minTallyApprovals,
     encodeRatio(params.minParticipation, 6),
     encodeRatio(params.supportThreshold, 6),
-    BigNumber.from(params.minDuration),
-    BigNumber.from(params.expirationTime),
+    BigNumber.from(params.minVoteDuration),
+    BigNumber.from(params.minTallyDuration),
     '0x0000000000000000000000000000000000000000',
     BigNumber.from(params.minProposerVotingPower ?? 0),
     params.censusStrategy,
@@ -100,12 +100,12 @@ export function votingSettingsfromContract(
   settings: VocdoniVoting.PluginSettingsStructOutput
 ): GaslessPluginVotingSettings {
   return {
-    onlyMultisigProposalCreation: settings[0],
+    onlyExecutionMultisigProposalCreation: settings[0],
     minTallyApprovals: settings[1],
     minParticipation: decodeRatio(settings[2], 6),
     supportThreshold: decodeRatio(settings[3], 6),
-    minDuration: settings[4].toNumber(),
-    expirationTime: settings[5].toNumber(),
+    minVoteDuration: settings[4].toNumber(),
+    minTallyDuration: settings[5].toNumber(),
     daoTokenAddress: settings[6],
     minProposerVotingPower: settings[7].toBigInt(),
     censusStrategy: settings[8],
@@ -116,11 +116,13 @@ export function proposalParamsfromContract(
   params: VocdoniVoting.ProposalParametersStructOutput
 ): GaslessProposalParametersStruct {
   return {
-    censusBlock: params.censusBlock,
     securityBlock: params.securityBlock.toNumber(),
     startDate: new Date(Number(params.startDate) * 1000),
-    endDate: new Date(Number(params.endDate) * 1000),
-    expirationDate: new Date(Number(params.expirationDate) * 1000),
+    voteEndDate: new Date(Number(params.voteEndDate) * 1000),
+    tallyEndDate: new Date(Number(params.tallyEndDate) * 1000),
+    totalVotingPower: params.totalVotingPower.toBigInt(),
+    censusURI: params.censusURI,
+    censusRoot: params.censusRoot,
   };
 }
 
@@ -140,7 +142,7 @@ export function initParamsToContract(params: GaslessVotingPluginInstall) {
       params.useToken.wrappedToken.symbol,
     ];
   }
-  params.votingSettings.onlyMultisigProposalCreation = true;
+  params.votingSettings.onlyExecutionMultisigProposalCreation = true;
   return [
     params.multisig,
     gaslessVotingSettingsToContract(params.votingSettings),
@@ -230,13 +232,13 @@ export function computeProposalStatus(
   executed: boolean,
   hasSucceeded: boolean,
   startDate: Date,
-  endDate: Date
+  voteEndDate: Date
 ): ProposalStatus {
   const now = new Date();
   if (startDate >= now) {
     return ProposalStatus.PENDING;
   }
-  if (endDate >= now) {
+  if (voteEndDate >= now) {
     return ProposalStatus.ACTIVE;
   }
   if (executed) {
@@ -279,7 +281,7 @@ export function toNewProposal(
     // census3Token.decimals
   );
   const startDate = SCProposal.parameters.startDate as Date;
-  const endDate = new Date(SCProposal.parameters.endDate);
+  const endDate = new Date(SCProposal.parameters.voteEndDate);
 
   return {
     id: `0x${SCproposalID.toString()}`, // string;
@@ -303,7 +305,7 @@ export function toNewProposal(
     startDate, //Date;
     endDate, //Date;
     creationDate: vochainProposal.creationTime, //Date;
-    expirationDate: new Date(SCProposal.parameters.expirationDate as Date),
+    tallyEndDate: new Date(SCProposal.parameters.tallyEndDate as Date),
     actions: SCProposal.actions, //DaoAction[];
     status: computeProposalStatus(
       SCProposal.executed,

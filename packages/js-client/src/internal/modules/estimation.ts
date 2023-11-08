@@ -45,15 +45,17 @@ export class GaslessVotingClientEstimation
 
 
     const startTimestamp = params.startDate?.getTime() || 0;
-    const endTimestamp = params.endDate.getTime();
-    const expirationTimestamp = params.expirationDate?.getTime() || 0;
+    const endTimestamp = params.voteEndDate.getTime();
+    const minTallyDurationTimestamp = params.tallyEndDate?.getTime() || 0;
 
     const votingParams: GaslessProposalParametersContractStruct = {
-      censusBlock: [] as string[],
       startDate: BigInt(Math.round(startTimestamp / 1000)),
-      endDate: BigInt(Math.round(endTimestamp / 1000)),
-      expirationDate: BigInt(Math.round(expirationTimestamp / 1000)),
+      voteEndDate: BigInt(Math.round(endTimestamp / 1000)),
+      tallyEndDate: BigInt(Math.round(minTallyDurationTimestamp / 1000)),
       securityBlock: BigInt(0),
+      totalVotingPower: params.totalVotingPower,
+      censusURI: params.censusURI,
+      censusRoot: hexToBytes(params.censusRoot)
     };
     const estimatedGasFee =
       await gaslessVotingContract.estimateGas.createProposal(
