@@ -131,7 +131,7 @@ export function handleProposalExecuted(event: ProposalExecuted): void {
   }
 }
 
-export function handleCommitteeMembersAdded(
+export function handleExecutionMultisigMembersAdded(
   event: ExecutionMultisigMembersAdded
 ): void {
   const pluginAddress = event.address;
@@ -157,7 +157,7 @@ export function handleCommitteeMembersAdded(
   }
 }
 
-export function handleCommitteeMembersRemoved(
+export function handleExecutionMultisigMembersRemoved(
   event: ExecutionMultisigMembersRemoved
 ): void {
   const pluginAddress = event.address;

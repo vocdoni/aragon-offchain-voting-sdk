@@ -24,6 +24,13 @@
   dependencies:
     ethers "^5.6.2"
 
+"@aragon/osx-ethers@1.3.0-rc0.4", "@aragon/osx-ethers@^1.3.0-rc0.4":
+  version "1.3.0-rc0.4"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.3.0-rc0.4.tgz#878af071e454ef068801104deae8439f0f8f1720"
+  integrity sha512-FDuF6LC1OLnjFK4C8+P4Wf0sORrrUQ/JtUAxL5ABVtBD8JpyyhtdWGDiv/yWIooLyC2l8aqbDLPuiYWhw1DjEQ==
+  dependencies:
+    ethers "^5.6.2"
+
 "@aragon/osx@^1.3.0-rc0.3":
   version "1.3.0-rc0.3"
   resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.3.0-rc0.3.tgz#d35ff40ccbb1b7e24f0c74ecb31953e14d79be73"
@@ -33,12 +40,12 @@
     "@openzeppelin/contracts" "4.8.1"
     "@openzeppelin/contracts-upgradeable" "4.8.1"
 
-"@aragon/sdk-client-common@^1.7.0", "@aragon/sdk-client-common@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@aragon/sdk-client-common/-/sdk-client-common-1.8.0.tgz#07dd809bf7b6d04c470b828d4a8d261fed8af55f"
-  integrity sha512-R23KZx5T0o9uhgzFza1Npg4NsD6TtmID1QT+eg6jKPfk25aX2nq6MaVL92fOpIYO3c0drEM80+8Te/RDPi/fRg==
+"@aragon/sdk-client-common@^1.11.0", "@aragon/sdk-client-common@^1.9.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@aragon/sdk-client-common/-/sdk-client-common-1.11.0.tgz#37d4f4ab4012fd65e06e40c3f41b9c3163328dcf"
+  integrity sha512-zn3BP5vnW7NHgc0fDEbAkVzuiOk+hzSh9oCwOcHY9tLGdGR+g+D0Jzpwqu9McBBur6TpzcW3xdNgMMGTqr21ZA==
   dependencies:
-    "@aragon/osx-ethers" "^1.3.0-rc0.3"
+    "@aragon/osx-ethers" "^1.3.0-rc0.4"
     "@aragon/osx-ethers-v1.0.0" "npm:@aragon/osx-ethers@1.2.1"
     "@aragon/sdk-ipfs" "^1.1.0"
     "@ethersproject/abstract-signer" "^5.5.0"
@@ -51,13 +58,13 @@
     graphql-request "^4.3.0"
     yup "^1.2.0"
 
-"@aragon/sdk-client@^1.14.0":
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/@aragon/sdk-client/-/sdk-client-1.17.0.tgz#c794d3f6b85170157ec7d0efa9b1ba594d5303be"
-  integrity sha512-bk1MnbGGskZ62Dl6FdWmDALKWcUOFVEJBR/yk1rNXnbON5z3p/Cb60ODDcL3Vt0Ve+XYMpc4JR9jjkRKMJLvmA==
+"@aragon/sdk-client@^1.17.1":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@aragon/sdk-client/-/sdk-client-1.19.0.tgz#13f8e95c72aff84c4ff3520220dd8948cd9a3bd4"
+  integrity sha512-JXxLlkEnTA+ycGl4yTus4y8OvxJXQxoX9k2tfG9pIcVFxgeLAojCAGabDo88S+6AX5rDc0jEF9b3NQbjWo1lnA==
   dependencies:
-    "@aragon/osx-ethers" "1.3.0-rc0.3"
-    "@aragon/sdk-client-common" "^1.8.0"
+    "@aragon/osx-ethers" "1.3.0-rc0.4"
+    "@aragon/sdk-client-common" "^1.11.0"
     "@aragon/sdk-ipfs" "^1.1.0"
     "@ethersproject/abstract-signer" "^5.5.0"
     "@ethersproject/bignumber" "^5.6.0"
@@ -70,11 +77,6 @@
     graphql "^16.5.0"
     graphql-request "^4.3.0"
     yup "^1.2.0"
-
-"@aragon/sdk-common@^1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@aragon/sdk-common/-/sdk-common-1.7.0.tgz#7e71617aec584ff241ff4c7a0d0e73303f169539"
-  integrity sha512-Op5c52Qn6MdNdPu+ZJDj9ai1Leur+VpVebaGE3HaZMPYE34IPXblmM10YU05H9Znf5g6jvIDLRB8xQmUOTFscw==
 
 "@aragon/sdk-ipfs@^1.1.0":
   version "1.1.0"
@@ -3506,9 +3508,9 @@
     "@typescript-eslint/types" "5.60.0"
     eslint-visitor-keys "^3.3.0"
 
-"@vocdoni/gasless-voting-ethers@./vocdoni-gasless-voting-ethers-v0.0.1-rc1.tgz":
-  version "0.0.1-rc1"
-  resolved "./vocdoni-gasless-voting-ethers-v0.0.1-rc1.tgz#1894038992f64a79cafa67c12baae96b4203facd"
+"@vocdoni/gasless-voting-ethers@./vocdoni-gasless-voting-ethers-v0.0.1-rc6.tgz":
+  version "0.0.1-rc6"
+  resolved "./vocdoni-gasless-voting-ethers-v0.0.1-rc6.tgz#90a40413564cbd89f89dd41b76e6745bf59fd84a"
   dependencies:
     ethers "^5.6.2"
 
