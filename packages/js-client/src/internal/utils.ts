@@ -88,7 +88,7 @@ export function gaslessVotingSettingsToContract(
     params.minTallyApprovals,
     encodeRatio(params.minParticipation, 6),
     encodeRatio(params.supportThreshold, 6),
-    BigNumber.from(params.minVoteDuration),
+    BigNumber.from(params.minDuration),
     BigNumber.from(params.minTallyDuration),
     '0x0000000000000000000000000000000000000000',
     BigNumber.from(params.minProposerVotingPower ?? 0),
@@ -104,7 +104,7 @@ export function votingSettingsfromContract(
     minTallyApprovals: settings[1],
     minParticipation: decodeRatio(settings[2], 6),
     supportThreshold: decodeRatio(settings[3], 6),
-    minVoteDuration: settings[4].toNumber(),
+    minDuration: settings[4].toNumber(),
     minTallyDuration: settings[5].toNumber(),
     daoTokenAddress: settings[6],
     minProposerVotingPower: settings[7].toBigInt(),
@@ -118,7 +118,7 @@ export function proposalParamsfromContract(
   return {
     securityBlock: params.securityBlock.toNumber(),
     startDate: new Date(Number(params.startDate) * 1000),
-    voteEndDate: new Date(Number(params.voteEndDate) * 1000),
+    endDate: new Date(Number(params.voteEndDate) * 1000),
     tallyEndDate: new Date(Number(params.tallyEndDate) * 1000),
     totalVotingPower: params.totalVotingPower.toBigInt(),
     censusURI: params.censusURI,
@@ -142,7 +142,6 @@ export function initParamsToContract(params: GaslessVotingPluginInstall) {
       params.useToken.wrappedToken.symbol,
     ];
   }
-  params.votingSettings.onlyExecutionMultisigProposalCreation = true;
   return [
     params.multisig,
     gaslessVotingSettingsToContract(params.votingSettings),
@@ -232,13 +231,13 @@ export function computeProposalStatus(
   executed: boolean,
   hasSucceeded: boolean,
   startDate: Date,
-  voteEndDate: Date
+  endDate: Date
 ): ProposalStatus {
   const now = new Date();
   if (startDate >= now) {
     return ProposalStatus.PENDING;
   }
-  if (voteEndDate >= now) {
+  if (endDate >= now) {
     return ProposalStatus.ACTIVE;
   }
   if (executed) {
@@ -281,7 +280,7 @@ export function toNewProposal(
     // census3Token.decimals
   );
   const startDate = SCProposal.parameters.startDate as Date;
-  const endDate = new Date(SCProposal.parameters.voteEndDate);
+  const endDate = new Date(SCProposal.parameters.endDate);
 
   return {
     id: `0x${SCproposalID.toString()}`, // string;

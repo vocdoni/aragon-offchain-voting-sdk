@@ -1,4 +1,4 @@
-import { DEFAULT_GASLESS_VOTING_BACKEND_URL, DEFAULT_GASLESS_VOTING_REPO_ADDRESS } from "./internal";
+import { DEFAULT_GASLESS_VOTING_BACKEND_URL, DEFAULT_GASLESS_VOTING_REPO_ADDRESS, DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL } from "./internal";
 import {
   GaslessVotingContextState as GaslessVotingContextState,
   GaslessVotingOverriddenState as GaslessVotingOverriddenState,
@@ -19,6 +19,7 @@ export class GaslessVotingContext extends ContextCore {
     super();
     // if the user alredy provides an aragon context that we can use
     if (aragonContext) {
+      aragonContext.set({graphqlNodes: [{"url":DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL}]})
       // override the default values with the ones from the aragon context
       Object.assign(this, aragonContext);
     }

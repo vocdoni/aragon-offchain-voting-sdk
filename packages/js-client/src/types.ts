@@ -95,13 +95,13 @@ export enum VotingMode {
   VoteReplacement,
 }
 
-export type VotingSettings = {
-  votingMode: number;
-  supportThreshold: number;
-  minParticipation: number;
-  minVoteDuration: bigint;
-  minProposerVotingPower: bigint;
-};
+// export type VotingSettings = {
+//   votingMode: number;
+//   supportThreshold: number;
+//   minParticipation: number;
+//   minVoteDuration: bigint;
+//   minProposerVotingPower: bigint;
+// };
 
 export const RATIO_BASE = BigNumber.from(10).pow(6); // 100% => 10**6
 export const pctToRatio = (x: number) => RATIO_BASE.mul(x).div(100);
@@ -112,7 +112,7 @@ export const ONE_YEAR = 365 * ONE_DAY;
 
 export type GaslessPluginVotingSettings = {
   minTallyApprovals: number;
-  minVoteDuration: number;
+  minDuration: number;
   minTallyDuration: number;
   minParticipation: number;
   supportThreshold: number;
@@ -124,7 +124,7 @@ export type GaslessPluginVotingSettings = {
 export type GaslessProposalParametersStruct = {
   securityBlock?: number; // calculated internally in the smart contract
   startDate?: Date; // UNIX timestamp (ms)
-  voteEndDate: Date; // UNIX timestamp (ms)
+  endDate: Date; // UNIX timestamp (ms)
   tallyEndDate?: Date; // calculated internally in the smart contract based on minTallyDuration
   totalVotingPower: bigint; // the total census voting power provided by the weight of the census in census3
   censusURI: string; // the URI of the census as provided by census3
