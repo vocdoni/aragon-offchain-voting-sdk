@@ -45,7 +45,7 @@ export class GaslessVotingClientEstimation
 
 
     const startTimestamp = params.startDate?.getTime() || 0;
-    const endTimestamp = params.voteEndDate.getTime();
+    const endTimestamp = params.endDate?.getTime() || 0;
     const minTallyDurationTimestamp = params.tallyEndDate?.getTime() || 0;
 
     const votingParams: GaslessProposalParametersContractStruct = {
@@ -53,9 +53,9 @@ export class GaslessVotingClientEstimation
       voteEndDate: BigInt(Math.round(endTimestamp / 1000)),
       tallyEndDate: BigInt(Math.round(minTallyDurationTimestamp / 1000)),
       securityBlock: BigInt(0),
-      totalVotingPower: params.totalVotingPower,
-      censusURI: params.censusURI,
-      censusRoot: hexToBytes(params.censusRoot)
+      totalVotingPower: params.totalVotingPower || BigInt(1),
+      censusURI: params.censusURI || '',
+      censusRoot: hexToBytes(params.censusRoot || '0000000000000000000000000000000000000000000000000000000000000000')
     };
     const estimatedGasFee =
       await gaslessVotingContract.estimateGas.createProposal(

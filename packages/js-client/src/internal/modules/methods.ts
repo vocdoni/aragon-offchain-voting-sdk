@@ -116,7 +116,7 @@ export class GaslessVotingClientMethods
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
 
     const startTimestamp = params.startDate?.getTime() || 0;
-    const endTimestamp = params.voteEndDate.getTime() || 0;
+    const endTimestamp = params.endDate?.getTime() || 0;
     const minTallyDurationTimestamp = params.tallyEndDate?.getTime() || 0;
 
 

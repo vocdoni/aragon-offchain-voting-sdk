@@ -1,7 +1,7 @@
 {
   "name": "@vocdoni/gasless-voting",
   "author": "Vocdoni Association",
-  "version": "0.0.1-rc13",
+  "version": "0.0.1-rc22",
   "license": "AGPL-3.0-or-later",
   "main": "dist/index.js",
   "module": "dist/gasless-voting.esm.js",
@@ -71,8 +71,8 @@
     "@ethersproject/wallet": "^5.7.0",
     "graphql": "^16.6.0",
     "graphql-request": "4.3.0",
-    "@vocdoni/gasless-voting-ethers": "./vocdoni-gasless-voting-ethers-v0.0.1-rc4.tgz",
-    "@vocdoni/sdk": "0.3.1",
+    "@vocdoni/gasless-voting-ethers": "./vocdoni-gasless-voting-ethers-v0.0.1-rc6.tgz",
+    "@vocdoni/sdk": "0.4.2",
     "axios": "0.27.2",
     "@types/big.js": "^6.1.5"
   },
