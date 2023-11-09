@@ -46,6 +46,18 @@ type Plugin implements PluginInstallation @entity {
   dao: Dao!
 
   "Set plugin specific related data below:"
+  onlyExecutionMultisigProposalCreation: Boolean
+  minTallyApprovals: Int
+  minParticipation: BigInt
+  supportThreshold: BigInt
+  minVoteDuration: BigInt
+  minTallyDuration: BigInt
+  daoTokenAddress: String
+  censusStrategyURI: Bytes
+  minProposerVotingPower: BigInt
+
+  executionMultisigMembers: [String!]
+
   proposals: [PluginProposal!]! @derivedFrom(field: "plugin")
   members: [PluginMember!]! @derivedFrom(field: "plugin")
 }
@@ -77,13 +89,13 @@ interface IProposal {
   executed: Boolean!
   createdAt: BigInt!
   startDate: BigInt!
-  endDate: BigInt!
   executionTxHash: Bytes
 }
 
 type PluginProposal implements IProposal @entity {
   id: ID! # plugin + proposalId
   dao: Dao!
+  metadata: String
   actions: [Action!]! @derivedFrom(field: "proposal")
   allowFailureMap: BigInt!
   failureMap: BigInt
@@ -93,15 +105,25 @@ type PluginProposal implements IProposal @entity {
   vochainProposalId: Bytes!
 
   creator: Bytes!
-  createdAt: BigInt!
   startDate: BigInt!
-  endDate: BigInt!
+  createdAt: BigInt!
+  voteEndDate: BigInt!
+  tallyEndDate: BigInt!
+
   creationBlockNumber: BigInt!
   snapshotBlock: BigInt!
-  expirationDate: BigInt!
   executed: Boolean!
   executionDate: BigInt
   executionBlockNumber: BigInt
   executionTxHash: Bytes
   approvers: [PluginProposalMember!]! @derivedFrom(field: "proposal")
+
+  tally: [TallyElement!] @derivedFrom(field: "proposal")
+  tallyApproved: Boolean!
+}
+
+type TallyElement @entity {
+  id: ID!
+  proposal: PluginProposal!
+  values: [BigInt!]
 }

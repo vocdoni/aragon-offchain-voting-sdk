@@ -815,6 +815,7 @@ describe('Vocdoni Plugin', function () {
           [signers[0].address], // signers[0] is listed
           vocdoniVotingSettings
         );
+
         await expect(
           vocdoniVoting
             .connect(signers[2]) // not listed

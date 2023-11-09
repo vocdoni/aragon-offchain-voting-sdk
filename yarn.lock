@@ -10,36 +10,43 @@
     "@jridgewell/gen-mapping" "^0.3.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aragon/osx-ethers@1.3.0-rc0", "@aragon/osx-ethers@^1.3.0-rc0":
-  version "1.3.0-rc0"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.3.0-rc0.tgz#f706b007f8e3c95418f6ba8dab7bdeeb97858378"
-  integrity sha512-iPTkjnmIToVc6x+4xfBByMskX0VhYrNvHlolsewLHz3wuJONx08dUODAxnMgU17X9H8UXxuLcApTf+KvhUezxg==
+"@aragon/osx-ethers-v1.0.0@npm:@aragon/osx-ethers@1.2.1", "osx-ethersV120@npm:@aragon/osx-ethers@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.1.tgz#a442048137153ed5a3ca4eff3f3927b45a5134b5"
+  integrity sha512-3Fscq8C9elIktiI6OT7fR5iaAvim+ghU6IUvZF3P/phvWm9roNp/GXAROhA/Vx41NQxeqmfXokgFo6KOWt4drA==
   dependencies:
     ethers "^5.6.2"
 
-"@aragon/osx-ethers@^1.3.0-rc0.1":
-  version "1.3.0-rc0.1"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.3.0-rc0.1.tgz#d8168205d76edfae42e961d5eab5e545c1bacb99"
-  integrity sha512-KjaEoIXG6+P6cxfX2FzmlTc+A67+l44FxpnSSW0GljyI5kcdFlXIrsgOeyj8iIcKo2iHsCkPibjjNgSc3sP6QA==
+"@aragon/osx-ethers@1.3.0-rc0.3", "@aragon/osx-ethers@^1.3.0-rc0.3":
+  version "1.3.0-rc0.3"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.3.0-rc0.3.tgz#53c7ee2888e25704932e4450c1518014cb383093"
+  integrity sha512-8hjNtAni7rGygtZDScJuCUh0QnA5q6gF8zhQycyhCvvjwakxWouLFEySpBPIYoFsMziqFa4E2uu/XyNHQb+YiQ==
   dependencies:
     ethers "^5.6.2"
 
-"@aragon/osx@^1.3.0-rc0.1":
-  version "1.3.0-rc0.1"
-  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.3.0-rc0.1.tgz#284133efcea4d9c142a24179bc1be6d808f91e6b"
-  integrity sha512-JGfomBRqeHii6qLRUVmmu+s2xsSHIw0RD3Q38ZFN6P0TiYPK5BVnDnWKpC/6uBdxFrwUi3HwWCMevYEr5nBH/w==
+"@aragon/osx-ethers@1.3.0-rc0.4", "@aragon/osx-ethers@^1.3.0-rc0.4":
+  version "1.3.0-rc0.4"
+  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.3.0-rc0.4.tgz#878af071e454ef068801104deae8439f0f8f1720"
+  integrity sha512-FDuF6LC1OLnjFK4C8+P4Wf0sORrrUQ/JtUAxL5ABVtBD8JpyyhtdWGDiv/yWIooLyC2l8aqbDLPuiYWhw1DjEQ==
+  dependencies:
+    ethers "^5.6.2"
+
+"@aragon/osx@^1.3.0-rc0.3":
+  version "1.3.0-rc0.3"
+  resolved "https://registry.yarnpkg.com/@aragon/osx/-/osx-1.3.0-rc0.3.tgz#d35ff40ccbb1b7e24f0c74ecb31953e14d79be73"
+  integrity sha512-QRxS2jXxYir6p94zjhjfc6HH1R+3D48p0DcMU0nYAzKIhjPXORfEpLTk49CkqldhQkCZZXXKYCwNZ97XzHC00g==
   dependencies:
     "@ensdomains/ens-contracts" "0.0.11"
     "@openzeppelin/contracts" "4.8.1"
     "@openzeppelin/contracts-upgradeable" "4.8.1"
 
-"@aragon/sdk-client-common@1.2.0-rc0", "@aragon/sdk-client-common@^1.2.0-rc0":
-  version "1.2.0-rc0"
-  resolved "https://registry.yarnpkg.com/@aragon/sdk-client-common/-/sdk-client-common-1.2.0-rc0.tgz#642d294aa8faae4ddc1d121b4ba1df4c8d526fab"
-  integrity sha512-xzVBcNnY0FBdID1lD84L+krlOrIYX/ZOzluFWD4gdQr+5Mo1xc7UTazSUMiU5cvr8vD/dF2JrZHj8eWpW3j7nA==
+"@aragon/sdk-client-common@^1.11.0", "@aragon/sdk-client-common@^1.9.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@aragon/sdk-client-common/-/sdk-client-common-1.11.0.tgz#37d4f4ab4012fd65e06e40c3f41b9c3163328dcf"
+  integrity sha512-zn3BP5vnW7NHgc0fDEbAkVzuiOk+hzSh9oCwOcHY9tLGdGR+g+D0Jzpwqu9McBBur6TpzcW3xdNgMMGTqr21ZA==
   dependencies:
-    "@aragon/osx-ethers" "^1.3.0-rc0"
-    "@aragon/sdk-common" "^1.5.0"
+    "@aragon/osx-ethers" "^1.3.0-rc0.4"
+    "@aragon/osx-ethers-v1.0.0" "npm:@aragon/osx-ethers@1.2.1"
     "@aragon/sdk-ipfs" "^1.1.0"
     "@ethersproject/abstract-signer" "^5.5.0"
     "@ethersproject/bignumber" "^5.6.0"
@@ -49,15 +56,15 @@
     "@ethersproject/wallet" "^5.6.0"
     graphql "^16.5.0"
     graphql-request "^4.3.0"
+    yup "^1.2.0"
 
-"@aragon/sdk-client@1.10.0-rc1":
-  version "1.10.0-rc1"
-  resolved "https://registry.yarnpkg.com/@aragon/sdk-client/-/sdk-client-1.10.0-rc1.tgz#74f5226c8d0f9cf8bfdc2b7b6a2bf46622ebf2e5"
-  integrity sha512-WjNmPLlUGJBYRljFQgCGpl7+6dehwQAkVwiz+3HnSfIrx3aOTyEnxBtOKSXkH7Na2f6WZDLa/1q9ICsVfLnFlA==
+"@aragon/sdk-client@^1.17.1":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@aragon/sdk-client/-/sdk-client-1.19.0.tgz#13f8e95c72aff84c4ff3520220dd8948cd9a3bd4"
+  integrity sha512-JXxLlkEnTA+ycGl4yTus4y8OvxJXQxoX9k2tfG9pIcVFxgeLAojCAGabDo88S+6AX5rDc0jEF9b3NQbjWo1lnA==
   dependencies:
-    "@aragon/osx-ethers" "1.3.0-rc0"
-    "@aragon/sdk-client-common" "^1.2.0-rc0"
-    "@aragon/sdk-common" "^1.5.0"
+    "@aragon/osx-ethers" "1.3.0-rc0.4"
+    "@aragon/sdk-client-common" "^1.11.0"
     "@aragon/sdk-ipfs" "^1.1.0"
     "@ethersproject/abstract-signer" "^5.5.0"
     "@ethersproject/bignumber" "^5.6.0"
@@ -65,13 +72,11 @@
     "@ethersproject/contracts" "^5.5.0"
     "@ethersproject/providers" "^5.5.0"
     "@ethersproject/wallet" "^5.6.0"
+    "@openzeppelin/contracts" "^4.8.1"
+    "@openzeppelin/contracts-upgradeable" "^4.8.1"
     graphql "^16.5.0"
     graphql-request "^4.3.0"
-
-"@aragon/sdk-common@1.5.0", "@aragon/sdk-common@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@aragon/sdk-common/-/sdk-common-1.5.0.tgz#321d5861a18d3d50b79aebb888ab77c830022be9"
-  integrity sha512-3dV1ATZamBOaDhEPlXM1thIl6BzjerqArFjd0MvajEyjbVBkFFAVM5PZRSYs243o+91iSNdVPGFml+TSonCZTg==
+    yup "^1.2.0"
 
 "@aragon/sdk-ipfs@^1.1.0":
   version "1.1.0"
@@ -2442,6 +2447,11 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.8.1.tgz#363f7dd08f25f8f77e16d374350c3d6b43340a7a"
   integrity sha512-1wTv+20lNiC0R07jyIAbHU7TNHKRwGiTGRfiNnA8jOWjKT98g5OgLpYWOi40Vgpk8SPLA9EvfJAbAeIyVn+7Bw==
 
+"@openzeppelin/contracts-upgradeable@^4.8.1":
+  version "4.9.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.3.tgz#ff17a80fb945f5102571f8efecb5ce5915cc4811"
+  integrity sha512-jjaHAVRMrE4UuZNfDwjlLGDxTHWIOwTJS2ldnc278a0gevfXfPr8hxKEVBGFBE96kl2G3VHDZhUimw/+G3TG2A==
+
 "@openzeppelin/contracts-upgradeable@^4.8.2":
   version "4.9.2"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.2.tgz#a817c75688f8daede420052fbcb34e52482e769e"
@@ -2456,6 +2466,11 @@
   version "4.9.1"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.1.tgz#afa804d2c68398704b0175acc94d91a54f203645"
   integrity sha512-aLDTLu/If1qYIFW5g4ZibuQaUsFGWQPBq1mZKp/txaebUnGHDmmiBhRLY1tDNedN0m+fJtKZ1zAODS9Yk+V6uA==
+
+"@openzeppelin/contracts@^4.8.1":
+  version "4.9.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.3.tgz#00d7a8cf35a475b160b3f0293a6403c511099364"
+  integrity sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==
 
 "@openzeppelin/contracts@^4.8.2":
   version "4.9.2"
@@ -3028,6 +3043,11 @@
   dependencies:
     "@babel/types" "^7.20.7"
 
+"@types/big.js@^6.1.5":
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/@types/big.js/-/big.js-6.2.1.tgz#0e5eda9b8ffe33e2cc4540fad6e91a4c7255ca88"
+  integrity sha512-dKzZVT10m3ELZgYIShPJ+3Os/E1s3aDQS+wr1ne7VCLU/8hc/R+z/+gkm9WabxSkV9E8wJhTl5wC+0fD9nitsw==
+
 "@types/bn.js@^4.11.3":
   version "4.11.6"
   resolved "https://registry.yarnpkg.com/@types/bn.js/-/bn.js-4.11.6.tgz#c306c70d9358aaea33cd4eda092a742b9505967c"
@@ -3488,9 +3508,9 @@
     "@typescript-eslint/types" "5.60.0"
     eslint-visitor-keys "^3.3.0"
 
-"@vocdoni/offchain-voting-ethers@./vocdoni-offchain-voting-ethers-v0.0.3.tgz":
-  version "0.0.3"
-  resolved "./vocdoni-offchain-voting-ethers-v0.0.3.tgz#b327f352ecf4236bbdbda75bd62af0f077d1708e"
+"@vocdoni/gasless-voting-ethers@./vocdoni-gasless-voting-ethers-v0.0.1-rc6.tgz":
+  version "0.0.1-rc6"
+  resolved "./vocdoni-gasless-voting-ethers-v0.0.1-rc6.tgz#90a40413564cbd89f89dd41b76e6745bf59fd84a"
   dependencies:
     ethers "^5.6.2"
 
@@ -3502,10 +3522,10 @@
     long "^5.2.1"
     protobufjs "^7.1.2"
 
-"@vocdoni/sdk@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@vocdoni/sdk/-/sdk-0.3.0.tgz#fa02565b60ab9c76b6201a797d153005e94ca551"
-  integrity sha512-70OP9dbv4MpomSpJ/os2wfgSGshkG1e0PzemDPlTTNl90OEvJaRXzISndX5E80c5eFjtEUIYiSk9W1q+xDomGg==
+"@vocdoni/sdk@0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@vocdoni/sdk/-/sdk-0.3.1.tgz#94f137d6bc554c990123c70e2833b5ebd47be2f9"
+  integrity sha512-CAZ1d9wqjoeubSN0GTHTbsXLZTFeInrsNpYPHVczVxxqjnlccQnsfyWQqSfu4kQOSCd91in/ywNS3BuuWEob+w==
   dependencies:
     "@ethersproject/abstract-signer" "^5.7.0"
     "@ethersproject/address" "^5.7.0"
@@ -11536,13 +11556,6 @@ os-tmpdir@~1.0.2:
   resolved "https://registry.yarnpkg.com/os-tmpdir/-/os-tmpdir-1.0.2.tgz#bbe67406c79aa85c5cfec766fe5734555dfa1274"
   integrity sha512-D2FR03Vir7FIu45XBY20mTb+/ZSWB00sjU9jdQXt83gDrI4Ztz5Fs7/yy74g2N5SVQY4xY1qDr4rNddwYRVX0g==
 
-"osx-ethersV120@npm:@aragon/osx-ethers@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@aragon/osx-ethers/-/osx-ethers-1.2.1.tgz#a442048137153ed5a3ca4eff3f3927b45a5134b5"
-  integrity sha512-3Fscq8C9elIktiI6OT7fR5iaAvim+ghU6IUvZF3P/phvWm9roNp/GXAROhA/Vx41NQxeqmfXokgFo6KOWt4drA==
-  dependencies:
-    ethers "^5.6.2"
-
 p-cancelable@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/p-cancelable/-/p-cancelable-2.1.1.tgz#aab7fbd416582fa32a3db49859c122487c5ed2cf"
@@ -12025,6 +12038,11 @@ property-expr@^2.0.4:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/property-expr/-/property-expr-2.0.5.tgz#278bdb15308ae16af3e3b9640024524f4dc02cb4"
   integrity sha512-IJUkICM5dP5znhCckHSv30Q4b5/JA5enCtkRHYaOVOAocnH/1BQEYTC5NMfT3AVl/iXKdr3aqQbQn9DxyWknwA==
+
+property-expr@^2.0.5:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/property-expr/-/property-expr-2.0.6.tgz#f77bc00d5928a6c748414ad12882e83f24aec1e8"
+  integrity sha512-SVtmxhRE/CGkn3eZY1T6pC8Nln6Fr/lu1mKSgRud0eC73whjGfoAogbn78LkD8aFL0zz3bAFerKSnOl7NlErBA==
 
 protobufjs@^6.10.2:
   version "6.11.3"
@@ -13953,6 +13971,11 @@ timeout-abort-controller@^2.0.0:
     native-abort-controller "^1.0.4"
     retimer "^3.0.0"
 
+tiny-case@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/tiny-case/-/tiny-case-1.0.3.tgz#d980d66bc72b5d5a9ca86fb7c9ffdb9c898ddd03"
+  integrity sha512-Eet/eeMhkO6TX8mnUteS9zgPbUMQa4I6Kkp5ORiBD5476/m+PIRiumP5tmh5ioJpH7k51Kehawy2UDfsnxxY8Q==
+
 tiny-glob@^0.2.6:
   version "0.2.9"
   resolved "https://registry.yarnpkg.com/tiny-glob/-/tiny-glob-0.2.9.tgz#2212d441ac17928033b110f8b3640683129d31e2"
@@ -14308,6 +14331,11 @@ type-fest@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
+
+type-fest@^2.19.0:
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.19.0.tgz#88068015bb33036a598b952e55e9311a60fd3a9b"
+  integrity sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==
 
 type-is@~1.6.18:
   version "1.6.18"
@@ -15451,6 +15479,16 @@ yup@^0.32.11:
     nanoclone "^0.2.1"
     property-expr "^2.0.4"
     toposort "^2.0.2"
+
+yup@^1.2.0:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/yup/-/yup-1.3.2.tgz#afffc458f1513ed386e6aaf4bcaa4e67a9e270dc"
+  integrity sha512-6KCM971iQtJ+/KUaHdrhVr2LDkfhBtFPRnsG1P8F4q3uUVQ2RfEM9xekpha9aA4GXWJevjM10eDcPQ1FfWlmaQ==
+  dependencies:
+    property-expr "^2.0.5"
+    tiny-case "^1.0.3"
+    toposort "^2.0.2"
+    type-fest "^2.19.0"
 
 zksync-web3@^0.14.3:
   version "0.14.3"

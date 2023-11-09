@@ -1,5 +1,5 @@
 {{info}}
-specVersion: 0.0.2
+specVersion: 0.0.5
 description: A template for Plugin subgraphs
 repository: https://github.com/aragon/osx-plugin-subgraph
 schema:
@@ -16,7 +16,7 @@ dataSources:
       startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - PluginInstallation
@@ -52,7 +52,7 @@ templates:
       abi: VocdoniVoting
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
         - Plugin
@@ -60,9 +60,19 @@ templates:
         - name: VocdoniVoting
           file: $PLUGIN_MODULE/artifacts/src/VocdoniVoting.sol/VocdoniVoting.json
       eventHandlers:
+        - event: PluginSettingsUpdated(bool,indexed uint16,uint32,uint32,uint64,uint64,indexed address,indexed string,uint256)
+          handler: handlePluginSettingsUpdated
         - event: ProposalCreated(indexed uint256,indexed bytes32,indexed address,uint64,uint64,uint64,(address,uint256,bytes)[],uint256)
           handler: handleProposalCreated
         - event: ProposalExecuted(indexed uint256)
           handler: handleProposalExecuted
+        - event: ExecutionMultisigMembersAdded(address[])
+          handler:  handleExecutionMultisigMembersAdded
+        - event: ExecutionMultisigMembersRemoved(address[])
+          handler: handleExecutionMultisigMembersRemoved
+        - event: TallySet(indexed uint256,uint256[][])
+          handler: handleTallySet
+        - event: TallyApproval(indexed uint256,indexed address)
+          handler: handleTallyApproval
       file: ./src/plugin/plugin.ts
 

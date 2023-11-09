@@ -31,8 +31,7 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   const pluginRepo = event.params.pluginSetupRepo;
 
   // Check if the prepared plugin is our plugin.
-  const isThisPlugin =
-    pluginRepo === Address.fromHexString(PLUGIN_REPO_ADDRESS);
+  const isThisPlugin = pluginRepo == Address.fromString(PLUGIN_REPO_ADDRESS);
 
   if (!isThisPlugin) {
     return;
@@ -44,11 +43,10 @@ export function handleInstallationPrepared(event: InstallationPrepared): void {
   const dao = event.params.dao;
   const daoId = getDaoId(dao);
 
-  let doaEntity = Dao.load(daoId);
-  if (!doaEntity) {
-    doaEntity = new Dao(daoId);
-
-    doaEntity.save();
+  let daoEntity = Dao.load(daoId);
+  if (!daoEntity) {
+    daoEntity = new Dao(daoId);
+    daoEntity.save();
   }
 
   const plugin = event.params.plugin;
