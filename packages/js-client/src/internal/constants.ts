@@ -6,6 +6,7 @@ import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 
 export const DEFAULT_GASLESS_VOTING_REPO_ADDRESS =
   '0x0000000000000000000000000000000000000000';
+export const DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL = 'https://api.studio.thegraph.com/query/56700/gasless-voting/version/latest'
 export const DEFAULT_ADDRESSES: {
   [K in SupportedNetwork]: { repoAddress: string; setupAddress: string };
 } = {
