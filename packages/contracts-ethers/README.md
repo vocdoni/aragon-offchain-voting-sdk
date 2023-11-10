@@ -1,9 +1,9 @@
-# Aragon OSx Contracts for ethers.js
+# Vocdoni Gasless Voting Contracts for for ethers.js
 
-NPM package that provides ethers.js wrappers to use the Aragon DAO framework smart contracts.
+NPM package that provides ethers.js wrappers to use the Vocdoni Gasless plugin on top of the Aragon DAO framework smart contracts.
 
 ```sh
-yarn add @aragon/osx-ethers
+yarn add @vocdoni/gasless-voting-ethers
 ```
 
 ## Usage
@@ -13,16 +13,16 @@ yarn add @aragon/osx-ethers
 ```ts
 import {
   DAOFactory__factory
-} from "@aragon/osx-ethers";
+} from "@vocdoni/gasless-voting-ethers";
 
 // Use it
-const daoFactoryInstance = DAOFactory__factory.connect(...);
+const daoFactoryInstance = Vocdoni_Vot.connect(...);
 ```
 
 ### Getting the list of global contract addresses
 
 ```ts
-import {activeContractsList} from '@aragon/osx-ethers';
+import {activeContractsList} from '@vocdoni/gasless-voting-ethers';
 
 console.log(activeContractsList.rinkeby.DAOFactory);
 // '0x2290E6dF695C5272cE942015c90aAe24bFB94960'
