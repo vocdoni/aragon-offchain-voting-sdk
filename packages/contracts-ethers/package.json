@@ -1,14 +1,22 @@
 {
   "name": "@vocdoni/gasless-voting-ethers",
   "author": "Vocdoni Association",
-  "version": "0.0.1-rc4",
-  "description": "Plugin contract definitions for ethers.js",
+  "version": "0.0.1-rc1",
+  "description": "Aragon DAO Gasless Voting Plugin contract definitions for ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
   "types": "dist/bundle.d.ts",
   "publishConfig": {
     "access": "public"
   },
+  "keywords": [
+    "voting",
+    "blockchain",
+    "vocdoni",
+    "aragon",
+    "gasless",
+    "dao"
+  ],
   "scripts": {
     "build:contracts": "cd ../contracts && yarn build",
     "build": "find ../contracts/artifacts/src/ -name '*.json' -type f | grep -v '.dbg.json' | xargs typechain --target=ethers-v5 --out-dir ./types",
@@ -18,13 +26,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aragon/osx.git"
+    "url": "git+https://github.com/vocdoni/aragon-offchain-voting-sdk/osx.git"
   },
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/aragon/osx/issues"
+    "url": "https://github.com/vocdoni/aragon-offchain-voting-sdk/issues"
   },
-  "homepage": "https://github.com/aragon/osx#readme",
+  "homepage": "https://vocdoni.io",
   "devDependencies": {
     "@typechain/ethers-v5": "^10.0.0"
   },
