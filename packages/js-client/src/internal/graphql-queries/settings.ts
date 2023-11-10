@@ -1,8 +1,8 @@
 import { gql } from 'graphql-request';
 
 export const QueryPluginSettings = gql`
-  query PluginSettings($address: ID!, $block: Block_height) {
-    plugin(id: $address, block: $block) {
+  query PluginSettings($address: String!, $block: Block_height) {
+    plugins(address: $address, block: $block) {
       id
       onlyExecutionMultisigProposalCreation
       minTallyApprovals
