@@ -46,6 +46,7 @@ type Plugin implements PluginInstallation @entity {
   dao: Dao!
 
   "Set plugin specific related data below:"
+  address: String
   onlyExecutionMultisigProposalCreation: Boolean
   minTallyApprovals: Int
   minParticipation: BigInt

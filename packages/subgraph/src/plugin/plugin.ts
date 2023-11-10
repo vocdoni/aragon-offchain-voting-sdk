@@ -14,8 +14,7 @@ import {
   TallyApproval,
   TallySet,
 } from '../../generated/templates/Plugin/VocdoniVoting';
-import {Address, Bytes, dataSource} from '@graphprotocol/graph-ts';
-import {log} from 'matchstick-as';
+import {Address, dataSource} from '@graphprotocol/graph-ts';
 
 export function handlePluginSettingsUpdated(
   event: PluginSettingsUpdated
@@ -33,6 +32,7 @@ export function handlePluginSettingsUpdated(
   if (installationId) {
     let pluginEntity = Plugin.load(installationId.toHexString());
     if (pluginEntity) {
+      pluginEntity.address = pluginAddress.toHexString();
       pluginEntity.onlyExecutionMultisigProposalCreation =
         event.params.onlyExecutionMultisigProposalCreation;
       pluginEntity.minTallyApprovals = event.params.minTallyApprovals;
@@ -74,7 +74,7 @@ export function handleProposalCreated(event: ProposalCreated): void {
 
         proposalEntity.dao = daoId;
         proposalEntity.allowFailureMap = event.params.allowFailureMap;
-        proposalEntity.plugin = pluginAddress.toHexString();
+        proposalEntity.plugin = pluginEntity.id;
 
         proposalEntity.pluginProposalId = proposalId;
         proposalEntity.vochainProposalId = event.params.vochainProposalId;
