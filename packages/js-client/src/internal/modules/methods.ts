@@ -9,6 +9,7 @@ import {
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { GaslessVotingClientCore } from '../core';
+import { QueryPluginSettings } from '../graphql-queries';
 import { IGaslessVotingClientMethods } from '../interfaces';
 import {
   initParamsToContract,
@@ -30,10 +31,10 @@ import {
   TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
- findLog,
+  findLog,
   InvalidAddressOrEnsError,
   NoProviderError,
-prepareGenericInstallation,
+  prepareGenericInstallation,
   PrepareInstallationStepValue,
   ProposalMetadata,
   SupportedNetwork,
@@ -52,9 +53,12 @@ prepareGenericInstallation,
   SortDirection,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
+// import { Wallet } from '@ethersproject/wallet';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 import { ErrElectionNotFound, ElectionAPI } from '@vocdoni/sdk';
 import axios from 'axios';
+
+// import { providers } from 'ethers';
 
 export class GaslessVotingClientMethods
   extends GaslessVotingClientCore
@@ -119,7 +123,6 @@ export class GaslessVotingClientMethods
     const endTimestamp = params.endDate?.getTime() || 0;
     const minTallyDurationTimestamp = params.tallyEndDate?.getTime() || 0;
 
-
     const votingParams: GaslessProposalParametersContractStruct = {
       startDate: BigInt(Math.round(startTimestamp / 1000)),
       voteEndDate: BigInt(Math.round(endTimestamp / 1000)),
@@ -127,7 +130,7 @@ export class GaslessVotingClientMethods
       securityBlock: BigInt(0),
       totalVotingPower: params.totalVotingPower,
       censusURI: params.censusURI,
-      censusRoot: hexToBytes(params.censusRoot)
+      censusRoot: hexToBytes(params.censusRoot),
     };
     const tx = await gaslessVotingContract.createProposal(
       // toUtf8Bytes(params.metadataUri),
@@ -258,7 +261,7 @@ export class GaslessVotingClientMethods
   public async getProposal(
     proposalId: string,
     daoName?: string,
-    daoAddress?: string,
+    daoAddress?: string
   ): Promise<GaslessVotingProposal | null> {
     try {
       const { pluginAddress, id } = decodeProposalId(proposalId);
@@ -286,7 +289,10 @@ export class GaslessVotingClientMethods
       const vochainProposal = await this.vocdoniSDK.fetchElection(
         parsedSCProposal.vochainProposalId
       );
-      const votesList = await ElectionAPI.votesList(this.vocdoniSDK.url,parsedSCProposal.vochainProposalId)
+      const votesList = await ElectionAPI.votesList(
+        this.vocdoniSDK.url,
+        parsedSCProposal.vochainProposalId
+      );
       const voters = votesList.votes.map((vote) => vote.voterID);
 
       const census3token = await this.vocdoniCensus3.getToken(
@@ -301,7 +307,7 @@ export class GaslessVotingClientMethods
         census3token,
         voters,
         daoName,
-        daoAddress,
+        daoAddress
       );
     } catch (error) {
       if (error instanceof ErrElectionNotFound) return null;
@@ -319,12 +325,11 @@ export class GaslessVotingClientMethods
   public async getProposals({
     daoAddressOrEns,
     pluginAddress,
-    skip= 0,
+    skip = 0,
     limit = 10,
-    status=undefined,
+    status = undefined,
     direction = SortDirection.ASC,
-  }:
-  // sortBy = ProposalSortBy.CREATED_AT,
+  }: // sortBy = ProposalSortBy.CREATED_AT,
   ProposalQueryParams & { pluginAddress: string }): Promise<
     GaslessVotingProposal[]
   > {
@@ -358,14 +363,14 @@ export class GaslessVotingClientMethods
       proposal = await this.getProposal(
         encodeProposalId(pluginAddress, id),
         daoAddressOrEns || '',
-        address || '',
+        address || ''
       );
       if (proposal) proposals.push(proposal);
       id += 1;
-    } while ((proposal != null) && (id < limit)) ;
+    } while (proposal != null && id < limit);
     if (direction == SortDirection.DESC) proposals.reverse();
     if (status) {
-      return proposals.filter(prop => prop.status == status)
+      return proposals.filter((prop) => prop.status == status);
     }
     return proposals;
   }
@@ -379,6 +384,40 @@ export class GaslessVotingClientMethods
    * @memberof GaslessVotingClientMethods
    */
   public async getVotingSettings(
+    pluginAddress: string,
+    blockNumber?: number
+  ): Promise<GaslessPluginVotingSettings | null> {
+    if (!isAddress(pluginAddress)) {
+      Promise.reject(new InvalidAddressError());
+    }
+
+    const query = QueryPluginSettings;
+    const params = {
+      address: pluginAddress.toLowerCase(),
+      block: blockNumber ? { number: blockNumber } : null,
+    };
+    const name = 'GaslessVoting settings';
+    type T = { plugins: GaslessPluginVotingSettings[] };
+    const { plugins } = await this.graphql.request<T>({
+      query,
+      params,
+      name,
+    });
+    if (!plugins.length) {
+      return null;
+    }
+    return plugins[0];
+  }
+
+  /**
+   * Returns the settings of a plugin given the address of the plugin instance
+   *
+   * @param {string} pluginAddress
+   * @param {number} blockNumber
+   * @return {*}  {Promise<VotingSettings>}
+   * @memberof GaslessVotingClientMethods
+   */
+  public async getVotingSettings2(
     pluginAddress: string,
     blockNumber?: number
   ): Promise<GaslessPluginVotingSettings | null> {
@@ -488,17 +527,15 @@ export class GaslessVotingClientMethods
    * @memberof GaslessVotingClientMethods
    */
   public async approve(
-    proposalId: string,
+    proposalId: string
   ): Promise<AsyncGenerator<ApproveTallyStepValue>> {
     const signer = this.web3.getConnectedSigner();
-
 
     const { pluginAddress, id } = decodeProposalId(proposalId);
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
     if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
-
 
     let isMultisigMember = await this.isMultisigMember(
       pluginAddress,
@@ -594,10 +631,7 @@ export class GaslessVotingClientMethods
       signer
     );
 
-    const tx = await gaslessVotingContract.approveTally(
-      id,
-      tryExecution
-    );
+    const tx = await gaslessVotingContract.approveTally(id, tryExecution);
 
     yield {
       key: ApproveTallyStep.EXECUTING,
@@ -626,11 +660,11 @@ export class GaslessVotingClientMethods
     if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
     const signer = this.web3.getConnectedSigner();
 
-    const tokenVotingContract = VocdoniVoting__factory.connect(
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
       pluginAddress,
       signer
     );
-    const tx = await tokenVotingContract.executeProposal(id);
+    const tx = await gaslessVotingContract.executeProposal(id);
 
     yield {
       key: ExecuteProposalStep.EXECUTING,

@@ -120,7 +120,10 @@ export type GaslessPluginVotingSettings = {
   censusStrategy: string;
   daoTokenAddress?: string; // calculated during the DAO installation
   onlyExecutionMultisigProposalCreation?: boolean;
+  id?: string;
+  executionMultisigMembers?: string[];
 };
+
 export type GaslessProposalParametersStruct = {
   securityBlock?: number; // calculated internally in the smart contract
   startDate?: Date; // UNIX timestamp (ms)
@@ -182,7 +185,7 @@ export type GaslessVotingProposal = ProposalBase & {
     decimals: number;
     type: string;
   };
-  voters?:  string[];
+  voters?: string[];
 };
 
 export type CreateGasslessProposalParams = CreateProposalBaseParams &
