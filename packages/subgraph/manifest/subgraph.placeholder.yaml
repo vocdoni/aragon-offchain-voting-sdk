@@ -75,4 +75,25 @@ templates:
         - event: TallyApproval(indexed uint256,indexed address)
           handler: handleTallyApproval
       file: ./src/plugin/plugin.ts
-
+  - name: GovernanceERC20
+    kind: ethereum/contract
+    network: {{network}}
+    source:
+      abi: GovernanceERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - PluginMember
+      abis:
+        - name: GovernanceERC20
+          file: $PLUGIN_MODULE/artifacts/@aragon/osx/token/ERC20/governance/GovernanceERC20.sol/GovernanceERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: DelegateChanged(indexed address,indexed address,indexed address)
+          handler: handleDelegateChanged
+        - event: DelegateVotesChanged(indexed address,uint256,uint256)
+          handler: handleDelegateVotesChanged
+      file: ./src/plugin/governance-erc20.ts

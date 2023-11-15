@@ -5,6 +5,7 @@ import {
   PluginProposal,
   TallyElement,
 } from '../../generated/schema';
+import {GovernanceERC20} from '../../generated/templates';
 import {
   ExecutionMultisigMembersAdded,
   ExecutionMultisigMembersRemoved,
@@ -14,7 +15,7 @@ import {
   TallyApproval,
   TallySet,
 } from '../../generated/templates/Plugin/VocdoniVoting';
-import {Address, dataSource} from '@graphprotocol/graph-ts';
+import {Address, DataSourceContext, dataSource} from '@graphprotocol/graph-ts';
 
 export function handlePluginSettingsUpdated(
   event: PluginSettingsUpdated
@@ -45,6 +46,14 @@ export function handlePluginSettingsUpdated(
       pluginEntity.censusStrategyURI = event.params.censusStrategyURI;
       pluginEntity.save();
     }
+
+    // Create template
+    const pluginContext = new DataSourceContext();
+    pluginContext.setString('pluginId', installationId.toHexString());
+    GovernanceERC20.createWithContext(
+      event.params.daoTokenAddress,
+      pluginContext
+    );
   }
 }
 
