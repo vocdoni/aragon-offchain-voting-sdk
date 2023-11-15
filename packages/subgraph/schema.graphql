@@ -66,8 +66,13 @@ type Plugin implements PluginInstallation @entity {
 type PluginMember @entity {
   id: ID! # plugin_address + member_address
   address: String # address as string to facilitate filtering by address on the UI
-  proposals: [PluginProposalMember!]! @derivedFrom(field: "approver")
+  balance: BigInt!
   plugin: Plugin!
+  proposals: [PluginProposalMember!]! @derivedFrom(field: "approver")
+  delegatee: PluginMember
+  votingPower: BigInt
+  # we assume token owners and/or delegatees are members
+  delegators: [PluginMember!]! @derivedFrom(field: "delegatee")
 }
 
 type PluginProposalMember @entity(immutable: true) {
