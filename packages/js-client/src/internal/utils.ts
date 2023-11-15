@@ -20,7 +20,7 @@ import {
   ProposalStatus,
   hexToBytes,
   encodeRatio,
-  decodeRatio
+  decodeRatio,
 } from '@aragon/sdk-client-common';
 import { Result } from '@ethersproject/abi';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
@@ -250,14 +250,14 @@ export function computeProposalStatus(
 }
 
 export function toNewProposal(
-  SCproposalID: number,
+  SCproposalID: string,
   settings: GaslessPluginVotingSettings,
   vochainProposal: PublishedElection,
   SCProposal: GaslessVotingProposalFromSC,
   census3Token: Token,
   voters: string[],
-  daoName= '',
-  daoAddress= '',
+  daoName = '',
+  daoAddress = ''
 ): GaslessVotingProposal {
   let metadata = EMPTY_PROPOSAL_METADATA_LINK;
   metadata.title = vochainProposal.title.default;
@@ -283,7 +283,7 @@ export function toNewProposal(
   const endDate = new Date(SCProposal.parameters.endDate);
 
   return {
-    id: `0x${SCproposalID.toString()}`, // string;
+    id: SCproposalID, // string;
     dao: {
       address: daoAddress, //string;
       name: daoName, //string; TODO
@@ -338,7 +338,7 @@ export function toNewProposal(
       currentPercentage: participation.currentPercentage,
       missingParticipation: participation.missingPart,
     },
-    voters
+    voters,
   } as GaslessVotingProposal;
 }
 

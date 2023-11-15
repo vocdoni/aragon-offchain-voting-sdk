@@ -297,10 +297,77 @@ export class GaslessVotingClientMethods
 
       const census3token = await this.vocdoniCensus3.getToken(
         pluginSettings.daoTokenAddress as string
+        // await signer.getChainId()
       );
 
       return toNewProposal(
-        id,
+        proposalId,
+        pluginSettings,
+        vochainProposal,
+        parsedSCProposal,
+        census3token,
+        voters,
+        daoName,
+        daoAddress
+      );
+    } catch (error) {
+      if (error instanceof ErrElectionNotFound) return null;
+      throw error;
+    }
+  }
+
+  /**
+   * Returns the details of the given proposal
+   *
+   * @param {string} pluginAdress
+   * @param {string} proposalId
+   * @return {*}  {Promise<TokenVotingProposal>}
+   * @memberof GaslessVotingClientMethods
+   */
+  public async getProposal2(
+    proposalId: string,
+    daoName?: string,
+    daoAddress?: string
+  ): Promise<GaslessVotingProposal | null> {
+    try {
+      const { pluginAddress, id } = decodeProposalId(proposalId);
+      if (!isAddress(pluginAddress)) {
+        Promise.reject(new InvalidAddressError());
+      }
+
+      const signer = this.web3.getConnectedSigner();
+
+      const gaslessVotingContract = VocdoniVoting__factory.connect(
+        pluginAddress,
+        signer
+      );
+      let pluginSettings = votingSettingsfromContract(
+        await gaslessVotingContract.getPluginSettings()
+      );
+      let proposal = await gaslessVotingContract.getProposal(id);
+
+      if (!proposal) {
+        return null;
+      }
+      let parsedSCProposal = toGaslessVotingProposal(proposal);
+      if (!parsedSCProposal.vochainProposalId)
+        Promise.reject(new ErrElectionNotFound());
+      const vochainProposal = await this.vocdoniSDK.fetchElection(
+        parsedSCProposal.vochainProposalId
+      );
+      const votesList = await ElectionAPI.votesList(
+        this.vocdoniSDK.url,
+        parsedSCProposal.vochainProposalId
+      );
+      const voters = votesList.votes.map((vote) => vote.voterID);
+
+      const census3token = await this.vocdoniCensus3.getToken(
+        pluginSettings.daoTokenAddress as string
+        // await signer.getChainId()
+      );
+
+      return toNewProposal(
+        proposalId,
         pluginSettings,
         vochainProposal,
         parsedSCProposal,
