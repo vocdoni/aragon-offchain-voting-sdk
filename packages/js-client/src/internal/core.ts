@@ -17,7 +17,7 @@ export class GaslessVotingClientCore extends ClientCore {
     this.vocdoniSDK = new VocdoniSDKClient({ env: vocdoniEnv });
     this.vocdoniCensus3 = new VocdoniCensus3Client({
       env: vocdoniEnv,
-      api_url: 'https://census3-dev.vocdoni.net/api',
+      api_url: 'https://census3-stg.vocdoni.net/api',
     });
     this.gaslessVotingContext = pluginContext.gaslessVotingBackendUrl;
     this.gaslessVotingRepoAddress = pluginContext.gaslessVotingRepoAddress;

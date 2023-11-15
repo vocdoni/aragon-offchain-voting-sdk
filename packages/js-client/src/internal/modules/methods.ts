@@ -275,12 +275,16 @@ export class GaslessVotingClientMethods
         pluginAddress,
         signer
       );
-      let pluginSettings = votingSettingsfromContract(
-        await gaslessVotingContract.getPluginSettings()
-      );
+
+      let pluginSettings = await this.getVotingSettings(pluginAddress);
+      if (!pluginSettings) return null;
       let proposal = await gaslessVotingContract.getProposal(id);
 
-      if (!proposal) {
+      if (
+        !proposal ||
+        proposal[2] ===
+          '0x0000000000000000000000000000000000000000000000000000000000000000'
+      ) {
         return null;
       }
       let parsedSCProposal = toGaslessVotingProposal(proposal);
@@ -296,8 +300,8 @@ export class GaslessVotingClientMethods
       const voters = votesList.votes.map((vote) => vote.voterID);
 
       const census3token = await this.vocdoniCensus3.getToken(
-        pluginSettings.daoTokenAddress as string
-        // await signer.getChainId()
+        pluginSettings.daoTokenAddress as string,
+        await signer.getChainId()
       );
 
       return toNewProposal(
@@ -362,8 +366,8 @@ export class GaslessVotingClientMethods
       const voters = votesList.votes.map((vote) => vote.voterID);
 
       const census3token = await this.vocdoniCensus3.getToken(
-        pluginSettings.daoTokenAddress as string
-        // await signer.getChainId()
+        pluginSettings.daoTokenAddress as string,
+        await signer.getChainId()
       );
 
       return toNewProposal(
