@@ -68,6 +68,7 @@ type PluginMember @entity {
   address: String # address as string to facilitate filtering by address on the UI
   balance: BigInt!
   plugin: Plugin!
+  pluginAddress: String! # address as string to facilitate filtering by address on the UI
   proposals: [PluginProposalMember!]! @derivedFrom(field: "approver")
   delegatee: PluginMember
   votingPower: BigInt

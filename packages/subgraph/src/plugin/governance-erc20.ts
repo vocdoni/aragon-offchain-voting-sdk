@@ -15,7 +15,7 @@ function getOrCreateMember(user: Address, pluginId: string): PluginMember {
     member.address = user.toHexString();
     member.balance = BigInt.zero();
     member.plugin = pluginId;
-
+    member.pluginAddress = dataSource.address().toHexString();
     member.delegatee = null;
     member.votingPower = BigInt.zero();
   }
