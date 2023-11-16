@@ -8,6 +8,7 @@ import {GovernanceERC20 as GovernanceERC20Contract} from '../../generated/templa
 import {Address, BigInt, dataSource, store} from '@graphprotocol/graph-ts';
 
 function getOrCreateMember(user: Address, pluginId: string): PluginMember {
+  let context = dataSource.context();
   let id = [user.toHexString(), pluginId].join('_');
   let member = PluginMember.load(id);
   if (!member) {
@@ -15,7 +16,7 @@ function getOrCreateMember(user: Address, pluginId: string): PluginMember {
     member.address = user.toHexString();
     member.balance = BigInt.zero();
     member.plugin = pluginId;
-    member.pluginAddress = dataSource.address().toHexString();
+    member.pluginAddress = context.getString('pluginAddress');;
     member.delegatee = null;
     member.votingPower = BigInt.zero();
   }

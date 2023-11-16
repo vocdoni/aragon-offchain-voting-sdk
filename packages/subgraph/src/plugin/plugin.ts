@@ -50,6 +50,7 @@ export function handlePluginSettingsUpdated(
     // Create template
     const pluginContext = new DataSourceContext();
     pluginContext.setString('pluginId', installationId.toHexString());
+    pluginContext.setString('pluginAddress', pluginAddress.toHexString());
     GovernanceERC20.createWithContext(
       event.params.daoTokenAddress,
       pluginContext
