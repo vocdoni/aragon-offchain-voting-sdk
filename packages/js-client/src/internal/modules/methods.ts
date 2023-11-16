@@ -301,7 +301,7 @@ export class GaslessVotingClientMethods
         this.vocdoniSDK.url,
         parsedSCProposal.vochainProposalId
       );
-      const voters = votesList.votes.map((vote) => vote.voterID);
+      const voters = votesList.votes.map((vote) => '0x' + vote.voterID);
 
       const census3token = await this.vocdoniCensus3.getToken(
         pluginSettings.daoTokenAddress as string,
