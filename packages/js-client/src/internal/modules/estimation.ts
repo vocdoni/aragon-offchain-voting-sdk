@@ -39,12 +39,14 @@ export class GaslessVotingClientEstimation
       params.failSafeActions?.length &&
       params.failSafeActions.length !== params.actions?.length
     ) {
-      throw new SizeMismatchError(`Expected failsafeactions ${params.failSafeActions?.length}`, `Found actions ${params.actions?.length}`);
+      throw new SizeMismatchError(
+        `Expected failsafeactions ${params.failSafeActions?.length}`,
+        `Found actions ${params.actions?.length}`
+      );
     }
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
 
-
-    const startTimestamp = params.startDate?.getTime() || 0;
+    const startTimestamp = params.startDate?.getTime() || Date.now();
     const endTimestamp = params.endDate?.getTime() || 0;
     const minTallyDurationTimestamp = params.tallyEndDate?.getTime() || 0;
 
@@ -52,10 +54,13 @@ export class GaslessVotingClientEstimation
       startDate: BigInt(Math.round(startTimestamp / 1000)),
       voteEndDate: BigInt(Math.round(endTimestamp / 1000)),
       tallyEndDate: BigInt(Math.round(minTallyDurationTimestamp / 1000)),
-      securityBlock: BigInt(0),
+      securityBlock: BigInt(1),
       totalVotingPower: params.totalVotingPower || BigInt(1),
       censusURI: params.censusURI || '',
-      censusRoot: hexToBytes(params.censusRoot || '0000000000000000000000000000000000000000000000000000000000000000')
+      censusRoot: hexToBytes(
+        params.censusRoot ||
+          '0000000000000000000000000000000000000000000000000000000000000000'
+      ),
     };
     const estimatedGasFee =
       await gaslessVotingContract.estimateGas.createProposal(
@@ -105,9 +110,7 @@ export class GaslessVotingClientEstimation
    * @return {*}  {Promise<GasFeeEstimation>}
    * @memberof GaslessVotingClientEstimation
    */
-  public async approve(
-    proposalId: string
-  ): Promise<GasFeeEstimation> {
+  public async approve(proposalId: string): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
     const { pluginAddress, id } = decodeProposalId(proposalId);
 
@@ -146,9 +149,7 @@ export class GaslessVotingClientEstimation
    * @return {*}  {Promise<GasFeeEstimation>}
    * @memberof GaslessVotingClientEstimation
    */
-  public async executeProposal(
-    proposalId: string
-  ): Promise<GasFeeEstimation> {
+  public async executeProposal(proposalId: string): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
     const { pluginAddress, id } = decodeProposalId(proposalId);
 

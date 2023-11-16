@@ -8,11 +8,13 @@ import {
   GaslessProposalParametersStruct,
   GaslessVotingProposalFromSC,
   SCVoteValues,
+  SubgraphVotingMember,
 } from '../types';
 import {
   MintTokenParams,
   TokenVotingProposalResult,
   VoteValues,
+  TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
   DaoAction,
@@ -111,6 +113,23 @@ export function votingSettingsfromContract(
     censusStrategy: settings[8],
   };
 }
+
+// export function fromSubgraphToVotingSettings(
+//   settings: GaslessPluginVotingSettings
+// ): GaslessPluginVotingSettings {
+//   return {
+//     onlyExecutionMultisigProposalCreation:
+//       settings.onlyExecutionMultisigProposalCreation,
+//     minTallyApprovals: settings.minTallyApprovals,
+//     minParticipation: decodeRatio(settings.minParticipation, 6),
+//     supportThreshold: decodeRatio(settings.supportThreshold, 6),
+//     minDuration: settings.minDuration,
+//     minTallyDuration: settings.minTallyDuration,
+//     daoTokenAddress: settings.daoTokenAddress,
+//     minProposerVotingPower: settings.minProposerVotingPower,
+//     censusStrategy: settings.censusStrategy,
+//   };
+// }
 
 export function proposalParamsfromContract(
   params: VocdoniVoting.ProposalParametersStructOutput
@@ -420,4 +439,26 @@ export function vochainResultsToSCResults(
       results[0][index] = appResults[value as keyof TokenVotingProposalResult];
     });
   return results;
+}
+
+export function toTokenVotingMember(
+  member: SubgraphVotingMember
+): TokenVotingMember {
+  return {
+    address: member.address,
+    votingPower: BigInt(member.votingPower),
+    balance: BigInt(member.balance),
+    delegatee:
+      member.delegatee?.address === member.address || !member.delegatee
+        ? null
+        : member.delegatee.address,
+    delegators: member.delegators
+      .filter((delegator) => delegator.address !== member.address)
+      .map((delegator) => {
+        return {
+          address: delegator.address,
+          balance: BigInt(delegator.balance),
+        };
+      }),
+  };
 }
