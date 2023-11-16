@@ -193,6 +193,19 @@ export type CreateGasslessProposalParams = CreateProposalBaseParams &
     vochainProposalId: string;
   };
 
+export type SubgraphVotingMember = {
+  address: string;
+  balance: string;
+  votingPower: string;
+  delegatee?: {
+    address: string;
+  };
+  delegators: {
+    address: string;
+    balance: string;
+  }[];
+};
+
 export enum Operation {
   Grant,
   Revoke,

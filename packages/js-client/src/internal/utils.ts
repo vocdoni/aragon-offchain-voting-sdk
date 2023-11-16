@@ -8,11 +8,13 @@ import {
   GaslessProposalParametersStruct,
   GaslessVotingProposalFromSC,
   SCVoteValues,
+  SubgraphVotingMember,
 } from '../types';
 import {
   MintTokenParams,
   TokenVotingProposalResult,
   VoteValues,
+  TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
   DaoAction,
@@ -20,7 +22,7 @@ import {
   ProposalStatus,
   hexToBytes,
   encodeRatio,
-  decodeRatio
+  decodeRatio,
 } from '@aragon/sdk-client-common';
 import { Result } from '@ethersproject/abi';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
@@ -111,6 +113,23 @@ export function votingSettingsfromContract(
     censusStrategy: settings[8],
   };
 }
+
+// export function fromSubgraphToVotingSettings(
+//   settings: GaslessPluginVotingSettings
+// ): GaslessPluginVotingSettings {
+//   return {
+//     onlyExecutionMultisigProposalCreation:
+//       settings.onlyExecutionMultisigProposalCreation,
+//     minTallyApprovals: settings.minTallyApprovals,
+//     minParticipation: decodeRatio(settings.minParticipation, 6),
+//     supportThreshold: decodeRatio(settings.supportThreshold, 6),
+//     minDuration: settings.minDuration,
+//     minTallyDuration: settings.minTallyDuration,
+//     daoTokenAddress: settings.daoTokenAddress,
+//     minProposerVotingPower: settings.minProposerVotingPower,
+//     censusStrategy: settings.censusStrategy,
+//   };
+// }
 
 export function proposalParamsfromContract(
   params: VocdoniVoting.ProposalParametersStructOutput
@@ -250,14 +269,14 @@ export function computeProposalStatus(
 }
 
 export function toNewProposal(
-  SCproposalID: number,
+  SCproposalID: string,
   settings: GaslessPluginVotingSettings,
   vochainProposal: PublishedElection,
   SCProposal: GaslessVotingProposalFromSC,
   census3Token: Token,
   voters: string[],
-  daoName= '',
-  daoAddress= '',
+  daoName = '',
+  daoAddress = ''
 ): GaslessVotingProposal {
   let metadata = EMPTY_PROPOSAL_METADATA_LINK;
   metadata.title = vochainProposal.title.default;
@@ -283,13 +302,13 @@ export function toNewProposal(
   const endDate = new Date(SCProposal.parameters.endDate);
 
   return {
-    id: `0x${SCproposalID.toString()}`, // string;
+    id: SCproposalID, // string;
     dao: {
       address: daoAddress, //string;
       name: daoName, //string; TODO
     },
     token: {
-      address: census3Token.id,
+      address: census3Token.ID,
       name: census3Token.name,
       symbol: census3Token.symbol,
       decimals: census3Token.decimals,
@@ -338,7 +357,7 @@ export function toNewProposal(
       currentPercentage: participation.currentPercentage,
       missingParticipation: participation.missingPart,
     },
-    voters
+    voters,
   } as GaslessVotingProposal;
 }
 
@@ -420,4 +439,26 @@ export function vochainResultsToSCResults(
       results[0][index] = appResults[value as keyof TokenVotingProposalResult];
     });
   return results;
+}
+
+export function toTokenVotingMember(
+  member: SubgraphVotingMember
+): TokenVotingMember {
+  return {
+    address: member.address,
+    votingPower: BigInt(member.votingPower),
+    balance: BigInt(member.balance),
+    delegatee:
+      member.delegatee?.address === member.address || !member.delegatee
+        ? null
+        : member.delegatee.address,
+    delegators: member.delegators
+      .filter((delegator) => delegator.address !== member.address)
+      .map((delegator) => {
+        return {
+          address: delegator.address,
+          balance: BigInt(delegator.balance),
+        };
+      }),
+  };
 }
