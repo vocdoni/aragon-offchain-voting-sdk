@@ -46,7 +46,7 @@ export class GaslessVotingClientEstimation
     }
     const allowFailureMap = boolArrayToBitmap(params.failSafeActions);
 
-    const startTimestamp = params.startDate?.getTime() || Date.now();
+    const startTimestamp = params.startDate?.getTime() || 0;
     const endTimestamp = params.endDate?.getTime() || 0;
     const minTallyDurationTimestamp = params.tallyEndDate?.getTime() || 0;
 
