@@ -86,7 +86,7 @@ export function gaslessVotingSettingsToContract(
   string
 ] {
   return [
-    params.onlyExecutionMultisigProposalCreation || true,
+    params.onlyExecutionMultisigProposalCreation || false,
     params.minTallyApprovals,
     encodeRatio(params.minParticipation, 6),
     encodeRatio(params.supportThreshold, 6),
