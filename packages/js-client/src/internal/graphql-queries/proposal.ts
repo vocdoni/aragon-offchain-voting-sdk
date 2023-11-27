@@ -6,6 +6,7 @@ export const QueryPluginProposal = gql`
       id
       dao {
         id
+        proposalsCount
       }
       metadata
       actions {
@@ -58,6 +59,7 @@ export const QueryPluginProposals = gql`
       id
       dao {
         id
+        proposalsCount
       }
       metadata
       actions {

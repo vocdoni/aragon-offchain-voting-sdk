@@ -14,6 +14,10 @@ export const QueryPluginSettings = gql`
       censusStrategyURI
       minProposerVotingPower
       executionMultisigMembers
+      dao {
+        id
+        proposalsCount
+      }
     }
   }
 `;

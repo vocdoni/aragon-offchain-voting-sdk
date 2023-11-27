@@ -1,6 +1,7 @@
 import {getPluginInstallationId} from '../../commons/ids';
 import {
   Action,
+  Dao,
   Plugin,
   PluginProposal,
   TallyElement,
@@ -15,7 +16,12 @@ import {
   TallyApproval,
   TallySet,
 } from '../../generated/templates/Plugin/VocdoniVoting';
-import {Address, DataSourceContext, dataSource} from '@graphprotocol/graph-ts';
+import {
+  Address,
+  BigInt,
+  DataSourceContext,
+  dataSource,
+} from '@graphprotocol/graph-ts';
 
 export function handlePluginSettingsUpdated(
   event: PluginSettingsUpdated
@@ -24,6 +30,12 @@ export function handlePluginSettingsUpdated(
 
   const context = dataSource.context();
   const daoId = context.getString('daoAddress');
+
+  const dao = Dao.load(daoId);
+  if (dao) {
+    dao.proposalsCount = BigInt.fromI32(0);
+    dao.save();
+  }
 
   const installationId = getPluginInstallationId(
     Address.fromString(daoId),
@@ -117,6 +129,17 @@ export function handleProposalCreated(event: ProposalCreated): void {
         }
 
         proposalEntity.save();
+      }
+
+      const dao = Dao.load(daoId);
+      if (dao) {
+        let pCount = BigInt.fromI32(0);
+        if (dao.proposalsCount) {
+          pCount = dao.proposalsCount as BigInt;
+        }
+
+        dao.proposalsCount = pCount.plus(BigInt.fromI32(1));
+        dao.save();
       }
     }
   }

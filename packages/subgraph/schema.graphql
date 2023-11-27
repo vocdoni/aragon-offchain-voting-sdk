@@ -19,6 +19,7 @@ type Dao @entity {
   actions: [Action!]! @derivedFrom(field: "dao")
   proposals: [IProposal!]! @derivedFrom(field: "dao")
   plugins: [Plugin!]! @derivedFrom(field: "dao")
+  proposalsCount: BigInt
 }
 
 # Plugins
