@@ -122,6 +122,11 @@ export type GaslessPluginVotingSettings = {
   onlyExecutionMultisigProposalCreation?: boolean;
   id?: string;
   executionMultisigMembers?: string[];
+  proposalCount?: number;
+  dao?: {
+    id: string
+    proposalsCount: number
+  };
 };
 
 export type GaslessProposalParametersStruct = {
