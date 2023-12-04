@@ -92,7 +92,7 @@ export function gaslessVotingSettingsToContract(
     encodeRatio(params.supportThreshold, 6),
     BigNumber.from(params.minDuration),
     BigNumber.from(params.minTallyDuration),
-    '0x0000000000000000000000000000000000000000',
+    params.daoTokenAddress || '0x0000000000000000000000000000000000000000',
     BigNumber.from(params.minProposerVotingPower ?? 0),
     params.censusStrategy,
   ];
