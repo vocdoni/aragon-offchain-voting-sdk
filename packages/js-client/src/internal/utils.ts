@@ -114,23 +114,6 @@ export function votingSettingsfromContract(
   };
 }
 
-// export function fromSubgraphToVotingSettings(
-//   settings: GaslessPluginVotingSettings
-// ): GaslessPluginVotingSettings {
-//   return {
-//     onlyExecutionMultisigProposalCreation:
-//       settings.onlyExecutionMultisigProposalCreation,
-//     minTallyApprovals: settings.minTallyApprovals,
-//     minParticipation: decodeRatio(settings.minParticipation, 6),
-//     supportThreshold: decodeRatio(settings.supportThreshold, 6),
-//     minDuration: settings.minDuration,
-//     minTallyDuration: settings.minTallyDuration,
-//     daoTokenAddress: settings.daoTokenAddress,
-//     minProposerVotingPower: settings.minProposerVotingPower,
-//     censusStrategy: settings.censusStrategy,
-//   };
-// }
-
 export function proposalParamsfromContract(
   params: VocdoniVoting.ProposalParametersStructOutput
 ): GaslessProposalParametersStruct {
@@ -208,9 +191,6 @@ export function hasProposalSucceeded(
   results: TokenVotingProposalResult,
   supportThreshold: number | undefined,
   missingParticipation: number | undefined,
-  totalVotingWeight: bigint,
-  usedVotingWeight: bigint
-  // tokenDecimals: number
 ): boolean {
   if (
     missingParticipation === undefined ||
@@ -232,17 +212,13 @@ export function hasProposalSucceeded(
     // participation reached
     missingParticipation === 0 &&
     // support threshold met even if absentees show up and all vote against, still cannot change outcome
-    Big(results.yes.toString())
-      .div(
-        Big(
-          BigInt(
-            results.yes + results.no + totalVotingWeight - usedVotingWeight
-          ).toString()
-        )
-      )
-      .gte(supportThreshold)
-    // (results.yes + results.no + (totalVotingWeight - usedVotingWeight)) >
-    // supportThreshold
+    Big(1-supportThreshold)
+    .mul(
+      Big(results.yes.toString()))
+    .gte(
+      Big(supportThreshold)
+      .mul(results.no.toString())
+    )
   );
 }
 
@@ -294,9 +270,6 @@ export function toNewProposal(
     result,
     settings.supportThreshold,
     participation.missingPart,
-    vochainProposal.census.weight || BigInt(0),
-    totalUsedWeight
-    // census3Token.decimals
   );
   const startDate = SCProposal.parameters.startDate as Date;
   const endDate = new Date(SCProposal.parameters.endDate);
