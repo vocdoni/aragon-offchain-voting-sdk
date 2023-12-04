@@ -24,6 +24,43 @@ export class GaslessVotingClientDecoding
 {
   // add your action decoders here
   /**
+   * Decodes a list of addresses from an encoded add members action
+   *
+   * @param {Uint8Array} data
+   * @return {*}  {string[]}
+   * @memberof GaslessVotingClientDecoding
+   */
+  public addAddressesAction(data: Uint8Array): string[] {
+    const votingInterface = VocdoniVoting__factory.createInterface();
+    const hexBytes = bytesToHex(data);
+
+    const expectedfunction = votingInterface.getFunction("addExecutionMultisigMembers");
+    const result = votingInterface.decodeFunctionData(
+      expectedfunction,
+      hexBytes,
+    );
+    return result[0];
+  }
+  /**
+   * Decodes a list of addresses from an encoded remove members action
+   *
+   * @param {Uint8Array} data
+   * @return {*}  {string[]}
+   * @memberof GaslessVotingClientDecoding
+   */
+  public removeAddressesAction(data: Uint8Array): string[] {
+    const votingInterface = VocdoniVoting__factory.createInterface();
+    const hexBytes = bytesToHex(data);
+    const expectedfunction = votingInterface.getFunction(
+      "removeExecutionMultisigMembers",
+    );
+    const result = votingInterface.decodeFunctionData(
+      expectedfunction,
+      hexBytes,
+    );
+    return result[0];
+  }
+  /**
    * Decodes a dao metadata from an encoded update metadata action
    *
    * @param {Uint8Array} data

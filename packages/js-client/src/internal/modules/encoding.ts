@@ -12,7 +12,7 @@ import {
   gaslessVotingSettingsToContract,
 } from '../utils';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
-import { MintTokenParams } from '@aragon/sdk-client';
+import { AddAddressesParams, MintTokenParams, RemoveAddressesParams } from '@aragon/sdk-client';
 import {
   DaoAction,
   getNamedTypesFromMetadata,
@@ -89,6 +89,69 @@ export class GaslessVotingClientEncoding
       to: pluginAddress,
       value: BigInt(0),
       data: this.encodeUpdateVotingSettingsAction(params),
+    };
+  }
+
+   /**
+   * Computes the parameters to be given when creating a proposal that updates the governance configuration
+   *
+   * @param {AddAddressesParams} params
+   * @return {*}  {DaoAction[]}
+   * @memberof GaslessVotingClientEncoding
+   */
+   public addAddressesAction(
+    params: AddAddressesParams,
+  ): DaoAction {
+    if (!isAddress(params.pluginAddress)) {
+      throw new InvalidAddressError();
+    }
+    // TODO yup validation
+    for (const member of params.members) {
+      if (!isAddress(member)) {
+        throw new InvalidAddressError();
+      }
+    }
+    const votingInterface = VocdoniVoting__factory.createInterface();
+    // get hex bytes
+    const hexBytes = votingInterface.encodeFunctionData(
+      "addExecutionMultisigMembers",
+      [params.members],
+    );
+    return {
+      to: params.pluginAddress,
+      value: BigInt(0),
+      data: hexToBytes(hexBytes),
+    };
+  }
+  /**
+   * Computes the parameters to be given when creating a proposal that adds addresses to address list
+   *
+   * @param {RemoveAddressesParams} params
+   * @return {*}  {DaoAction[]}
+   * @memberof GaslessVotingClientEncoding
+   */
+  public removeAddressesAction(
+    params: RemoveAddressesParams,
+  ): DaoAction {
+    if (!isAddress(params.pluginAddress)) {
+      throw new InvalidAddressError();
+    }
+    // TODO yup validation
+    for (const member of params.members) {
+      if (!isAddress(member)) {
+        throw new InvalidAddressError();
+      }
+    }
+    const votingInterface = VocdoniVoting__factory.createInterface();
+    // get hex bytes
+    const hexBytes = votingInterface.encodeFunctionData(
+      "removeExecutionMultisigMembers",
+      [params.members],
+    );
+    return {
+      to: params.pluginAddress,
+      value: BigInt(0),
+      data: hexToBytes(hexBytes),
     };
   }
 
