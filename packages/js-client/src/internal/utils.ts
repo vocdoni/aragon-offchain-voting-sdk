@@ -224,22 +224,24 @@ export function hasProposalSucceeded(
 
 export function computeProposalStatus(
   executed: boolean,
-  hasSucceeded: boolean,
+  approved: boolean,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  tallyEndDate: Date
 ): ProposalStatus {
   const now = new Date();
   if (startDate >= now) {
     return ProposalStatus.PENDING;
   }
-  if (endDate >= now) {
-    return ProposalStatus.ACTIVE;
-  }
   if (executed) {
     return ProposalStatus.EXECUTED;
   }
-  if (hasSucceeded) {
-    return ProposalStatus.SUCCEEDED;
+  if (tallyEndDate >= now) {
+    if (approved) return ProposalStatus.SUCCEEDED;
+    return ProposalStatus.ACTIVE;
+  }
+  if (endDate >= now) {
+    return ProposalStatus.ACTIVE;
   }
   return ProposalStatus.DEFEATED;
 }
@@ -266,13 +268,15 @@ export function toNewProposal(
     census3Token.decimals
   );
   const totalUsedWeight = result.abstain + result.no + result.yes;
-  const hasSucceeded = hasProposalSucceeded(
-    result,
-    settings.supportThreshold,
-    participation.missingPart,
-  );
+  // const hasSucceeded = hasProposalSucceeded(
+  //   result,
+  //   settings.supportThreshold,
+  //   participation.missingPart,
+  // );
   const startDate = SCProposal.parameters.startDate as Date;
   const endDate = new Date(SCProposal.parameters.endDate);
+  const tallyEndDate  =  SCProposal.parameters.tallyEndDate as Date;
+  const approved = SCProposal.approvers.length >= settings.minTallyApprovals;
 
   return {
     id: SCproposalID, // string;
@@ -300,9 +304,10 @@ export function toNewProposal(
     actions: SCProposal.actions, //DaoAction[];
     status: computeProposalStatus(
       SCProposal.executed,
-      hasSucceeded,
+      approved,
       startDate,
-      endDate
+      endDate,
+      tallyEndDate
     ),
     creationBlockNumber: SCProposal.parameters?.securityBlock || 0, //number; //TODO
     executionDate: null, //Date | null; //TODO
