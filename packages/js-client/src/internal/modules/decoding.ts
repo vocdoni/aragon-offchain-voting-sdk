@@ -84,7 +84,7 @@ export class GaslessVotingClientDecoding
     const result = votingInterface.decodeFunctionData(
       expectedfunction,
       hexBytes
-    ) as VocdoniVoting.PluginSettingsStructOutput;
+    )[0] as VocdoniVoting.PluginSettingsStructOutput;
 
     return votingSettingsfromContract(result);
   }
