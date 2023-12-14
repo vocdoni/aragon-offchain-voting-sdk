@@ -14,6 +14,8 @@ import {
   TokenVotingMember,
   ExecuteProposalStepValue,
   ProposalQueryParams,
+  AddAddressesParams,
+  RemoveAddressesParams,
 } from '@aragon/sdk-client';
 import {
   GasFeeEstimation,
@@ -111,11 +113,19 @@ export interface IGaslessVotingClientEncoding {
     pluginAddress: string,
     params: GaslessPluginVotingSettings
   ): DaoAction;
+  addAddressesAction(
+    params: AddAddressesParams,
+  ): DaoAction;
+  removeAddressesAction(
+    params: RemoveAddressesParams,
+  ): DaoAction;
 }
 export interface IGaslessVotingClientDecoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(data: Uint8Array): params;
   findInterface(data: Uint8Array): InterfaceParams | null;
+  addAddressesAction(data: Uint8Array): string[];
+  removeAddressesAction(data: Uint8Array): string[]
   updatePluginSettingsAction(data: Uint8Array): GaslessPluginVotingSettings;
   mintTokenAction(data: Uint8Array): MintTokenParams;
 }
