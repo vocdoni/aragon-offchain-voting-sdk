@@ -79,7 +79,7 @@ type PluginMember @entity {
 
 type PluginProposalMember @entity(immutable: true) {
   "MemberProposal for Many-to-Many"
-  id: ID! # approver + proposal
+  id: ID! # proposal + member
   approver: PluginMember!
   proposal: PluginProposal!
   createdAt: BigInt!

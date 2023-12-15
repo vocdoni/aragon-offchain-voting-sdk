@@ -3,7 +3,9 @@ import {
   Action,
   Dao,
   Plugin,
+  PluginMember,
   PluginProposal,
+  PluginProposalMember,
   TallyElement,
 } from '../../generated/schema';
 import {GovernanceERC20} from '../../generated/templates';
@@ -19,6 +21,7 @@ import {
 import {
   Address,
   BigInt,
+  Bytes,
   DataSourceContext,
   dataSource,
 } from '@graphprotocol/graph-ts';
@@ -264,5 +267,30 @@ export function handleTallyApproval(event: TallyApproval): void {
   if (proposalEntity) {
     proposalEntity.tallyApproved = true;
     proposalEntity.save();
+
+    const pluginAddress = event.address;
+    const context = dataSource.context();
+    const daoId = context.getString('daoAddress');
+    const pluginId: Bytes = getPluginInstallationId(
+      Address.fromString(daoId),
+      pluginAddress
+    ) as Bytes;
+
+    const pluginMemberId = [
+      event.params.approver.toHexString(),
+      pluginId.toHexString(),
+    ].join('_');
+    const pluginProposalMemberId = [
+      proposalId.toHexString(),
+      pluginMemberId,
+    ].join('_');
+    let pProposalMember = PluginProposalMember.load(pluginProposalMemberId);
+    if (!pProposalMember) {
+      pProposalMember = new PluginProposalMember(pluginProposalMemberId);
+      pProposalMember.proposal = proposalEntityId;
+      pProposalMember.approver = pluginMemberId;
+      pProposalMember.createdAt = event.block.timestamp;
+      pProposalMember.save();
+    }
   }
 }
