@@ -1,28 +1,22 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity ^0.8.17;
+pragma solidity 0.8.17;
 
 import {SafeCastUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeCastUpgradeable.sol";
 import {IVotesUpgradeable} from "@openzeppelin/contracts-upgradeable/governance/utils/IVotesUpgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import {IDAO} from "@aragon/osx/core/dao/IDAO.sol";
-import {PluginUUPSUpgradeable} from "@aragon/osx/core/plugin/PluginUUPSUpgradeable.sol";
 import {RATIO_BASE, _applyRatioCeiled, RatioOutOfBounds} from "@aragon/osx/plugins/utils/Ratio.sol";
-import {Addresslist} from "@aragon/osx/plugins/utils/Addresslist.sol";
 
 import {VocdoniProposalUpgradeable} from "./VocdoniProposalUpgradeable.sol";
 import {IVocdoniVoting} from "./IVocdoniVoting.sol";
+import {ExecutionMultisig} from "./ExecutionMultisig.sol";
 
 /// @title VocdoniVoting
 /// @author Vocdoni
 /// @notice The Vocdoni gasless voting data contract for the OSX plugin.
 /// @notice The voting Proposal is managed gasless on the Vocdoni blockchain.
-contract VocdoniVoting is
-    IVocdoniVoting,
-    PluginUUPSUpgradeable,
-    VocdoniProposalUpgradeable,
-    Addresslist
-{
+contract VocdoniVoting is IVocdoniVoting, VocdoniProposalUpgradeable, ExecutionMultisig {
     using SafeCastUpgradeable for uint256;
 
     /// @notice The [ERC-165](https://eips.ethereum.org/EIPS/eip-165) interface ID of the contract.
@@ -32,10 +26,6 @@ contract VocdoniVoting is
     /// @notice The ID of the permission required to update the plugin settings.
     bytes32 public constant UPDATE_PLUGIN_SETTINGS_PERMISSION_ID =
         keccak256("UPDATE_PLUGIN_SETTINGS_PERMISSION");
-
-    /// @notice The ID of the permission required to add/remove executionMultisig members.
-    bytes32 public constant UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID =
-        keccak256("UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION");
 
     /// @notice Emitted when the plugin settings are updated.
     /// @param onlyExecutionMultisigProposalCreation If true, only executionMultisig members can create proposals.
@@ -81,49 +71,8 @@ contract VocdoniVoting is
         string censusStrategyURI;
     }
 
-    /// @notice A container for the proposal parameters.
-    /// @param securityBlock Block number used for limiting contract usage when plugin settings are updated
-    /// @param startDate The timestamp when the proposal starts.
-    /// @param voteEndDate The timestamp when the proposal ends. At this point the tally can be set.
-    /// @param tallyEndDate The timestamp when the proposal expires. Proposal can't be executed after.
-    /// @param totalVotingPower The total voting power of the proposal.
-    /// @param censusURI The URI of the census.
-    /// @param censusRoot The root of the census.
-    struct ProposalParameters {
-        uint64 securityBlock;
-        uint64 startDate;
-        uint64 voteEndDate;
-        uint64 tallyEndDate;
-        uint256 totalVotingPower;
-        string censusURI;
-        bytes32 censusRoot;
-    }
-
-    /// @notice A container for proposal-related information.
-    /// @param executed Whether the proposal is executed or not.
-    /// @param vochainProposalId The ID of the proposal in the Vochain.
-    /// @param allowFailureMap A bitmap allowing the proposal to succeed, even if individual actions might revert. If the bit at index `i` is 1,
-    //         the proposal succeeds even if the nth action reverts. A failure map value of 0 requires every action to not revert.
-    /// @param parameters The parameters of the proposal.
-    /// @param tally The tally of the proposal.
-    /// @dev tally only supports [[Yes, No, Abstain]] schema in this order. i.e [[10, 5, 2]] means 10 Yes, 5 No, 2 Abstain.
-    /// @param approvers The approvers of the tally.
-    /// @param actions The actions to be executed when the proposal passes.
-    struct Proposal {
-        bool executed;
-        bytes32 vochainProposalId;
-        uint256 allowFailureMap;
-        ProposalParameters parameters;
-        uint256[][] tally;
-        address[] approvers;
-        IDAO.Action[] actions;
-    }
-
     /// @notice Keeps track at which block number the plugin settings have been changed the last time.
     uint64 private lastPluginSettingsChange;
-
-    /// @notice Keeps track at which block number the executionMultisig has been changed the last time.
-    uint64 private lastExecutionMultisigChange;
 
     /// @notice A mapping between proposal IDs and proposal information.
     mapping(uint256 => Proposal) private proposals;
@@ -140,7 +89,7 @@ contract VocdoniVoting is
         address[] calldata _executionMultisigAddresses,
         PluginSettings memory _pluginSettings
     ) external initializer {
-        __PluginUUPSUpgradeable_init(_dao);
+        __ExecutionMultisig_init(_dao);
         _addExecutionMultisigMembers(_executionMultisigAddresses);
         _updatePluginSettings(_pluginSettings);
     }
@@ -150,52 +99,15 @@ contract VocdoniVoting is
     /// @return Returns `true` if the interface is supported.
     function supportsInterface(
         bytes4 _interfaceId
-    )
-        public
-        view
-        virtual
-        override(PluginUUPSUpgradeable, VocdoniProposalUpgradeable)
-        returns (bool)
-    {
+    ) public view virtual override(ExecutionMultisig, VocdoniProposalUpgradeable) returns (bool) {
         return
             _interfaceId == VOCDONI_INTERFACE_ID ||
             _interfaceId == type(IVocdoniVoting).interfaceId ||
-            _interfaceId == type(Addresslist).interfaceId ||
             super.supportsInterface(_interfaceId);
     }
 
-    /// @inheritdoc IVocdoniVoting
-    function addExecutionMultisigMembers(
-        address[] calldata _members
-    ) external override auth(UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID) {
-        _addExecutionMultisigMembers(_members);
-    }
-
-    /// @notice Private function for adding execution multisig members.
-    /// @param _members The addresses to add.
-    function _addExecutionMultisigMembers(address[] calldata _members) private {
-        _guardExecutionMultisig();
-        if (_members.length == 0) {
-            revert InvalidListLength({length: _members.length});
-        }
-
-        uint256 newAddresslistLength = addresslistLength() + _members.length;
-
-        // Check if the new address list length would be greater than `type(uint16).max`, the maximal number of approvals.
-        if (newAddresslistLength > type(uint16).max) {
-            revert AddresslistLengthOutOfBounds({
-                limit: type(uint16).max,
-                actual: newAddresslistLength
-            });
-        }
-
-        _addAddresses(_members);
-        lastExecutionMultisigChange = uint64(block.number);
-
-        emit ExecutionMultisigMembersAdded({newMembers: _members});
-    }
-
-    /// @inheritdoc IVocdoniVoting
+    /// @inheritdoc ExecutionMultisig
+    /// @dev Overriden where for having access to minTallyApprovals
     function removeExecutionMultisigMembers(
         address[] calldata _members
     ) external override auth(UPDATE_PLUGIN_EXECUTION_MULTISIG_PERMISSION_ID) {
@@ -226,16 +138,32 @@ contract VocdoniVoting is
         emit ExecutionMultisigMembersRemoved({removedMembers: _members});
     }
 
-    /// @inheritdoc IVocdoniVoting
-    function isExecutionMultisigMember(address _member) public view override returns (bool) {
-        return _isExecutionMultisigMember(_member);
+    /// @inheritdoc ExecutionMultisig
+    function hasApprovedTally(
+        uint256 _proposalId,
+        address _member
+    ) external view override returns (bool) {
+        return _hasApprovedTally(proposals[_proposalId], _member);
     }
 
-    /// @notice Internal function for checking whether an address is a executionMultisig member.
-    /// @param _member The address to check.
-    /// @return Whether the address is a executionMultisig member.
-    function _isExecutionMultisigMember(address _member) internal view returns (bool) {
-        return isListed(_member);
+    /// @notice Internal function for checking if a member has approved a proposal tally.
+    /// @param _proposal The proposal to check.
+    /// @param _member The member to check.
+    /// @return Whether the member has approved the proposal tally.
+    function _hasApprovedTally(
+        Proposal memory _proposal,
+        address _member
+    ) internal pure returns (bool) {
+        uint approversLength = _proposal.approvers.length;
+        for (uint256 i = 0; i < approversLength; ) {
+            if (_proposal.approvers[i] == _member) {
+                return true;
+            }
+            unchecked {
+                i++;
+            }
+        }
+        return false;
     }
 
     /// @notice Updates the plugin settings.
@@ -258,6 +186,7 @@ contract VocdoniVoting is
                 actual: _pluginSettings.supportThreshold
             });
         }
+
         // Require the minimum participation value to be in the interval [0, 10^6], because `>=` comparision is used in the participation criterion.
         if (_pluginSettings.minParticipation > RATIO_BASE) {
             revert RatioOutOfBounds({limit: RATIO_BASE, actual: _pluginSettings.minParticipation});
@@ -270,7 +199,7 @@ contract VocdoniVoting is
             });
         }
 
-        if (_pluginSettings.minVoteDuration < 5 minutes) {
+        if (_pluginSettings.minVoteDuration < 60 minutes) {
             revert VoteDurationOutOfBounds({
                 limit: 60 minutes,
                 actual: _pluginSettings.minVoteDuration
@@ -284,7 +213,7 @@ contract VocdoniVoting is
             });
         }
 
-        if (_pluginSettings.minTallyDuration < 5 minutes) {
+        if (_pluginSettings.minTallyDuration < 60 minutes) {
             revert TallyDurationOutOfBounds({
                 limit: 60 minutes,
                 actual: _pluginSettings.minTallyDuration
@@ -370,7 +299,8 @@ contract VocdoniVoting is
 
         if (_pluginSettings.minProposerVotingPower != 0) {
             // Because of the checks in `VocdoniVotingSetup`, we can assume that `votingToken` is an [ERC-20](https://eips.ethereum.org/EIPS/eip-20) token.
-            uint256 votes = IVotesUpgradeable(_pluginSettings.daoTokenAddress).getVotes(sender);
+            // It can be the case where the token does not implement the getVotes() function, so we need to handle the call as a possible failure to ignore.
+            uint256 votes = _tryGetVotes(sender);
             uint256 balance = IERC20Upgradeable(_pluginSettings.daoTokenAddress).balanceOf(sender);
 
             if (
@@ -407,6 +337,7 @@ contract VocdoniVoting is
         proposal.parameters.censusRoot = _parameters.censusRoot;
         proposal.parameters.securityBlock = block.number.toUint64();
         proposal.allowFailureMap = _allowFailureMap;
+
         for (uint256 i = 0; i < _actions.length; ) {
             proposal.actions.push(_actions[i]);
             unchecked {
@@ -534,7 +465,8 @@ contract VocdoniVoting is
             address[] memory newApprovers = new address[](0);
             // newApprovers are the oldApprovers list without the non executionMultisig members at the current block
             uint8 newApproversCount = 0;
-            for (uint256 i = 0; i < proposal.approvers.length; ) {
+            uint approversLength = proposal.approvers.length;
+            for (uint256 i = 0; i < approversLength; ) {
                 address oldApprover = proposal.approvers[i];
                 if (
                     _isExecutionMultisigMember(oldApprover) &&
@@ -586,8 +518,14 @@ contract VocdoniVoting is
         return false;
     }
 
-    /// @notice Internal function to check the tally and execute a proposal if the tally
-    ///         number of YES votes is greater than the tally number of NO votes.
+    /// @notice Internal function to check the tally and execute a proposal if:
+    ///          - The support threshold is reached
+    ///          - The minimum participation is reached.
+    ///          - Enough execution multisig members have approved the tally.
+    ///          - Proposal is not already executed.
+    ///          - The tally is valid.
+    ///          - The proposal is in the tally phase.
+    /// @param _proposalId The ID of the proposal to check.
     function _checkTallyAndExecute(uint256 _proposalId) internal {
         Proposal memory proposal = proposals[_proposalId];
 
@@ -666,7 +604,7 @@ contract VocdoniVoting is
         uint64 _startDate,
         uint64 _voteEndDate,
         uint64 _tallyEndDate
-    ) internal view virtual returns (uint64 startDate, uint64 voteEndDate, uint64 tallyEndDate) {
+    ) internal view returns (uint64 startDate, uint64 voteEndDate, uint64 tallyEndDate) {
         uint64 currentBlockTimestamp = block.timestamp.toUint64();
         // check proposal start date and set it to the current block timestamp if it is 0
         if (_startDate == 0) {
@@ -708,40 +646,6 @@ contract VocdoniVoting is
         return pluginSettings;
     }
 
-    /// @notice Returns true if the provided _member has approved the given proposal tally
-    /// @param _proposalId The ID of the proposal.
-    /// @return Whether the msg.sender has approved the proposal tally.
-    function hasApprovedTally(uint256 _proposalId, address _member) external view returns (bool) {
-        return _hasApprovedTally(proposals[_proposalId], _member);
-    }
-
-    /// @notice Internal function for checking if a member has approved a proposal tally.
-    /// @param _proposal The proposal to check.
-    /// @param _member The member to check.
-    /// @return Whether the member has approved the proposal tally.
-    function _hasApprovedTally(
-        Proposal memory _proposal,
-        address _member
-    ) internal pure returns (bool) {
-        for (uint256 i = 0; i < _proposal.approvers.length; ) {
-            if (_proposal.approvers[i] == _member) {
-                return true;
-            }
-            unchecked {
-                i++;
-            }
-        }
-        return false;
-    }
-
-    /// @notice Guard checks that processes key updates are not executed in the same block
-    ///         where the executionMultisig changed.
-    function _guardExecutionMultisig() internal view {
-        if (lastExecutionMultisigChange == uint64(block.number)) {
-            revert ExecutionMultisigUpdatedTooRecently({lastUpdate: lastExecutionMultisigChange});
-        }
-    }
-
     /// @notice Guard checks that processes key updates are not executed in the same block
     ///          where the plugin settings changed.
     function _guardPluginSettings() internal view {
@@ -750,13 +654,25 @@ contract VocdoniVoting is
         }
     }
 
-    // get last executionMultisig change block number
-    function getLastExecutionMultisigChange() external view returns (uint64) {
-        return lastExecutionMultisigChange;
-    }
-
-    // get last plugin settings change block number
+    /// @notice Returns the last block number where the plugin settings changed.
+    /// @return The last block number where the plugin settings changed.
     function getLastPluginSettingsChange() external view returns (uint64) {
         return lastPluginSettingsChange;
+    }
+
+    /// @notice Handles the getVotes() call possible failure.
+    /// @param voter The address of the user.
+    /// @return uint256 The votes of the user.
+    function _tryGetVotes(address voter) internal view returns (uint256) {
+        (bool success, bytes memory data) = pluginSettings.daoTokenAddress.staticcall(
+            abi.encodeCall(IVotesUpgradeable.getVotes, voter)
+        );
+        if (success && data.length == 32) {
+            // Decode and return the votes if the call was successful and data length is correct
+            return abi.decode(data, (uint256));
+        } else {
+            // If the call failed or returned unexpected data, handle as error
+            return 0;
+        }
     }
 }

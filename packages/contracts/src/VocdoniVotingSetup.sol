@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-pragma solidity ^0.8.17;
+pragma solidity 0.8.17;
 
 import {IDAO} from "@aragon/osx/core/dao/IDAO.sol";
 import {DAO} from "@aragon/osx/core/dao/DAO.sol";
@@ -101,29 +101,6 @@ contract VocdoniVotingSetup is PluginSetup {
             if (!_isERC20(token)) {
                 revert TokenNotERC20(token);
             }
-
-            // [0] = IERC20Upgradeable, [1] = IVotesUpgradeable, [2] = IGovernanceWrappedERC20
-            bool[] memory supportedIds = _getTokenInterfaceIds(token);
-
-            if (
-                // If token supports none of them
-                // it's simply ERC20 which gets checked by _isERC20
-                // Currently, not a satisfiable check.
-                (!supportedIds[0] && !supportedIds[1] && !supportedIds[2]) ||
-                // If token supports IERC20, but neither
-                // IVotes nor IGovernanceWrappedERC20, it needs wrapping.
-                (supportedIds[0] && !supportedIds[1] && !supportedIds[2])
-            ) {
-                token = governanceWrappedERC20Base.clone();
-                // User already has a token. We need to wrap it in
-                // GovernanceWrappedERC20 in order to make the token
-                // include governance functionality.
-                GovernanceWrappedERC20(token).initialize(
-                    IERC20Upgradeable(tokenSettings.addr),
-                    tokenSettings.name,
-                    tokenSettings.symbol
-                );
-            }
         } else {
             // Clone a `GovernanceERC20`.
             token = governanceERC20Base.clone();
@@ -136,6 +113,7 @@ contract VocdoniVotingSetup is PluginSetup {
         }
 
         helpers[0] = token;
+
         pluginSettings.daoTokenAddress = token;
 
         // Prepare and Deploy the plugin proxy.
