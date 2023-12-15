@@ -95,14 +95,6 @@ export enum VotingMode {
   VoteReplacement,
 }
 
-// export type VotingSettings = {
-//   votingMode: number;
-//   supportThreshold: number;
-//   minParticipation: number;
-//   minVoteDuration: bigint;
-//   minProposerVotingPower: bigint;
-// };
-
 export const RATIO_BASE = BigNumber.from(10).pow(6); // 100% => 10**6
 export const pctToRatio = (x: number) => RATIO_BASE.mul(x).div(100);
 
@@ -159,14 +151,32 @@ export type GaslessVotingProposalFromSC = {
   actions?: DaoAction[];
 };
 
-export type GaslessVotingProposal = ProposalBase & {
+export type GaslessVotingProposalSubgraph =   ProposalBase &
+{
+  dao: {
+    address: string;
+  };
+  allowFailureMap: number;
+  vochainProposalId: string;
   tallyEndDate: Date;
   executed: boolean;
+  approvers: { id: string }[];
+  tallyAprroved: boolean;
+  tallySubgraph:  number[];
+  tally?: number[][];
+}
+
+
+export type GaslessVotingProposal = Omit<GaslessVotingProposalSubgraph,
+"tallyEndDate" | "endDate" | "startDate" | "creationDate" | "executionDate" | "approvers" >
+& {
+  tallyEndDate: Date;
+  endDate: Date;
+  startDate: Date;
+  creationDate: Date;
+  executionDate: Date;
   approvers: string[];
-  vochainProposalId: string;
   parameters: GaslessProposalParametersStruct;
-  allowFailureMap: number;
-  tally: number[][];
   settings: GaslessPluginVotingSettings;
   vochain: {
     metadata: PublishedElection;
@@ -191,6 +201,7 @@ export type GaslessVotingProposal = ProposalBase & {
     type: string;
   };
   voters?: string[];
+  canBeApproved?: boolean;
 };
 
 export type CreateGasslessProposalParams = CreateProposalBaseParams &

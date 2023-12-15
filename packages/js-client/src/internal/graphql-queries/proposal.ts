@@ -2,11 +2,10 @@ import { gql } from 'graphql-request';
 
 export const QueryPluginProposal = gql`
   query PluginProposal($proposalId: ID!) {
-    pluginProposals(id: $proposalId) {
+    pluginProposal(id: $proposalId) {
       id
       dao {
-        id
-        proposalsCount
+        address: id
       }
       metadata
       actions {
@@ -16,12 +15,11 @@ export const QueryPluginProposal = gql`
       }
       allowFailureMap
       failureMap
-      pluginProposalId
       vochainProposalId
-      creator
+      creatorAddress: creator
       startDate
-      createdAt
-      voteEndDate
+      creationDate:  createdAt
+      endDate: voteEndDate
       tallyEndDate
       creationBlockNumber
       snapshotBlock
@@ -32,8 +30,7 @@ export const QueryPluginProposal = gql`
       approvers {
         id
       }
-      tally {
-        id
+      tallySubgraph: tally {
         values
       }
       tallyApproved

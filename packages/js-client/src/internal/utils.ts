@@ -9,6 +9,7 @@ import {
   GaslessVotingProposalFromSC,
   SCVoteValues,
   SubgraphVotingMember,
+  GaslessVotingProposalSubgraph,
 } from '../types';
 import {
   MintTokenParams,
@@ -31,19 +32,6 @@ import { VocdoniVoting } from '@vocdoni/gasless-voting-ethers';
 import { IChoice, IQuestion, PublishedElection, Token } from '@vocdoni/sdk';
 import Big from 'big.js';
 import { formatUnits as ethersFormatUnits } from 'ethers/lib/utils';
-
-// export function votingModeFromContracts(votingMode: number): VotingMode {
-//   switch (votingMode) {
-//     case 0:
-//       return VotingMode.STANDARD;
-//     case 1:
-//       return VotingMode.EARLY_EXECUTION;
-//     case 2:
-//       return VotingMode.VOTE_REPLACEMENT;
-//     default:
-//       throw new InvalidVotingModeError();
-//   }
-// }
 
 export function mintTokenParamsToContract(
   params: MintTokenParams
@@ -246,11 +234,14 @@ export function computeProposalStatus(
   return ProposalStatus.DEFEATED;
 }
 
+export function dateFromSC(date: any): Date  {
+  return new Date(Number(date)*1000);
+}
+
 export function toNewProposal(
-  SCproposalID: string,
+  proposal: GaslessVotingProposalSubgraph,
   settings: GaslessPluginVotingSettings,
   vochainProposal: PublishedElection,
-  SCProposal: GaslessVotingProposalFromSC,
   census3Token: Token,
   voters: string[],
   daoName = '',
@@ -268,18 +259,19 @@ export function toNewProposal(
     census3Token.decimals
   );
   const totalUsedWeight = result.abstain + result.no + result.yes;
-  // const hasSucceeded = hasProposalSucceeded(
-  //   result,
-  //   settings.supportThreshold,
-  //   participation.missingPart,
-  // );
-  const startDate = SCProposal.parameters.startDate as Date;
-  const endDate = new Date(SCProposal.parameters.endDate);
-  const tallyEndDate  =  SCProposal.parameters.tallyEndDate as Date;
-  const approved = SCProposal.approvers.length >= settings.minTallyApprovals;
+  const hasSucceeded = hasProposalSucceeded(
+    result,
+    settings.supportThreshold,
+    participation.missingPart,
+  );
+  // const startDate = SCProposal.parameters.startDate as Date;
+  // const endDate = new Date(SCProposal.parameters.endDate);
+  // const tallyEndDate  =  SCProposal.parameters.tallyEndDate as Date;
+  const approved = proposal.approvers.length >= settings.minTallyApprovals;
 
   return {
-    id: SCproposalID, // string;
+    ...proposal,
+    // id: SCproposalID, // string;
     dao: {
       address: daoAddress, //string;
       name: daoName, //string; TODO
@@ -291,34 +283,28 @@ export function toNewProposal(
       decimals: census3Token.decimals,
       type: census3Token.type,
     },
-    creatorAddress: vochainProposal.organizationId, //string;
     metadata: {
       title: vochainProposal.title.default,
       description: vochainProposal.description?.default || '',
       summary: vochainProposal.questions[0].title.default,
+      resources: [],
     }, //ProposalMetadata;
-    startDate, //Date;
-    endDate, //Date;
-    creationDate: vochainProposal.creationTime, //Date;
-    tallyEndDate: new Date(SCProposal.parameters.tallyEndDate as Date),
-    actions: SCProposal.actions, //DaoAction[];
     status: computeProposalStatus(
-      SCProposal.executed,
+      proposal.executed,
       approved,
-      startDate,
-      endDate,
-      tallyEndDate
+      proposal.startDate as Date,
+      proposal.endDate as Date,
+      proposal.tallyEndDate as Date
     ),
-    creationBlockNumber: SCProposal.parameters?.securityBlock || 0, //number; //TODO
-    executionDate: null, //Date | null; //TODO
-    executionBlockNumber: null, //number | null; //TODO
-    executionTxHash: null, //string | null;
-    executed: SCProposal.executed, //boolean;
-    approvers: SCProposal.approvers, //string[];
-    vochainProposalId: SCProposal.vochainProposalId, //string;
-    parameters: SCProposal.parameters, //GaslessProposalParametersStruct;
-    allowFailureMap: SCProposal.allowFailureMap, //number;
-    tally: SCProposal.tally, //number[][];
+    parameters: {
+      securityBlock: proposal.creationBlockNumber,
+      startDate: proposal.startDate,
+      endDate: proposal.endDate,
+      tallyEndDate: proposal.tallyEndDate,
+      totalVotingPower: vochainProposal.census.weight,
+      censusURI: vochainProposal.census.censusURI,
+      censusRoot: vochainProposal.census.censusId,
+    },
     settings,
     vochain: {
       metadata: vochainProposal,
@@ -336,6 +322,8 @@ export function toNewProposal(
       missingParticipation: participation.missingPart,
     },
     voters,
+    approvers: proposal.approvers.map(x => x.id.split('_')[1]),
+    canBeApproved: hasSucceeded,
   } as GaslessVotingProposal;
 }
 
