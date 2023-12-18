@@ -151,6 +151,12 @@ export type GaslessVotingProposalFromSC = {
   actions?: DaoAction[];
 };
 
+export type SubgraphAction = {
+  to: string;
+  value: string;
+  data: string;
+};
+
 export type GaslessVotingProposalSubgraph =   ProposalBase &
 {
   dao: {
@@ -164,6 +170,7 @@ export type GaslessVotingProposalSubgraph =   ProposalBase &
   tallyAprroved: boolean;
   tallySubgraph:  number[];
   tally?: number[][];
+  actionsSubgraph: SubgraphAction[];
 }
 
 

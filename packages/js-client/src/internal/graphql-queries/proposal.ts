@@ -8,8 +8,8 @@ export const QueryPluginProposal = gql`
         address: id
       }
       metadata
-      actions {
-        id
+      actionsSubgraph: actions {
+        to
         value
         data
       }

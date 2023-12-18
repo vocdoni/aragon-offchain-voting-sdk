@@ -8,6 +8,7 @@ import {
   ApproveTallyStepValue,
   SubgraphVotingMember,
   GaslessVotingProposalSubgraph,
+  SubgraphAction
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { GaslessVotingClientCore } from '../core';
@@ -55,6 +56,7 @@ import {
   decodeProposalId,
   SortDirection,
   decodeRatio,
+  DaoAction,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
 // import { Wallet } from '@ethersproject/wallet';
@@ -225,6 +227,15 @@ export class GaslessVotingClientMethods
         executionDate: (pluginProposal.executionDate) ? dateFromSC(pluginProposal.executionDate) : null,
         executionBlockNumber: Number(pluginProposal.executionBlockNumber),
         creationBlockNumber: Number(pluginProposal.creationBlockNumber),
+        actions: pluginProposal.actionsSubgraph?.map(
+          (action: SubgraphAction): DaoAction => {
+            return {
+              data: hexToBytes(action.data),
+              to: action.to,
+              value: BigInt(action.value),
+            };
+          },
+        ),
       }
 
       const vochainProposal = await this.vocdoniSDK.fetchElection(

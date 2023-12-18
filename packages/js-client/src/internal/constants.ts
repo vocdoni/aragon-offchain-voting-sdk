@@ -61,6 +61,12 @@ export const AVAILABLE_FUNCTION_SIGNATURES: string[] = [
   VocdoniVoting__factory.createInterface()
     .getFunction('updatePluginSettings')
     .format('minimal'),
+  VocdoniVoting__factory.createInterface()
+    .getFunction('addExecutionMultisigMembers')
+    .format('minimal'),
+  VocdoniVoting__factory.createInterface()
+    .getFunction('removeExecutionMultisigMembers')
+    .format('minimal'),
   IERC20MintableUpgradeable__factory.createInterface()
     .getFunction('mint')
     .format('minimal'),
