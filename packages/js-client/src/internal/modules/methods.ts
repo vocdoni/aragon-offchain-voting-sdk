@@ -8,15 +8,14 @@ import {
   ApproveTallyStepValue,
   SubgraphVotingMember,
   GaslessVotingProposalSubgraph,
-  SubgraphAction
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { GaslessVotingClientCore } from '../core';
 import { QueryPluginMembers, QueryPluginProposal, QueryPluginSettings } from '../graphql-queries';
 import { IGaslessVotingClientMethods } from '../interfaces';
 import {
-  dateFromSC,
   initParamsToContract,
+  parseSubgraphProposal,
   toGaslessVotingProposal,
   toNewProposal,
   toTokenVotingMember,
@@ -56,7 +55,6 @@ import {
   decodeProposalId,
   SortDirection,
   decodeRatio,
-  DaoAction,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
 // import { Wallet } from '@ethersproject/wallet';
@@ -141,13 +139,10 @@ export class GaslessVotingClientMethods
       censusRoot: hexToBytes(params.censusRoot),
     };
     const tx = await gaslessVotingContract.createProposal(
-      // toUtf8Bytes(params.metadataUri),
       hexToBytes(params.vochainProposalId),
       allowFailureMap,
       votingParams,
       params.actions || []
-      // params.creatorVote || 0,
-      // params.executeOnPass || false,
     );
 
     yield {
@@ -217,26 +212,7 @@ export class GaslessVotingClientMethods
       if (!pluginProposal?.vochainProposalId.length) return null;
 
       // pluginProposal;
-      pluginProposal = {
-        ...pluginProposal,
-        tally: [pluginProposal.tallySubgraph?.length ? pluginProposal.tallySubgraph : []],
-        startDate: dateFromSC(pluginProposal.startDate),
-        endDate: dateFromSC(pluginProposal.endDate),
-        tallyEndDate: dateFromSC(pluginProposal.tallyEndDate),
-        creationDate: dateFromSC(pluginProposal.creationDate),
-        executionDate: (pluginProposal.executionDate) ? dateFromSC(pluginProposal.executionDate) : null,
-        executionBlockNumber: Number(pluginProposal.executionBlockNumber),
-        creationBlockNumber: Number(pluginProposal.creationBlockNumber),
-        actions: pluginProposal.actionsSubgraph?.map(
-          (action: SubgraphAction): DaoAction => {
-            return {
-              data: hexToBytes(action.data),
-              to: action.to,
-              value: BigInt(action.value),
-            };
-          },
-        ),
-      }
+      pluginProposal = parseSubgraphProposal(pluginProposal)
 
       const vochainProposal = await this.vocdoniSDK.fetchElection(
         pluginProposal.vochainProposalId

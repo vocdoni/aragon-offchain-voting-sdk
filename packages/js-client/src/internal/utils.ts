@@ -16,6 +16,7 @@ import {
   TokenVotingProposalResult,
   VoteValues,
   TokenVotingMember,
+  SubgraphAction,
 } from '@aragon/sdk-client';
 import {
   DaoAction,
@@ -160,6 +161,30 @@ export function toGaslessVotingProposal(
       };
     }),
   };
+}
+
+export function parseSubgraphProposal(proposal: GaslessVotingProposalSubgraph) {
+  return {
+    ...proposal,
+    tally: [proposal.tallySubgraph?.length ? proposal.tallySubgraph : []],
+    startDate: dateFromSC(proposal.startDate),
+    endDate: dateFromSC(proposal.endDate),
+    tallyEndDate: dateFromSC(proposal.tallyEndDate),
+    creationDate: dateFromSC(proposal.creationDate),
+    executionDate: (proposal.executionDate) ? dateFromSC(proposal.executionDate) : null,
+    executionBlockNumber: Number(proposal.executionBlockNumber),
+    creationBlockNumber: Number(proposal.creationBlockNumber),
+    actions: proposal.actionsSubgraph?.map(
+      (action: SubgraphAction): DaoAction => {
+        return {
+          data: hexToBytes(action.data),
+          to: action.to,
+          value: BigInt(action.value),
+        };
+      },
+    ),
+  };
+
 }
 
 export function vochainVoteResultsToProposal(
