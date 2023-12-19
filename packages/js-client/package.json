@@ -1,7 +1,7 @@
 {
   "name": "@vocdoni/gasless-voting",
   "author": "Vocdoni Association",
-  "version": "0.0.1-rc8",
+  "version": "0.0.1-rc13",
   "description": "Aragon DAO Gasless Voting Plugin SDK",
   "license": "AGPL-3.0-or-later",
   "main": "dist/index.js",
@@ -66,7 +66,7 @@
     }
   ],
   "devDependencies": {
-    "@aragon/sdk-client": "1.20.0",
+    "@aragon/sdk-client": "1.20.4",
     "@ensdomains/ens-contracts": "^0.0.15",
     "@size-limit/preset-small-lib": "^7.0.8",
     "@types/jest": "^29.5.2",
