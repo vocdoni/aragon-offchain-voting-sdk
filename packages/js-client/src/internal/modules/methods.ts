@@ -458,15 +458,12 @@ export class GaslessVotingClientMethods
 
     const proposal = await this.getProposal(proposalId);
     if (!proposal)  return Promise.reject(new InvalidProposalIdError());
-    const vochainProposal = await this.vocdoniSDK.fetchElection(
-      proposal.vochainProposalId
-    );
-    if (!vochainProposal.finalResults) Promise.reject(Error('No results yet'));
+    if (!proposal.vochain?.tally?.final) Promise.reject(Error('No results yet'));
 
     if (proposal.approvers.length == 0) {
       return this.setTally(
         proposalId,
-        vochainResultsToSCResults(vochainProposal)
+        vochainResultsToSCResults(proposal.vochain.metadata)
       );
     }
     return this.approveTally(proposalId, false);
