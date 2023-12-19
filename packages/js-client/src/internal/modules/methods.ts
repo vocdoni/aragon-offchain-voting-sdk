@@ -598,14 +598,9 @@ export class GaslessVotingClientMethods
     if (!isAddress(memberAddress)) {
       Promise.reject(new InvalidAddressError());
     }
-    const signer = this.web3.getConnectedSigner();
 
-    const tokenVotingContract = VocdoniVoting__factory.connect(
-      pluginAddress,
-      signer
-    );
-
-    return tokenVotingContract.isExecutionMultisigMember(memberAddress);
+    const settings = await this.getVotingSettings(pluginAddress);
+    return settings?.executionMultisigMembers?.indexOf(memberAddress) !== -1
   }
 
   /**
