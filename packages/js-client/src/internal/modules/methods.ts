@@ -600,7 +600,7 @@ export class GaslessVotingClientMethods
     }
 
     const settings = await this.getVotingSettings(pluginAddress);
-    return settings?.executionMultisigMembers?.indexOf(memberAddress) !== -1
+    return settings?.executionMultisigMembers?.indexOf(memberAddress.toLocaleLowerCase()) !== -1
   }
 
   /**
