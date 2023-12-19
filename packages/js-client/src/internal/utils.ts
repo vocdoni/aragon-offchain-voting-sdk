@@ -170,7 +170,7 @@ export function toGaslessVotingProposal(
 export function parseSubgraphProposal(proposal: GaslessVotingProposalSubgraph) {
   return {
     ...proposal,
-    tally: subgraphVoteResultsToProposal(Object.values(proposal.tallySubgraph[0])),
+    tally: subgraphVoteResultsToProposal(proposal.tallySubgraph),
     startDate: dateFromSC(proposal.startDate),
     endDate: dateFromSC(proposal.endDate),
     tallyEndDate: dateFromSC(proposal.tallyEndDate),
@@ -226,7 +226,7 @@ export function toGaslessVotingProposalListItem(
 }
 
 export function subgraphVoteResultsToProposal(
-  tally?: number[][]
+  tally: number[] | undefined
 ): TokenVotingProposalResult {
   let parsedResults = {
     yes: BigInt(0),
@@ -234,9 +234,10 @@ export function subgraphVoteResultsToProposal(
     abstain: BigInt(0),
   };
   if (!tally || !tally.length) return parsedResults as TokenVotingProposalResult;
-  parsedResults.yes = BigInt(tally[0][0]);
-  parsedResults.no = BigInt(tally[0][1]);
-  parsedResults.abstain = BigInt(tally[0][2]);
+  let parsedTally = Object.values(tally[0]);
+  parsedResults.yes = BigInt(parsedTally[0][0]);
+  parsedResults.no = BigInt(parsedTally[0][1]);
+  parsedResults.abstain = BigInt(parsedTally[0][2]);
   return parsedResults as TokenVotingProposalResult;
 }
 
