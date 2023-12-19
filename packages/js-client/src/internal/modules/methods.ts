@@ -445,9 +445,9 @@ export class GaslessVotingClientMethods
 
     const { pluginAddress, id } = decodeProposalId(proposalId);
     if (!isAddress(pluginAddress)) {
-      Promise.reject(new InvalidAddressError());
+      return Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(id)) Promise.reject(new InvalidProposalIdError());
+    if (isNaN(id))return Promise.reject(new InvalidProposalIdError());
 
     let isMultisigMember = await this.isMultisigMember(
       pluginAddress,
@@ -455,20 +455,15 @@ export class GaslessVotingClientMethods
     );
     if (!isMultisigMember) Promise.reject(new Error('Not a multisig member'));
 
-    const gaslessVotingContract = VocdoniVoting__factory.connect(
-      pluginAddress,
-      signer
-    );
 
-    const proposalFromSC = toGaslessVotingProposal(
-      await gaslessVotingContract.getProposal(id)
-    );
+    const proposal = await this.getProposal(proposalId);
+    if (!proposal)  return Promise.reject(new InvalidProposalIdError());
     const vochainProposal = await this.vocdoniSDK.fetchElection(
-      proposalFromSC.vochainProposalId
+      proposal.vochainProposalId
     );
     if (!vochainProposal.finalResults) Promise.reject(Error('No results yet'));
 
-    if (proposalFromSC.approvers.length == 0) {
+    if (proposal.approvers.length == 0) {
       return this.setTally(
         proposalId,
         vochainResultsToSCResults(vochainProposal)
