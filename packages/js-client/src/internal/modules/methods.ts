@@ -8,15 +8,16 @@ import {
   ApproveTallyStepValue,
   SubgraphVotingMember,
   GaslessVotingProposalSubgraph,
+  GaslessVotingProposalListItem,
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { GaslessVotingClientCore } from '../core';
-import { QueryPluginMembers, QueryPluginProposal, QueryPluginSettings } from '../graphql-queries';
+import { QueryPluginMembers, QueryPluginProposal, QueryPluginProposals, QueryPluginSettings } from '../graphql-queries';
 import { IGaslessVotingClientMethods } from '../interfaces';
 import {
   initParamsToContract,
   parseSubgraphProposal,
-  toGaslessVotingProposal,
+  toGaslessVotingProposalListItem,
   toNewProposal,
   toTokenVotingMember,
   vochainResultsToSCResults,
@@ -31,6 +32,7 @@ import {
   ProposalCreationStepValue,
   ProposalCreationSteps,
   ProposalQueryParams,
+  ProposalSortBy,
   TokenVotingMember,
 } from '@aragon/sdk-client';
 import {
@@ -257,13 +259,22 @@ export class GaslessVotingClientMethods
     limit = 10,
     status = undefined,
     direction = SortDirection.ASC,
-  }: // sortBy = ProposalSortBy.CREATED_AT,
+    sortBy = ProposalSortBy.CREATED_AT,
+  }:
   ProposalQueryParams & { pluginAddress: string }): Promise<
-    GaslessVotingProposal[]
+  GaslessVotingProposalListItem[]
   > {
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
+
+    let pluginSettings = await this.getVotingSettings(pluginAddress);
+    if (!pluginSettings) return [];
+    let  where : {plugin_: object, dao?: string} = { plugin_: {address:pluginAddress} }
+
+    let token = await this.getToken(pluginAddress)
+    if (!token) return [];
+
 
     let address = daoAddressOrEns;
     if (address) {
@@ -283,25 +294,40 @@ export class GaslessVotingClientMethods
           throw new InvalidAddressOrEnsError(e);
         }
       }
+      where = {...where,  dao: address.toLowerCase() };
     }
-    let id = skip;
-    let proposal = null;
-    let proposals: GaslessVotingProposal[] = [];
-    do {
-      proposal = await this.getProposal(
-        encodeProposalId(pluginAddress, id),
-        daoAddressOrEns || '',
-        address || ''
-      );
-      if (proposal) proposals.push(proposal);
-      id += 1;
-    } while (proposal != null && id < limit);
-    if (direction == SortDirection.DESC) proposals.reverse();
-    if (status) {
-      return proposals.filter((prop) => prop.status == status);
-    }
-    return proposals;
-  }
+
+    const query = QueryPluginProposals;
+    const params = {
+      where,
+      limit,
+      skip,
+      direction,
+      sortBy,
+    };
+
+    const name = "GaslessVoting proposals";
+    type T = { pluginProposals: GaslessVotingProposalSubgraph[] };
+    const { pluginProposals } = await this.graphql.request<T>({
+      query,
+      params,
+      name,
+    });
+
+    await Promise.all(pluginProposals.map(async (proposal)  => {
+      const vochainProposal = await this.vocdoniSDK.fetchElection(proposal.vochainProposalId);
+      proposal.metadata = {
+        title: vochainProposal.title?.default || '',
+        summary: vochainProposal.description?.default || '',
+        description: '',
+        resources: [],
+      }
+    }))
+    if (status)
+      return pluginProposals.map((proposal) => toGaslessVotingProposalListItem(proposal, token, pluginSettings as GaslessPluginVotingSettings)).filter(p => p.status == status)
+
+    return pluginProposals.map((proposal) => toGaslessVotingProposalListItem(proposal, token, pluginSettings as GaslessPluginVotingSettings));
+}
 
   /**
    * Returns the settings of a plugin given the address of the plugin instance

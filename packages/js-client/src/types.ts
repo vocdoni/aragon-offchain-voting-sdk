@@ -1,6 +1,8 @@
 import { IDAO } from '@aragon/osx-ethers';
 import {
   CreateProposalBaseParams,
+  Erc20TokenDetails,
+  Erc721TokenDetails,
   TokenVotingProposalResult,
 } from '@aragon/sdk-client';
 import {
@@ -10,6 +12,7 @@ import {
   ContextParams,
   DaoAction,
   ProposalBase,
+  ProposalListItemBase,
 } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
 import { VocdoniVoting } from '@vocdoni/gasless-voting-ethers';
@@ -169,9 +172,15 @@ export type GaslessVotingProposalSubgraph =   ProposalBase &
   approvers: { id: string }[];
   tallyAprroved: boolean;
   tallySubgraph:  number[];
-  tally?: number[][];
+  tally?: TokenVotingProposalResult;
   actionsSubgraph: SubgraphAction[];
 }
+
+export  type GaslessVotingProposalListItem = ProposalListItemBase & {
+  token: Erc20TokenDetails | Erc721TokenDetails | null;
+  result: TokenVotingProposalResult;
+  settings: GaslessPluginVotingSettings;
+};
 
 
 export type GaslessVotingProposal = Omit<GaslessVotingProposalSubgraph,

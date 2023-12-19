@@ -10,6 +10,7 @@ import {
   SCVoteValues,
   SubgraphVotingMember,
   GaslessVotingProposalSubgraph,
+  GaslessVotingProposalListItem,
 } from '../types';
 import {
   MintTokenParams,
@@ -17,6 +18,8 @@ import {
   VoteValues,
   TokenVotingMember,
   SubgraphAction,
+  Erc20TokenDetails,
+  Erc721TokenDetails,
 } from '@aragon/sdk-client';
 import {
   DaoAction,
@@ -25,6 +28,7 @@ import {
   hexToBytes,
   encodeRatio,
   decodeRatio,
+  ProposalMetadataSummary,
 } from '@aragon/sdk-client-common';
 import { Result } from '@ethersproject/abi';
 import { BigNumber, BigNumberish } from '@ethersproject/bignumber';
@@ -166,7 +170,7 @@ export function toGaslessVotingProposal(
 export function parseSubgraphProposal(proposal: GaslessVotingProposalSubgraph) {
   return {
     ...proposal,
-    tally: [proposal.tallySubgraph?.length ? proposal.tallySubgraph : []],
+    tally: subgraphVoteResultsToProposal(Object.values(proposal.tallySubgraph[0])),
     startDate: dateFromSC(proposal.startDate),
     endDate: dateFromSC(proposal.endDate),
     tallyEndDate: dateFromSC(proposal.tallyEndDate),
@@ -185,6 +189,55 @@ export function parseSubgraphProposal(proposal: GaslessVotingProposalSubgraph) {
     ),
   };
 
+}
+
+export function toGaslessVotingProposalListItem(
+  proposal: GaslessVotingProposalSubgraph,
+  token: Erc20TokenDetails | Erc721TokenDetails | null,
+  settings: GaslessPluginVotingSettings,
+  ): GaslessVotingProposalListItem {
+    proposal = parseSubgraphProposal(proposal);
+    const approved = proposal.approvers.length >= settings.minTallyApprovals;
+    return {
+      id: proposal.id,
+      creatorAddress: proposal.creatorAddress,
+      startDate: proposal.startDate,
+      endDate: proposal.endDate,
+      dao: {
+        address: proposal.dao.address,
+        name: '',
+      },
+      metadata: {
+        title: proposal.metadata.title,
+        summary: proposal.metadata.summary,
+      } as ProposalMetadataSummary,
+      actions: proposal.actions,
+      token,
+      settings,
+      status : computeProposalStatus(
+        proposal.executed,
+        approved,
+        proposal.startDate as Date,
+        proposal.endDate as Date,
+        proposal.tallyEndDate as Date
+      ),
+      result: proposal.tally,
+    } as GaslessVotingProposalListItem;
+}
+
+export function subgraphVoteResultsToProposal(
+  tally?: number[][]
+): TokenVotingProposalResult {
+  let parsedResults = {
+    yes: BigInt(0),
+    no: BigInt(0),
+    abstain: BigInt(0),
+  };
+  if (!tally || !tally.length) return parsedResults as TokenVotingProposalResult;
+  parsedResults.yes = BigInt(tally[0][0]);
+  parsedResults.no = BigInt(tally[0][1]);
+  parsedResults.abstain = BigInt(tally[0][2]);
+  return parsedResults as TokenVotingProposalResult;
 }
 
 export function vochainVoteResultsToProposal(

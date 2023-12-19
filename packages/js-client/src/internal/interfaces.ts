@@ -4,6 +4,7 @@ import {
   PrepareInstallationParams,
   GaslessPluginVotingSettings,
   ApproveTallyStepValue,
+  GaslessVotingProposalListItem,
 } from '../types';
 import {
   MintTokenParams,
@@ -52,9 +53,10 @@ export interface IGaslessVotingClientMethods {
     daoAddress?: string,
   ): Promise<GaslessVotingProposal | null>;
   //
-  getProposals(
-    params: ProposalQueryParams & { pluginAddress: string }
-  ): Promise<GaslessVotingProposal[]>;
+  getProposals(params:
+  ProposalQueryParams & { pluginAddress: string }): Promise<
+  GaslessVotingProposalListItem[]
+  >
   //
   getVotingSettings(
     pluginAddress: string,

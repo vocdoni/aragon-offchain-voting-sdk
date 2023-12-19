@@ -44,7 +44,7 @@ export const QueryPluginProposals = gql`
     $limit: Int!
     $skip: Int!
     $direction: OrderDirection!
-    $sortBy: TPluginProposal_orderBy!
+    $sortBy: PluginProposal_orderBy!
   ) {
     pluginProposals(
       where: $where
@@ -55,12 +55,11 @@ export const QueryPluginProposals = gql`
     ) {
       id
       dao {
-        id
-        proposalsCount
+        address: id
       }
       metadata
-      actions {
-        id
+      actionsSubgraph: actions {
+        to
         value
         data
       }
@@ -68,10 +67,10 @@ export const QueryPluginProposals = gql`
       failureMap
       pluginProposalId
       vochainProposalId
-      creator
+      creatorAddress: creator
       startDate
-      createdAt
-      voteEndDate
+      creationDate:  createdAt
+      endDate: voteEndDate
       tallyEndDate
       creationBlockNumber
       snapshotBlock
@@ -82,8 +81,7 @@ export const QueryPluginProposals = gql`
       approvers {
         id
       }
-      tally {
-        id
+      tallySubgraph: tally {
         values
       }
       tallyApproved
