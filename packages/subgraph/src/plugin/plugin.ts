@@ -183,7 +183,10 @@ export function handleExecutionMultisigMembersAdded(
   if (installationId) {
     let pluginEntity = Plugin.load(installationId.toHexString());
     if (pluginEntity) {
-      let members: string[] = [];
+      let members = pluginEntity.executionMultisigMembers;
+      if (!members) {
+        members = [];
+      }
       for (let i = 0; i < event.params.newMembers.length; i++) {
         members.push(event.params.newMembers[i].toHexString());
       }
