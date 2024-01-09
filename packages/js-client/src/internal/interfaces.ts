@@ -101,6 +101,7 @@ export interface IGaslessVotingClientEstimation {
     results: bigint[][]
   ): Promise<GasFeeEstimation>;
   approve(proposalId: string): Promise<GasFeeEstimation>;
+  approveTally(proposalId: string, tryExecution: boolean): Promise<GasFeeEstimation>;
   executeProposal(proposalId: string): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }

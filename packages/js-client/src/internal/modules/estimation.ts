@@ -145,6 +145,28 @@ export class GaslessVotingClientEstimation
   /**
    * Estimates the gas fee of creating a proposal on the plugin
    *
+   * @param {ApproveParams} params
+   * @return {*}  {Promise<GasFeeEstimation>}
+   * @memberof GaslessVotingClientEstimation
+   */
+  public async approveTally(proposalId: string, tryExecution=false): Promise<GasFeeEstimation> {
+    const signer = this.web3.getConnectedSigner();
+    const { pluginAddress, id } = decodeProposalId(proposalId);
+
+    const gaslessVotingContract = VocdoniVoting__factory.connect(
+      pluginAddress,
+      signer
+    );
+
+
+    const estimatedGasFee = await gaslessVotingContract.estimateGas.approveTally(id, tryExecution);
+
+    return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
+  }
+
+  /**
+   * Estimates the gas fee of creating a proposal on the plugin
+   *
    * @param {ExecuteParams} params
    * @return {*}  {Promise<GasFeeEstimation>}
    * @memberof GaslessVotingClientEstimation
