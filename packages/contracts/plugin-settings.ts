@@ -1,7 +1,7 @@
 import buildMetadata from './src/build-metadata.json';
 import releaseMetadata from './src/release-metadata.json';
 
-export const PLUGIN_REPO_ENS_NAME = 'vocdoni-gasless-voting-poc';
+export const PLUGIN_REPO_ENS_NAME = 'vocdoni-gasless-voting-poc-erc20';
 export const PLUGIN_CONTRACT_NAME = 'VocdoniVoting';
 export const PLUGIN_SETUP_CONTRACT_NAME = 'VocdoniVotingSetup';
 

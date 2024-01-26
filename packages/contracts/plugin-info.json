@@ -1,28 +1,28 @@
 {
   "goerli": {
-    "repo": "vocdoni-gasless-voting-poc",
-    "address": "0x74057f3F3809a874f28E3EbE80A1f1a5a137b64E",
+    "repo": "vocdoni-gasless-voting-poc-erc20",
+    "address": "0x493A8006224a1468d0190e5d48Aa7Ee914185444",
     "args": [],
-    "blockNumberOfDeployment": 10008529,
+    "blockNumberOfDeployment": 10436871,
     "releases": {
       "1": {
         "builds": {
           "1": {
             "setup": {
               "name": "VocdoniVotingSetup",
-              "address": "0xf8454f52f3ecA6c1a9E5Da0119173832F208ab18",
+              "address": "0x23E5565597B86a737173AF71993327Cfb8399653",
               "args": [],
-              "blockNumberOfDeployment": 10008531
+              "blockNumberOfDeployment": 10436872
             },
             "implementation": {
               "name": "VocdoniVoting",
-              "address": "0x46f31156Ff2557EA7C1E592bdB3Ad81CfCCE297c",
+              "address": "0x43205383740B13FD37529875a0Bdb7c6dB4ce863",
               "args": [],
-              "blockNumberOfDeployment": 10008531
+              "blockNumberOfDeployment": 10436872
             },
             "helpers": [],
             "buildMetadataURI": "ipfs://QmSH3MLwaKV4SH4r4RdrqFQUoSjk97H2Z4VjMewXvu7yLT",
-            "blockNumberOfPublication": 10008533
+            "blockNumberOfPublication": 10436873
           }
         },
         "releaseMetadataURI": "ipfs://QmcuUcHeFcQe4LhLyXBkLCxU61Asy6nYi1WRYZ6C4Ui42V"
