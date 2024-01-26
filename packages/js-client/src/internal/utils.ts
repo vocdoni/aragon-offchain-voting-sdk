@@ -175,7 +175,9 @@ export function parseSubgraphProposal(proposal: GaslessVotingProposalSubgraph) {
     endDate: dateFromSC(proposal.endDate),
     tallyEndDate: dateFromSC(proposal.tallyEndDate),
     creationDate: dateFromSC(proposal.creationDate),
-    executionDate: (proposal.executionDate) ? dateFromSC(proposal.executionDate) : null,
+    executionDate: proposal.executionDate
+      ? dateFromSC(proposal.executionDate)
+      : null,
     executionBlockNumber: Number(proposal.executionBlockNumber),
     creationBlockNumber: Number(proposal.creationBlockNumber),
     actions: proposal.actionsSubgraph?.map(
@@ -185,44 +187,60 @@ export function parseSubgraphProposal(proposal: GaslessVotingProposalSubgraph) {
           to: action.to,
           value: BigInt(action.value),
         };
-      },
+      }
     ),
   };
-
 }
 
 export function toGaslessVotingProposalListItem(
-  proposal: GaslessVotingProposalSubgraph,
+  inproposal: GaslessVotingProposalSubgraph & { census: any },
   token: Erc20TokenDetails | Erc721TokenDetails | null,
-  settings: GaslessPluginVotingSettings,
-  ): GaslessVotingProposalListItem {
-    proposal = parseSubgraphProposal(proposal);
-    const approved = proposal.approvers.length >= settings.minTallyApprovals;
-    return {
-      id: proposal.id,
-      creatorAddress: proposal.creatorAddress,
-      startDate: proposal.startDate,
-      endDate: proposal.endDate,
-      dao: {
-        address: proposal.dao.address,
-        name: '',
-      },
-      metadata: {
-        title: proposal.metadata.title,
-        summary: proposal.metadata.summary,
-      } as ProposalMetadataSummary,
-      actions: proposal.actions,
-      token,
-      settings,
-      status : computeProposalStatus(
-        proposal.executed,
-        approved,
-        proposal.startDate as Date,
-        proposal.endDate as Date,
-        proposal.tallyEndDate as Date
-      ),
-      result: proposal.tally,
-    } as GaslessVotingProposalListItem;
+  settings: GaslessPluginVotingSettings
+): GaslessVotingProposalListItem {
+  const proposal = parseSubgraphProposal(
+    inproposal as GaslessVotingProposalSubgraph
+  );
+
+  let result = proposal.tally as TokenVotingProposalResult;
+  const participation = getErc20VotingParticipation(
+    settings.minParticipation,
+    result.abstain + result.no + result.yes,
+    inproposal.census.weight as bigint,
+    (token as Erc20TokenDetails)?.decimals
+  );
+  const hasSucceeded = hasProposalSucceeded(
+    result,
+    settings.supportThreshold,
+    participation.missingPart
+  );
+  const approved = proposal.approvers.length >= settings.minTallyApprovals;
+  return {
+    id: proposal.id,
+    creatorAddress: proposal.creatorAddress,
+    startDate: proposal.startDate,
+    endDate: proposal.endDate,
+    tallyEndDate: proposal.tallyEndDate,
+    dao: {
+      address: proposal.dao.address,
+      name: '',
+    },
+    metadata: {
+      title: proposal.metadata.title,
+      summary: proposal.metadata.summary,
+    } as ProposalMetadataSummary,
+    actions: proposal.actions,
+    token,
+    settings,
+    status: computeProposalStatus(
+      proposal.executed,
+      approved,
+      proposal.startDate as Date,
+      proposal.endDate as Date,
+      proposal.tallyEndDate as Date,
+      hasSucceeded
+    ),
+    result: proposal.tally,
+  } as GaslessVotingProposalListItem;
 }
 
 export function subgraphVoteResultsToProposal(
@@ -233,7 +251,8 @@ export function subgraphVoteResultsToProposal(
     no: BigInt(0),
     abstain: BigInt(0),
   };
-  if (!tally || !tally.length) return parsedResults as TokenVotingProposalResult;
+  if (!tally || !tally.length)
+    return parsedResults as TokenVotingProposalResult;
   let parsedTally = Object.values(tally[0]);
   parsedResults.yes = BigInt(parsedTally[0][0]);
   parsedResults.no = BigInt(parsedTally[0][1]);
@@ -257,7 +276,7 @@ export function vochainVoteResultsToProposal(
 export function hasProposalSucceeded(
   results: TokenVotingProposalResult,
   supportThreshold: number | undefined,
-  missingParticipation: number | undefined,
+  missingParticipation: number | undefined
 ): boolean {
   if (
     missingParticipation === undefined ||
@@ -279,13 +298,9 @@ export function hasProposalSucceeded(
     // participation reached
     missingParticipation === 0 &&
     // support threshold met even if absentees show up and all vote against, still cannot change outcome
-    Big(1-supportThreshold)
-    .mul(
-      Big(results.yes.toString()))
-    .gte(
-      Big(supportThreshold)
-      .mul(results.no.toString())
-    )
+    Big(1 - supportThreshold)
+      .mul(Big(results.yes.toString()))
+      .gte(Big(supportThreshold).mul(results.no.toString()))
   );
 }
 
@@ -294,7 +309,8 @@ export function computeProposalStatus(
   approved: boolean,
   startDate: Date,
   endDate: Date,
-  tallyEndDate: Date
+  tallyEndDate: Date,
+  hasSucceeded: boolean
 ): ProposalStatus {
   const now = new Date();
   if (startDate >= now) {
@@ -303,18 +319,21 @@ export function computeProposalStatus(
   if (executed) {
     return ProposalStatus.EXECUTED;
   }
-  if (tallyEndDate >= now) {
-    if (approved) return ProposalStatus.SUCCEEDED;
-    return ProposalStatus.ACTIVE;
-  }
+
   if (endDate >= now) {
     return ProposalStatus.ACTIVE;
   }
+
+  if (tallyEndDate >= now && hasSucceeded) {
+    if (approved) return ProposalStatus.SUCCEEDED;
+    return ProposalStatus.ACTIVE;
+  }
+
   return ProposalStatus.DEFEATED;
 }
 
-export function dateFromSC(date: any): Date  {
-  return new Date(Number(date)*1000);
+export function dateFromSC(date: any): Date {
+  return new Date(Number(date) * 1000);
 }
 
 export function toNewProposal(
@@ -341,7 +360,7 @@ export function toNewProposal(
   const hasSucceeded = hasProposalSucceeded(
     result,
     settings.supportThreshold,
-    participation.missingPart,
+    participation.missingPart
   );
   // const startDate = SCProposal.parameters.startDate as Date;
   // const endDate = new Date(SCProposal.parameters.endDate);
@@ -373,7 +392,8 @@ export function toNewProposal(
       approved,
       proposal.startDate as Date,
       proposal.endDate as Date,
-      proposal.tallyEndDate as Date
+      proposal.tallyEndDate as Date,
+      hasSucceeded
     ),
     parameters: {
       securityBlock: proposal.creationBlockNumber,
@@ -401,7 +421,7 @@ export function toNewProposal(
       missingParticipation: participation.missingPart,
     },
     voters,
-    approvers: proposal.approvers.map(x => x.id.split('_')[1]),
+    approvers: proposal.approvers.map((x) => x.id.split('_')[1]),
     canBeApproved: hasSucceeded,
   } as GaslessVotingProposal;
 }
