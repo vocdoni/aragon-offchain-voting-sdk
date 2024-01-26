@@ -1,12 +1,24 @@
 // import { MetadataAbiInput } from './types';
-import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
-import { MetadataAbiInput, SupportedNetwork } from '@aragon/sdk-client-common';
+import {
+  IERC20MintableUpgradeable__factory,
+  IGovernanceWrappedERC20__factory,
+} from '@aragon/osx-ethers';
+import {
+  MetadataAbiInput,
+  SupportedNetwork,
+  getInterfaceId,
+} from '@aragon/sdk-client-common';
+import { Interface } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
+import { abi as IVOTES_UPGRADEABLE_ABI } from '@openzeppelin/contracts-upgradeable/build/contracts/IVotesUpgradeable.json';
+import { abi as ERC165_ABI } from '@openzeppelin/contracts/build/contracts/ERC165.json';
+import { abi as IVOTES_ABI } from '@openzeppelin/contracts/build/contracts/IVotes.json';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 
 export const DEFAULT_GASLESS_VOTING_REPO_ADDRESS =
   '0x0000000000000000000000000000000000000000';
-export const DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL = 'https://api.studio.thegraph.com/query/56700/gasless-voting/version/latest'
+export const DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL =
+  'https://api.studio.thegraph.com/query/56700/gasless-voting/version/latest';
 export const DEFAULT_ADDRESSES: {
   [K in SupportedNetwork]: { repoAddress: string; setupAddress: string };
 } = {
@@ -49,7 +61,7 @@ export const DEFAULT_ADDRESSES: {
   arbitrumGoerli: {
     setupAddress: '',
     repoAddress: '',
-  }
+  },
 };
 
 export const DEFAULT_GASLESS_VOTING_BACKEND_URL =
@@ -162,3 +174,11 @@ export const INSTALLATION_ABI: MetadataAbiInput[] = [
 ];
 
 export const MAX_UINT64 = BigNumber.from(2).pow(64).sub(1);
+
+export const ERC165_INTERFACE_ID = getInterfaceId(new Interface(ERC165_ABI));
+
+export const GOVERNANCE_SUPPORTED_INTERFACE_IDS = [
+  getInterfaceId(new Interface(IVOTES_UPGRADEABLE_ABI)),
+  getInterfaceId(new Interface(IVOTES_ABI)),
+  getInterfaceId(IGovernanceWrappedERC20__factory.createInterface()),
+];

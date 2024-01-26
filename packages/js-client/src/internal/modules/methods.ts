@@ -12,7 +12,12 @@ import {
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { GaslessVotingClientCore } from '../core';
-import { QueryPluginMembers, QueryPluginProposal, QueryPluginProposals, QueryPluginSettings } from '../graphql-queries';
+import {
+  QueryPluginMembers,
+  QueryPluginProposal,
+  QueryPluginProposals,
+  QueryPluginSettings,
+} from '../graphql-queries';
 import { IGaslessVotingClientMethods } from '../interfaces';
 import {
   initParamsToContract,
@@ -59,15 +64,21 @@ import {
   decodeRatio,
 } from '@aragon/sdk-client-common';
 import { isAddress } from '@ethersproject/address';
+import { getNetwork } from '@ethersproject/providers';
 // import { Wallet } from '@ethersproject/wallet';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 import { ErrElectionNotFound, ElectionAPI } from '@vocdoni/sdk';
-import { getNetwork } from '@ethersproject/providers';
 
 // import axios from 'axios';
 
 // import { providers } from 'ethers';
 
+/**
+ * GaslessVotingClientMethods class represents a collection of methods for interacting with the Gasless Voting client.
+ */
+/**
+ * GaslessVotingClientMethods class represents a collection of methods for interacting with the Gasless Voting client.
+ */
 export class GaslessVotingClientMethods
   extends GaslessVotingClientCore
   implements IGaslessVotingClientMethods
@@ -200,7 +211,7 @@ export class GaslessVotingClientMethods
 
       const query = QueryPluginProposal;
       const params = {
-        proposalId: proposalId
+        proposalId: proposalId,
       };
       const name = 'GaslessVoting Proposal';
       type T = { pluginProposal: GaslessVotingProposalSubgraph };
@@ -214,7 +225,7 @@ export class GaslessVotingClientMethods
       if (!pluginProposal?.vochainProposalId.length) return null;
 
       // pluginProposal;
-      pluginProposal = parseSubgraphProposal(pluginProposal)
+      pluginProposal = parseSubgraphProposal(pluginProposal);
 
       const vochainProposal = await this.vocdoniSDK.fetchElection(
         pluginProposal.vochainProposalId
@@ -260,9 +271,8 @@ export class GaslessVotingClientMethods
     status = undefined,
     direction = SortDirection.ASC,
     sortBy = ProposalSortBy.CREATED_AT,
-  }:
-  ProposalQueryParams & { pluginAddress: string }): Promise<
-  GaslessVotingProposalListItem[]
+  }: ProposalQueryParams & { pluginAddress: string }): Promise<
+    GaslessVotingProposalListItem[]
   > {
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
@@ -270,11 +280,12 @@ export class GaslessVotingClientMethods
 
     let pluginSettings = await this.getVotingSettings(pluginAddress);
     if (!pluginSettings) return [];
-    let  where : {plugin_: object, dao?: string} = { plugin_: {address:pluginAddress} }
+    let where: { plugin_: object; dao?: string } = {
+      plugin_: { address: pluginAddress },
+    };
 
-    let token = await this.getToken(pluginAddress)
+    let token = await this.getToken(pluginAddress);
     if (!token) return [];
-
 
     let address = daoAddressOrEns;
     if (address) {
@@ -294,7 +305,7 @@ export class GaslessVotingClientMethods
           throw new InvalidAddressOrEnsError(e);
         }
       }
-      where = {...where,  dao: address.toLowerCase() };
+      where = { ...where, dao: address.toLowerCase() };
     }
 
     const query = QueryPluginProposals;
@@ -306,28 +317,50 @@ export class GaslessVotingClientMethods
       sortBy,
     };
 
-    const name = "GaslessVoting proposals";
-    type T = { pluginProposals: GaslessVotingProposalSubgraph[] };
+    const name = 'GaslessVoting proposals';
+    type T = {
+      pluginProposals: Array<GaslessVotingProposalSubgraph & { census: any }>;
+    };
     const { pluginProposals } = await this.graphql.request<T>({
       query,
       params,
       name,
     });
 
-    await Promise.all(pluginProposals.map(async (proposal)  => {
-      const vochainProposal = await this.vocdoniSDK.fetchElection(proposal.vochainProposalId);
-      proposal.metadata = {
-        title: vochainProposal.title?.default || '',
-        summary: vochainProposal.description?.default || '',
-        description: '',
-        resources: [],
-      }
-    }))
+    await Promise.all(
+      pluginProposals.map(async (proposal) => {
+        const vochainProposal = await this.vocdoniSDK.fetchElection(
+          proposal.vochainProposalId
+        );
+        proposal.metadata = {
+          title: vochainProposal.title?.default || '',
+          summary: vochainProposal.description?.default || '',
+          description: '',
+          resources: [],
+        };
+        vochainProposal.census;
+        proposal.census = vochainProposal.census;
+      })
+    );
     if (status)
-      return pluginProposals.map((proposal) => toGaslessVotingProposalListItem(proposal, token, pluginSettings as GaslessPluginVotingSettings)).filter(p => p.status == status)
+      return pluginProposals
+        .map((proposal) =>
+          toGaslessVotingProposalListItem(
+            proposal,
+            token,
+            pluginSettings as GaslessPluginVotingSettings
+          )
+        )
+        .filter((p) => p.status == status);
 
-    return pluginProposals.map((proposal) => toGaslessVotingProposalListItem(proposal, token, pluginSettings as GaslessPluginVotingSettings));
-}
+    return pluginProposals.map((proposal) =>
+      toGaslessVotingProposalListItem(
+        proposal,
+        token,
+        pluginSettings as GaslessPluginVotingSettings
+      )
+    );
+  }
 
   /**
    * Returns the settings of a plugin given the address of the plugin instance
@@ -447,7 +480,7 @@ export class GaslessVotingClientMethods
     if (!isAddress(pluginAddress)) {
       return Promise.reject(new InvalidAddressError());
     }
-    if (isNaN(id))return Promise.reject(new InvalidProposalIdError());
+    if (isNaN(id)) return Promise.reject(new InvalidProposalIdError());
 
     let isMultisigMember = await this.isMultisigMember(
       pluginAddress,
@@ -455,10 +488,10 @@ export class GaslessVotingClientMethods
     );
     if (!isMultisigMember) Promise.reject(new Error('Not a multisig member'));
 
-
     const proposal = await this.getProposal(proposalId);
-    if (!proposal)  return Promise.reject(new InvalidProposalIdError());
-    if (!proposal.vochain?.tally?.final) Promise.reject(Error('No results yet'));
+    if (!proposal) return Promise.reject(new InvalidProposalIdError());
+    if (!proposal.vochain?.tally?.final)
+      Promise.reject(Error('No results yet'));
 
     if (proposal.approvers.length == 0) {
       return this.setTally(
@@ -600,7 +633,11 @@ export class GaslessVotingClientMethods
     }
 
     const settings = await this.getVotingSettings(pluginAddress);
-    return settings?.executionMultisigMembers?.indexOf(memberAddress.toLocaleLowerCase()) !== -1
+    return (
+      settings?.executionMultisigMembers?.indexOf(
+        memberAddress.toLocaleLowerCase()
+      ) !== -1
+    );
   }
 
   /**
@@ -623,7 +660,7 @@ export class GaslessVotingClientMethods
   //   return tokenVotingContract.canExecute(id);
   // }
 
-    /**
+  /**
    * Checks if an user can vote in a proposal
    *
    * @param {CanVoteParams} params
@@ -665,4 +702,79 @@ export class GaslessVotingClientMethods
       throw new IpfsPinError(e);
     }
   }
+
+  // /**
+  //  * This Validation function prevents sending broken
+  //  * addresses that may cause subgraph crash
+  //  *
+  //  * @param address Wallet Address
+  //  * @returns boolean determines whether it is erc20 compatible or not
+  //  */
+  // public async isERC20Token(tokenAddress: string): Promise<boolean> {
+  //   const signer = this.web3.getConnectedSigner();
+  //   const contract = new Contract(tokenAddress, ERC20_ABI, signer);
+  //   try {
+  //     await Promise.all([
+  //       contract.balanceOf(tokenAddress),
+  //       contract.totalSupply(),
+  //     ]);
+  //     return true;
+  //   } catch (err) {
+  //     return false;
+  //   }
+  // }
+
+  // /**
+  //  * Checks if a given ERC20 token, owned by the caller, is mintable.
+  //  * @param tokenAddress The address of the ERC20 token.
+  //  * @returns A promise that resolves to a boolean indicating whether the token is both owned by the callee and mintable.
+  //  */
+  // public async isOwnedERC20Mintable(tokenAddress: string): Promise<boolean> {
+  //   const signer = this.web3.getConnectedSigner();
+  //   const contract = new Contract(tokenAddress, ERC20_ABI, signer);
+  //   return contract.estimateGas
+  //     .mint(tokenAddress, 1)
+  //     .then(() => true)
+  //     .catch(() => false);
+  // }
+
+  /**
+   * Checks if the given token is compatible with the TokenVoting plugin
+   *
+   * @param {string} tokenAddress
+   * @return {*}  {Promise<TokenVotingTokenCompatibility>}
+   * @memberof TokenVotingClientMethods
+   */
+  // public async isTokenVotingCompatibleToken(
+  //   tokenAddress: string
+  // ): Promise<TokenVotingTokenCompatibility> {
+  //   // check if is address
+  //   if (!isAddress(tokenAddress) || tokenAddress === AddressZero) {
+  //     throw new InvalidAddressError();
+  //   }
+  //   const provider = this.web3.getProvider();
+  //   // check if is a contract
+  //   if ((await provider.getCode(tokenAddress)) === '0x') {
+  //     throw new NotAContractError();
+  //   }
+  //   const contract = new Contract(tokenAddress, ERC165_ABI, provider);
+
+  //   if (!(await this.isERC20Token(tokenAddress))) {
+  //     return TokenVotingTokenCompatibility.INCOMPATIBLE;
+  //   }
+  //   try {
+  //     if (!(await contract.supportsInterface(ERC165_INTERFACE_ID))) {
+  //       return TokenVotingTokenCompatibility.NEEDS_WRAPPING;
+  //     }
+  //     for (const interfaceId of GOVERNANCE_SUPPORTED_INTERFACE_IDS) {
+  //       const isSupported = await contract.supportsInterface(interfaceId);
+  //       if (isSupported) {
+  //         return TokenVotingTokenCompatibility.COMPATIBLE;
+  //       }
+  //     }
+  //     return TokenVotingTokenCompatibility.NEEDS_WRAPPING;
+  //   } catch (e) {
+  //     return TokenVotingTokenCompatibility.NEEDS_WRAPPING;
+  //   }
+  // }
 }

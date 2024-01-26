@@ -119,8 +119,8 @@ export type GaslessPluginVotingSettings = {
   executionMultisigMembers?: string[];
   proposalCount?: number;
   dao?: {
-    id: string
-    proposalsCount: number
+    id: string;
+    proposalsCount: number;
   };
 };
 
@@ -160,8 +160,7 @@ export type SubgraphAction = {
   data: string;
 };
 
-export type GaslessVotingProposalSubgraph =   ProposalBase &
-{
+export type GaslessVotingProposalSubgraph = ProposalBase & {
   dao: {
     address: string;
   };
@@ -171,21 +170,26 @@ export type GaslessVotingProposalSubgraph =   ProposalBase &
   executed: boolean;
   approvers: { id: string }[];
   tallyAprroved: boolean;
-  tallySubgraph:  number[];
+  tallySubgraph: number[];
   tally?: TokenVotingProposalResult;
   actionsSubgraph: SubgraphAction[];
-}
+};
 
-export  type GaslessVotingProposalListItem = ProposalListItemBase & {
+export type GaslessVotingProposalListItem = ProposalListItemBase & {
   token: Erc20TokenDetails | Erc721TokenDetails | null;
   result: TokenVotingProposalResult;
   settings: GaslessPluginVotingSettings;
 };
 
-
-export type GaslessVotingProposal = Omit<GaslessVotingProposalSubgraph,
-"tallyEndDate" | "endDate" | "startDate" | "creationDate" | "executionDate" | "approvers" >
-& {
+export type GaslessVotingProposal = Omit<
+  GaslessVotingProposalSubgraph,
+  | 'tallyEndDate'
+  | 'endDate'
+  | 'startDate'
+  | 'creationDate'
+  | 'executionDate'
+  | 'approvers'
+> & {
   tallyEndDate: Date;
   endDate: Date;
   startDate: Date;
@@ -341,4 +345,10 @@ export enum SCVoteValues {
   yes = 0,
   no = 1,
   abstain = 2,
+}
+
+export enum TokenVotingTokenCompatibility {
+  COMPATIBLE = 'compatible',
+  NEEDS_WRAPPING = 'needsWrapping',
+  INCOMPATIBLE = 'incompatible',
 }
