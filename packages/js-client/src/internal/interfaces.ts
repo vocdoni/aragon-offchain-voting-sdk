@@ -50,13 +50,12 @@ export interface IGaslessVotingClientMethods {
   getProposal(
     proposalId: string,
     daoName?: string,
-    daoAddress?: string,
+    daoAddress?: string
   ): Promise<GaslessVotingProposal | null>;
   //
-  getProposals(params:
-  ProposalQueryParams & { pluginAddress: string }): Promise<
-  GaslessVotingProposalListItem[]
-  >
+  getProposals(
+    params: ProposalQueryParams & { pluginAddress: string }
+  ): Promise<GaslessVotingProposalListItem[]>;
   //
   getVotingSettings(
     pluginAddress: string,
@@ -72,9 +71,7 @@ export interface IGaslessVotingClientMethods {
     pluginAddress: string,
     memberAddress: string
   ): Promise<boolean>;
-  approve(
-    proposalId: string,
-  ): Promise<AsyncGenerator<ApproveTallyStepValue>>;
+  approve(proposalId: string): Promise<AsyncGenerator<ApproveTallyStepValue>>;
   setTally(
     proposalId: string,
     results: bigint[][]
@@ -83,9 +80,11 @@ export interface IGaslessVotingClientMethods {
     proposalId: string,
     tryExecutio: boolean
   ): AsyncGenerator<ApproveTallyStepValue>;
-  executeProposal(
-    proposalId: string
-  ): AsyncGenerator<ExecuteProposalStepValue>;
+  executeProposal(proposalId: string): AsyncGenerator<ExecuteProposalStepValue>;
+  getDelegatee(
+    memberAddress: string,
+    blockNumber?: number
+  ): Promise<string | null>;
   pinMetadata(params: ProposalMetadata): Promise<string>;
 }
 export interface IGaslessVotingClientEstimation {
@@ -96,12 +95,12 @@ export interface IGaslessVotingClientEstimation {
   createProposal(
     params: CreateGasslessProposalParams
   ): Promise<GasFeeEstimation>;
-  setTally(
-    proposalId: string,
-    results: bigint[][]
-  ): Promise<GasFeeEstimation>;
+  setTally(proposalId: string, results: bigint[][]): Promise<GasFeeEstimation>;
   approve(proposalId: string): Promise<GasFeeEstimation>;
-  approveTally(proposalId: string, tryExecution: boolean): Promise<GasFeeEstimation>;
+  approveTally(
+    proposalId: string,
+    tryExecution: boolean
+  ): Promise<GasFeeEstimation>;
   executeProposal(proposalId: string): Promise<GasFeeEstimation>;
   // Add any estimation methods that you need
 }
@@ -116,19 +115,15 @@ export interface IGaslessVotingClientEncoding {
     pluginAddress: string,
     params: GaslessPluginVotingSettings
   ): DaoAction;
-  addAddressesAction(
-    params: AddAddressesParams,
-  ): DaoAction;
-  removeAddressesAction(
-    params: RemoveAddressesParams,
-  ): DaoAction;
+  addAddressesAction(params: AddAddressesParams): DaoAction;
+  removeAddressesAction(params: RemoveAddressesParams): DaoAction;
 }
 export interface IGaslessVotingClientDecoding {
   // Fill with methods that encode actions that can be passed to a proposal
   // encodeAction(data: Uint8Array): params;
   findInterface(data: Uint8Array): InterfaceParams | null;
   addAddressesAction(data: Uint8Array): string[];
-  removeAddressesAction(data: Uint8Array): string[]
+  removeAddressesAction(data: Uint8Array): string[];
   updatePluginSettingsAction(data: Uint8Array): GaslessPluginVotingSettings;
   mintTokenAction(data: Uint8Array): MintTokenParams;
 }

@@ -18,6 +18,7 @@ import {
   QueryPluginProposals,
   QueryPluginSettings,
 } from '../graphql-queries';
+import { QueryMemberInfo } from '../graphql-queries/member';
 import { IGaslessVotingClientMethods } from '../interfaces';
 import {
   initParamsToContract,
@@ -638,6 +639,36 @@ export class GaslessVotingClientMethods
         memberAddress.toLocaleLowerCase()
       ) !== -1
     );
+  }
+
+  /**
+   * Retrieves the delegatee address for a given member address.
+   * @param {string} memberAddress - The address of the member.
+   * @param {number} blockNumber - Optional block number to query the delegatee at a specific block.
+   * @returns A Promise that resolves to the delegatee address or null if not found.
+   */
+  public async getDelegatee(
+    memberAddress: string,
+    blockNumber?: number
+  ): Promise<string | null> {
+    if (!isAddress(memberAddress)) {
+      Promise.reject(new InvalidAddressError());
+    }
+    const query = QueryMemberInfo;
+    const params = {
+      address: memberAddress.toLowerCase(),
+      block: blockNumber ? { number: blockNumber } : null,
+    };
+    const name = 'GaslessVoting members';
+    type T = { pluginMembers: SubgraphVotingMember[] };
+    const { pluginMembers } = await this.graphql.request<T>({
+      query,
+      params,
+      name,
+    });
+    if (pluginMembers.length == 0) return null;
+    if (pluginMembers[0].delegatee) return pluginMembers[0].delegatee.address;
+    return null;
   }
 
   /**
