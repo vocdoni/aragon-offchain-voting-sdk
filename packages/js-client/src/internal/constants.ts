@@ -27,8 +27,8 @@ export const DEFAULT_ADDRESSES: {
     repoAddress: '',
   },
   goerli: {
-    setupAddress: '0xf8454f52f3ecA6c1a9E5Da0119173832F208ab18',
-    repoAddress: '0x74057f3F3809a874f28E3EbE80A1f1a5a137b64E',
+    setupAddress: '0x6847B82F943D7a761F12878b93a25868408D6cc3',
+    repoAddress: '0x98C60A356f03244f9C33C9cA224d960cD45FD2C1',
   },
   matic: {
     setupAddress: '',

@@ -15,7 +15,6 @@ import {
   ProposalListItemBase,
 } from '@aragon/sdk-client-common';
 import { BigNumber } from '@ethersproject/bignumber';
-import { VocdoniVoting } from '@vocdoni/gasless-voting-ethers';
 import { PublishedElection } from '@vocdoni/sdk';
 
 // extend the ContextParams interface with the params that you need
@@ -114,6 +113,7 @@ export type GaslessPluginVotingSettings = {
   minProposerVotingPower: bigint;
   censusStrategy: string;
   daoTokenAddress?: string; // calculated during the DAO installation
+  hasGovernanceEnabled?: boolean;
   onlyExecutionMultisigProposalCreation?: boolean;
   id?: string;
   executionMultisigMembers?: string[];
@@ -132,6 +132,24 @@ export type GaslessProposalParametersStruct = {
   totalVotingPower: bigint; // the total census voting power provided by the weight of the census in census3
   censusURI: string; // the URI of the census as provided by census3
   censusRoot: string; // the hex census root as provided by census3
+};
+
+export type ProposalParametersStructOutput = [
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  BigNumber,
+  string,
+  string
+] & {
+  securityBlock: BigNumber;
+  startDate: BigNumber;
+  voteEndDate: BigNumber;
+  tallyEndDate: BigNumber;
+  totalVotingPower: BigNumber;
+  censusURI: string;
+  censusRoot: string;
 };
 
 export type GaslessProposalParametersContractStruct = {
@@ -301,7 +319,7 @@ export type ProposalFromSC = {
   executed: boolean;
   approvers: string[];
   vochainProposalId: string;
-  parameters: VocdoniVoting.ProposalParametersStructOutput;
+  parameters: ProposalParametersStructOutput;
   allowFailureMap: BigNumber;
   tally: BigNumber[][];
   actions: IDAO.ActionStructOutput[];

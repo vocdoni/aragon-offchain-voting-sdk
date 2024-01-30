@@ -11,6 +11,7 @@ import {
   SubgraphVotingMember,
   GaslessVotingProposalSubgraph,
   GaslessVotingProposalListItem,
+  ProposalParametersStructOutput,
 } from '../types';
 import {
   MintTokenParams,
@@ -108,7 +109,7 @@ export function votingSettingsfromContract(
 }
 
 export function proposalParamsfromContract(
-  params: VocdoniVoting.ProposalParametersStructOutput
+  params: ProposalParametersStructOutput
 ): GaslessProposalParametersStruct {
   return {
     securityBlock: params.securityBlock.toNumber(),
