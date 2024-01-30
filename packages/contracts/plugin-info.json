@@ -1,28 +1,45 @@
 {
   "goerli": {
-    "repo": "vocdoni-gasless-voting-poc-erc20",
-    "address": "0x493A8006224a1468d0190e5d48Aa7Ee914185444",
+    "repo": "vocdoni-gasless-voting-poc-vanilla-erc20",
+    "address": "0x98C60A356f03244f9C33C9cA224d960cD45FD2C1",
     "args": [],
-    "blockNumberOfDeployment": 10436871,
+    "blockNumberOfDeployment": 10451417,
     "releases": {
       "1": {
         "builds": {
           "1": {
             "setup": {
               "name": "VocdoniVotingSetup",
-              "address": "0x23E5565597B86a737173AF71993327Cfb8399653",
+              "address": "0x4EeFE283C193AA561E0C3B4977171305C2C2Dd01",
               "args": [],
-              "blockNumberOfDeployment": 10436872
+              "blockNumberOfDeployment": 10451418
             },
             "implementation": {
               "name": "VocdoniVoting",
-              "address": "0x43205383740B13FD37529875a0Bdb7c6dB4ce863",
+              "address": "0x3193b4C1E3dBE4b650ACB493476D2A3894133649",
               "args": [],
-              "blockNumberOfDeployment": 10436872
+              "blockNumberOfDeployment": 10451418
             },
             "helpers": [],
             "buildMetadataURI": "ipfs://QmSH3MLwaKV4SH4r4RdrqFQUoSjk97H2Z4VjMewXvu7yLT",
-            "blockNumberOfPublication": 10436873
+            "blockNumberOfPublication": 10451419
+          },
+          "2": {
+            "setup": {
+              "name": "VocdoniVotingSetup",
+              "address": "0x6847B82F943D7a761F12878b93a25868408D6cc3",
+              "args": [],
+              "blockNumberOfDeployment": 10452517
+            },
+            "implementation": {
+              "name": "VocdoniVoting",
+              "address": "0x39f85f184611A9A1D8e6bE042e4Fa9eE984F230b",
+              "args": [],
+              "blockNumberOfDeployment": 10452517
+            },
+            "helpers": [],
+            "buildMetadataURI": "ipfs://QmSH3MLwaKV4SH4r4RdrqFQUoSjk97H2Z4VjMewXvu7yLT",
+            "blockNumberOfPublication": 10452518
           }
         },
         "releaseMetadataURI": "ipfs://QmcuUcHeFcQe4LhLyXBkLCxU61Asy6nYi1WRYZ6C4Ui42V"

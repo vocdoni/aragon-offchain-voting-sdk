@@ -1,7 +1,7 @@
 {
   "name": "@vocdoni/gasless-voting-ethers",
   "author": "Vocdoni Association",
-  "version": "0.0.1-rc1",
+  "version": "0.0.1-rc2-3",
   "description": "Aragon DAO Gasless Voting Plugin contract definitions for ethers.js",
   "main": "dist/bundle-cjs.js",
   "module": "dist/bundle-esm.js",
@@ -9,6 +9,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist",
+    "types"
+  ],
   "keywords": [
     "voting",
     "blockchain",
