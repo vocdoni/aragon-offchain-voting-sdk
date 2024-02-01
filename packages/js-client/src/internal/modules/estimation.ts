@@ -110,7 +110,10 @@ export class GaslessVotingClientEstimation
    * @return {*}  {Promise<GasFeeEstimation>}
    * @memberof GaslessVotingClientEstimation
    */
-  public async approve(proposalId: string): Promise<GasFeeEstimation> {
+  public async approve(
+    proposalId: string,
+    tryExecution = false
+  ): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
     const { pluginAddress, id } = decodeProposalId(proposalId);
 
@@ -135,7 +138,7 @@ export class GaslessVotingClientEstimation
     } else {
       estimatedGasFee = await gaslessVotingContract.estimateGas.approveTally(
         id,
-        false
+        tryExecution
       );
     }
 
@@ -149,7 +152,10 @@ export class GaslessVotingClientEstimation
    * @return {*}  {Promise<GasFeeEstimation>}
    * @memberof GaslessVotingClientEstimation
    */
-  public async approveTally(proposalId: string, tryExecution=false): Promise<GasFeeEstimation> {
+  public async approveTally(
+    proposalId: string,
+    tryExecution = false
+  ): Promise<GasFeeEstimation> {
     const signer = this.web3.getConnectedSigner();
     const { pluginAddress, id } = decodeProposalId(proposalId);
 
@@ -158,8 +164,8 @@ export class GaslessVotingClientEstimation
       signer
     );
 
-
-    const estimatedGasFee = await gaslessVotingContract.estimateGas.approveTally(id, tryExecution);
+    const estimatedGasFee =
+      await gaslessVotingContract.estimateGas.approveTally(id, tryExecution);
 
     return this.web3.getApproximateGasFee(estimatedGasFee.toBigInt());
   }

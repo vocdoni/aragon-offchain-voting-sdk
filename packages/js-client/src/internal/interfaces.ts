@@ -17,6 +17,7 @@ import {
   ProposalQueryParams,
   AddAddressesParams,
   RemoveAddressesParams,
+  ProposalSortBy,
 } from '@aragon/sdk-client';
 import {
   GasFeeEstimation,
@@ -24,6 +25,7 @@ import {
   DaoAction,
   InterfaceParams,
   ProposalMetadata,
+  SortDirection,
 } from '@aragon/sdk-client-common';
 
 export interface IGaslessVotingClient {
@@ -71,7 +73,10 @@ export interface IGaslessVotingClientMethods {
     pluginAddress: string,
     memberAddress: string
   ): Promise<boolean>;
-  approve(proposalId: string): Promise<AsyncGenerator<ApproveTallyStepValue>>;
+  approve(
+    proposalId: string,
+    tryExecution: boolean
+  ): Promise<AsyncGenerator<ApproveTallyStepValue>>;
   setTally(
     proposalId: string,
     results: bigint[][]
@@ -81,10 +86,14 @@ export interface IGaslessVotingClientMethods {
     tryExecutio: boolean
   ): AsyncGenerator<ApproveTallyStepValue>;
   executeProposal(proposalId: string): AsyncGenerator<ExecuteProposalStepValue>;
-  getDelegatee(
-    memberAddress: string,
-    blockNumber?: number
-  ): Promise<string | null>;
+  getDelegatee(tokenAddress: string): Promise<string | null>;
+  getMemberProposals(
+    pluginAddress: string,
+    creatorAddress: string,
+    blockNumber: number,
+    direction: SortDirection,
+    sortBy: ProposalSortBy
+  ): Promise<string[]>;
   pinMetadata(params: ProposalMetadata): Promise<string>;
 }
 export interface IGaslessVotingClientEstimation {
@@ -96,7 +105,7 @@ export interface IGaslessVotingClientEstimation {
     params: CreateGasslessProposalParams
   ): Promise<GasFeeEstimation>;
   setTally(proposalId: string, results: bigint[][]): Promise<GasFeeEstimation>;
-  approve(proposalId: string): Promise<GasFeeEstimation>;
+  approve(proposalId: string, tryExecution: boolean): Promise<GasFeeEstimation>;
   approveTally(
     proposalId: string,
     tryExecution: boolean
