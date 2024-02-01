@@ -1,7 +1,7 @@
 {
   "name": "@vocdoni/gasless-voting",
   "author": "Vocdoni Association",
-  "version": "0.0.1-rc17",
+  "version": "0.0.1-rc21",
   "description": "Aragon DAO Gasless Voting Plugin SDK",
   "license": "AGPL-3.0-or-later",
   "main": "dist/index.js",
@@ -86,14 +86,15 @@
     "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/wallet": "^5.7.0",
-    "graphql": "^16.6.0",
-    "graphql-request": "4.3.0",
-    "@vocdoni/gasless-voting-ethers": "0.0.1-rc1",
+    "@types/big.js": "^6.1.5",
+    "@vocdoni/gasless-voting-ethers": "0.0.1-rc2",
     "@vocdoni/sdk": "0.7.1",
     "axios": "0.27.2",
-    "@types/big.js": "^6.1.5"
+    "graphql": "^16.6.0",
+    "graphql-request": "4.3.0"
   },
   "jest": {
+    "preset": "ts-jest",
     "testEnvironment": "./test-environment.js",
     "testTimeout": 120000
   }
