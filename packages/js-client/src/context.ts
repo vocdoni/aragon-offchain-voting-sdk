@@ -1,10 +1,15 @@
-import { DEFAULT_GASLESS_VOTING_BACKEND_URL, DEFAULT_GASLESS_VOTING_REPO_ADDRESS, DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL } from "./internal";
 import {
-  GaslessVotingContextState as GaslessVotingContextState,
-  GaslessVotingOverriddenState as GaslessVotingOverriddenState,
-} from "./types";
-import { GaslessVotingContextParams } from "./types";
-import { Context, ContextCore } from "@aragon/sdk-client-common";
+  DEFAULT_GASLESS_VOTING_BACKEND_URL,
+  DEFAULT_GASLESS_VOTING_REPO_ADDRESS,
+  DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL,
+} from './internal';
+import {
+  GaslessVotingContextState,
+  GaslessVotingOverriddenState,
+} from './types';
+import { GaslessVotingContextParams } from './types';
+import { Context, ContextCore } from '@aragon/sdk-client-common';
+
 export class GaslessVotingContext extends ContextCore {
   // This variable keeps track of the state of the context and is an extension of the Base Context State
   protected state: GaslessVotingContextState = this.state;
@@ -12,21 +17,26 @@ export class GaslessVotingContext extends ContextCore {
   protected overriden: GaslessVotingOverriddenState = this.overriden;
   constructor(
     contextParams?: Partial<GaslessVotingContextParams>,
-    aragonContext?: Context,
+    aragonContext?: Context
   ) {
     // call the parent constructor to be able to have access to this
     // and set the default values
     super();
     // if the user alredy provides an aragon context that we can use
     if (aragonContext) {
-      aragonContext.set({graphqlNodes: [{"url":DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL}]})
+      const context = Object.assign({}, aragonContext);
       // override the default values with the ones from the aragon context
-      Object.assign(this, aragonContext);
+      Object.assign(this, context);
     }
     // contextParams have priority over the aragonContext
     if (contextParams) {
       // overide the aragonContext and default values with the ones from the contextParams
       this.set(contextParams);
+      this.set({
+        graphqlNodes: [{ url: DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL }],
+      });
+      this.overriden.graphqlNodes = true;
+      this.overriden.graphql = true;
     }
   }
 
@@ -46,8 +56,9 @@ export class GaslessVotingContext extends ContextCore {
       this.overriden.gaslessVotingBackendUrl = true;
     }
 
-    if(contextParams.gaslessVotingRepoAddress) {
-      this.state.gaslessVotingRepoAddress = contextParams.gaslessVotingRepoAddress;
+    if (contextParams.gaslessVotingRepoAddress) {
+      this.state.gaslessVotingRepoAddress =
+        contextParams.gaslessVotingRepoAddress;
       this.overriden.gaslessVotingRepoAddress = true;
     }
   }
