@@ -46,6 +46,10 @@ export const DEFAULT_ADDRESSES: {
     setupAddress: '',
     repoAddress: '',
   },
+  baseSepolia: {
+    setupAddress: '',
+    repoAddress: '',
+  },
   local: {
     setupAddress: '',
     repoAddress: '',
@@ -59,6 +63,10 @@ export const DEFAULT_ADDRESSES: {
     repoAddress: '',
   },
   arbitrumGoerli: {
+    setupAddress: '',
+    repoAddress: '',
+  },
+  arbitrumSepolia: {
     setupAddress: '',
     repoAddress: '',
   },
