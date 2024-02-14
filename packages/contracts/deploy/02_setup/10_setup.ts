@@ -1,4 +1,5 @@
 import {PLUGIN_SETUP_CONTRACT_NAME} from '../../plugin-settings';
+import {getTokensAddresses} from '../../utils/helpers';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
@@ -8,12 +9,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
+  const addresses = getTokensAddresses(hre.network.name);
+  console.log('addresses', addresses);
 
   await deploy(PLUGIN_SETUP_CONTRACT_NAME, {
     from: deployer,
     args: [
-      '0xf868169bde323f45005e476287f4c76411a610f8',
-      '0x073b8528bcfbb2454c8fa792558aa4a1e64c613b',
+      addresses[0], // GovernanceERC20
+      addresses[1], // GovernanceWrappedERC20
     ],
     log: true,
   });
