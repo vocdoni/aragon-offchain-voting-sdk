@@ -11,6 +11,7 @@ import {
   SubgraphVotingMember,
   GaslessVotingProposalSubgraph,
   GaslessVotingProposalListItem,
+  ProposalParametersStructOutput,
 } from '../types';
 import {
   MintTokenParams,
@@ -108,7 +109,7 @@ export function votingSettingsfromContract(
 }
 
 export function proposalParamsfromContract(
-  params: VocdoniVoting.ProposalParametersStructOutput
+  params: ProposalParametersStructOutput
 ): GaslessProposalParametersStruct {
   return {
     securityBlock: params.securityBlock.toNumber(),
@@ -201,7 +202,7 @@ export function toGaslessVotingProposalListItem(
     inproposal as GaslessVotingProposalSubgraph
   );
 
-  let result = proposal.tally as TokenVotingProposalResult;
+  let result = inproposal.tally as TokenVotingProposalResult;
   const participation = getErc20VotingParticipation(
     settings.minParticipation,
     result.abstain + result.no + result.yes,
@@ -239,7 +240,7 @@ export function toGaslessVotingProposalListItem(
       proposal.tallyEndDate as Date,
       hasSucceeded
     ),
-    result: proposal.tally,
+    result: inproposal.tally,
   } as GaslessVotingProposalListItem;
 }
 

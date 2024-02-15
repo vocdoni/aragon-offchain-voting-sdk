@@ -13,6 +13,7 @@ import {
 import { INSTALLATION_ABI } from '../constants';
 import { GaslessVotingClientCore } from '../core';
 import {
+  QueryMemberProposals,
   QueryPluginMembers,
   QueryPluginProposal,
   QueryPluginProposals,
@@ -26,6 +27,7 @@ import {
   toNewProposal,
   toTokenVotingMember,
   vochainResultsToSCResults,
+  vochainVoteResultsToProposal,
 } from '../utils';
 import { GovernanceWrappedERC20__factory } from '@aragon/osx-ethers';
 import {
@@ -338,7 +340,9 @@ export class GaslessVotingClientMethods
           description: '',
           resources: [],
         };
-        vochainProposal.census;
+        proposal.tally = vochainVoteResultsToProposal(
+          vochainProposal.questions
+        );
         proposal.census = vochainProposal.census;
       })
     );
@@ -464,6 +468,46 @@ export class GaslessVotingClientMethods
   }
 
   /**
+   * Retrieves the proposals created by a specific member for a given plugin.
+   *
+   * @param pluginAddress - The address of the plugin.
+   * @param creatorAddress - The address of the creator/member.
+   * @param skip - The number of proposals to skip (default: 0).
+   * @param limit - The maximum number of proposals to retrieve (default: 10).
+   * @param direction - The sorting direction for the proposals (default: SortDirection.ASC).
+   * @param sortBy - The field to sort the proposals by (default: ProposalSortBy.CREATED_AT).
+   * @returns A promise that resolves to an array of proposal IDs.
+   */
+  public async getMemberProposals(
+    pluginAddress: string,
+    creatorAddress: string,
+    blockNumber = 0,
+    direction = SortDirection.ASC,
+    sortBy = ProposalSortBy.CREATED_AT
+  ): Promise<string[]> {
+    if (!isAddress(pluginAddress) || !isAddress(creatorAddress)) {
+      Promise.reject(new InvalidAddressError());
+    }
+
+    const query = QueryMemberProposals;
+    const params = {
+      pluginAddress: pluginAddress.toLowerCase(),
+      creatorAddress: creatorAddress.toLowerCase(),
+      block: blockNumber ? { number: blockNumber } : null,
+      direction,
+      sortBy,
+    };
+    const name = 'GaslessVoting member proposals';
+    type T = { pluginProposals: Array<{ id: string }> };
+    const { pluginProposals } = await this.graphql.request<T>({
+      query,
+      params,
+      name,
+    });
+    return pluginProposals.map((proposal) => proposal.id);
+  }
+
+  /**
    * Wrapps the setTally, approve and execute function
    *
    * @param {string} pluginAddress
@@ -472,7 +516,8 @@ export class GaslessVotingClientMethods
    * @memberof GaslessVotingClientMethods
    */
   public async approve(
-    proposalId: string
+    proposalId: string,
+    tryExecution = false
   ): Promise<AsyncGenerator<ApproveTallyStepValue>> {
     const signer = this.web3.getConnectedSigner();
 
@@ -499,7 +544,7 @@ export class GaslessVotingClientMethods
         vochainResultsToSCResults(proposal.vochain.metadata)
       );
     }
-    return this.approveTally(proposalId, false);
+    return this.approveTally(proposalId, tryExecution);
   }
 
   /**
@@ -638,6 +683,24 @@ export class GaslessVotingClientMethods
         memberAddress.toLocaleLowerCase()
       ) !== -1
     );
+  }
+
+  /**
+   * Retrieves the current signer's delegatee for the given token
+   *
+   * @param {string} tokenAddress
+   * @return {*}  {Promise<string | null>}
+   * @memberof GaslessVotingClientMethods
+   */
+  public async getDelegatee(tokenAddress: string): Promise<string | null> {
+    const signer = this.web3.getConnectedSigner();
+    const governanceErc20Contract = GovernanceWrappedERC20__factory.connect(
+      tokenAddress,
+      signer
+    );
+    const address = await signer.getAddress();
+    const delegatee = await governanceErc20Contract.delegates(address);
+    return address === delegatee ? null : delegatee;
   }
 
   /**

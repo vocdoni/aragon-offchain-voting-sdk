@@ -18,7 +18,7 @@ import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
 export const DEFAULT_GASLESS_VOTING_REPO_ADDRESS =
   '0x0000000000000000000000000000000000000000';
 export const DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL =
-  'https://api.studio.thegraph.com/query/56700/gasless-voting/version/latest';
+  'https://api.studio.thegraph.com/query/56701/vocdoni-gasless-voting-plugin/version/latest';
 export const DEFAULT_ADDRESSES: {
   [K in SupportedNetwork]: { repoAddress: string; setupAddress: string };
 } = {
@@ -27,8 +27,8 @@ export const DEFAULT_ADDRESSES: {
     repoAddress: '',
   },
   goerli: {
-    setupAddress: '0xf8454f52f3ecA6c1a9E5Da0119173832F208ab18',
-    repoAddress: '0x74057f3F3809a874f28E3EbE80A1f1a5a137b64E',
+    setupAddress: '0x6847B82F943D7a761F12878b93a25868408D6cc3',
+    repoAddress: '0x98C60A356f03244f9C33C9cA224d960cD45FD2C1',
   },
   matic: {
     setupAddress: '',
@@ -55,8 +55,8 @@ export const DEFAULT_ADDRESSES: {
     repoAddress: '',
   },
   sepolia: {
-    setupAddress: '',
-    repoAddress: '',
+    setupAddress: '0x5A6E29875cCa6eb7a9c39938720e6096468a8917',
+    repoAddress: '0xb663C36d6fd959beeF2b82Bb40823660FEAaa55f',
   },
   arbitrum: {
     setupAddress: '',

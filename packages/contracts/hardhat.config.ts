@@ -26,6 +26,7 @@ const apiUrls: NetworkNameMapping = {
   polygon: 'https://polygon-mainnet.infura.io/v3/',
   polygonMumbai: 'https://polygon-mumbai.infura.io/v3/',
   baseGoerli: 'https://goerli.base.org',
+  sepolia: 'https://sepolia.infura.io/v3/',
 };
 
 export const networks: {[index: string]: NetworkUserConfig} = {
@@ -58,6 +59,12 @@ export const networks: {[index: string]: NetworkUserConfig} = {
     url: `${apiUrls.baseGoerli}`,
     gasPrice: 20000000000,
   },
+  sepolia: {
+    chainId: 11155111,
+    gasPrice: 100000000,
+    // blockGasLimit: 30000000,
+    url: `${apiUrls.sepolia}${process.env.INFURA_API_KEY}`,
+  },
 };
 
 // Uses hardhats private key if none is set. DON'T USE THIS ACCOUNT FOR DEPLOYMENTS
@@ -89,6 +96,7 @@ const config: HardhatUserConfig = {
       goerli: process.env.ETHERSCAN_API_KEY || '',
       polygon: process.env.POLYGONSCAN_API_KEY || '',
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || '',
+      sepolia: process.env.ETHERSCAN_API_KEY || '',
       baseGoerli: process.env.BASESCAN_API_KEY || '',
     },
     customChains: [
@@ -98,6 +106,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-goerli.basescan.org/api',
           browserURL: 'https://goerli.basescan.org',
+        },
+      },
+      {
+        network: 'sepolia',
+        chainId: 11155111,
+        urls: {
+          apiURL: 'https://api-sepolia.etherscan.io/api',
+          browserURL: 'https://sepolia.etherscan.io',
         },
       },
     ],

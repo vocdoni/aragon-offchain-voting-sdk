@@ -57,6 +57,7 @@ type Plugin implements PluginInstallation @entity {
   daoTokenAddress: String
   censusStrategyURI: Bytes
   minProposerVotingPower: BigInt
+  hasGovernanceEnabled: Boolean
 
   executionMultisigMembers: [String!]
 

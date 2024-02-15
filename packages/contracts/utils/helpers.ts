@@ -1,4 +1,8 @@
-import {activeContractsList} from '@aragon/osx-ethers';
+import {
+  getLatestNetworkDeployment,
+  getNetworkByNameOrAlias,
+} from '@aragon/osx-commons-configs';
+// import {activeContractsList} from '@aragon/osx-ethers';
 import {ContractFactory, ContractTransaction} from 'ethers';
 import {
   Interface,
@@ -19,7 +23,7 @@ export type ContractBlockNumberList = {
   [index: string]: {[index: string]: {address: string; blockNumber: number}};
 };
 
-export const osxContracts: ContractList = activeContractsList;
+// export const osxContracts: ContractList = activeContractsList;
 
 export const networkNameMapping: NetworkNameMapping = {
   mainnet: 'mainnet',
@@ -27,6 +31,7 @@ export const networkNameMapping: NetworkNameMapping = {
   polygon: 'polygon',
   polygonMumbai: 'mumbai',
   baseGoerli: 'baseGoerli',
+  sepolia: 'sepolia',
 };
 
 export const ERRORS = {
@@ -44,14 +49,23 @@ export function getPluginRepoFactoryAddress(networkName: string) {
       ? process.env.NETWORK_NAME
       : 'mainnet';
 
-    pluginRepoFactoryAddr = osxContracts[hardhatForkNetwork].PluginRepoFactory;
+    const network = getNetworkByNameOrAlias(hardhatForkNetwork);
+    if (!network) {
+      throw new Error(`Network "${networkName}" not found`);
+    }
+    const version = getLatestNetworkDeployment(network.name);
+    pluginRepoFactoryAddr = version?.PluginRepoFactory.address as string;
+    // pluginRepoFactoryAddr = osxContracts[hardhatForkNetwork].PluginRepoFactory;
     console.log(
       `Using the "${hardhatForkNetwork}" PluginRepoFactory address (${pluginRepoFactoryAddr}) for deployment testing on network "${networkName}"`
     );
   } else {
-    pluginRepoFactoryAddr =
-      osxContracts[networkNameMapping[networkName]].PluginRepoFactory;
-
+    const network = getNetworkByNameOrAlias(networkName);
+    if (!network) {
+      throw new Error(`Network "${networkName}" not found`);
+    }
+    const version = getLatestNetworkDeployment(network.name);
+    pluginRepoFactoryAddr = version?.PluginRepoFactory.address as string;
     console.log(
       `Using the ${networkNameMapping[networkName]} PluginRepoFactory address (${pluginRepoFactoryAddr}) for deployment...`
     );
@@ -59,11 +73,46 @@ export function getPluginRepoFactoryAddress(networkName: string) {
   return pluginRepoFactoryAddr;
 }
 
+export function getTokensAddresses(networkName: string) {
+  let addresses: string[] = [];
+  if (
+    networkName === 'localhost' ||
+    networkName === 'hardhat' ||
+    networkName === 'coverage'
+  ) {
+    const hardhatForkNetwork = process.env.NETWORK_NAME
+      ? process.env.NETWORK_NAME
+      : 'mainnet';
+
+    const network = getNetworkByNameOrAlias(hardhatForkNetwork);
+    if (!network) {
+      throw new Error(`Network "${networkName}" not found`);
+    }
+    const version = getLatestNetworkDeployment(network.name);
+    addresses = [
+      version?.GovernanceERC20.address ?? '',
+      version?.GovernanceWrappedERC20.address ?? '',
+    ];
+    // pluginRepoFactoryAddr = osxContracts[hardhatForkNetwork].PluginRepoFactory;
+  } else {
+    const network = getNetworkByNameOrAlias(networkName);
+    if (!network) {
+      throw new Error(`Network "${networkName}" not found`);
+    }
+    const version = getLatestNetworkDeployment(network.name);
+    addresses = [
+      version?.GovernanceERC20.address ?? '',
+      version?.GovernanceWrappedERC20.address ?? '',
+    ];
+  }
+  return addresses;
+}
+
 export function getPluginInfo(networkName: string): any {
   let pluginInfoFilePath: string;
   let pluginInfo: any = {};
 
-  if (['localhost', 'hardhat', 'coverage'].includes(networkName)) {
+  if (['localhost', 'hardhat', 'coverage', 'sepolia'].includes(networkName)) {
     pluginInfoFilePath = 'plugin-info-testing.json';
   } else {
     pluginInfoFilePath = 'plugin-info.json';
@@ -85,7 +134,7 @@ export function getPluginInfo(networkName: string): any {
 }
 
 function storePluginInfo(networkName: string, pluginInfo: any) {
-  if (['localhost', 'hardhat', 'coverage'].includes(networkName)) {
+  if (['localhost', 'hardhat', 'coverage', 'sepolia'].includes(networkName)) {
     writeFileSync(
       'plugin-info-testing.json',
       JSON.stringify(pluginInfo, null, 2) + '\n'

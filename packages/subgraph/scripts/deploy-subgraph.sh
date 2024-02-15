@@ -45,9 +45,8 @@ then
         --ipfs http://localhost:5001 \
         --node http://localhost:8020
 else
-    graph deploy $FULLNAME \
+    graph deploy --studio $FULLNAME \
         --version-label $SUBGRAPH_VERSION \
-        --node https://app.satsuma.xyz/api/subgraphs/deploy \
         --deploy-key $GRAPH_KEY > deploy-output.txt
 
     SUBGRAPH_ID=$(grep "Build completed:" deploy-output.txt | grep -oE "Qm[a-zA-Z0-9]{44}")

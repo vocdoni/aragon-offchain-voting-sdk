@@ -1,9 +1,10 @@
 import {getPluginInstallationId} from '../../commons/ids';
+import {ERC20} from '../../generated/PluginSetupProcessor/ERC20';
+import {ERC165} from '../../generated/PluginSetupProcessor/ERC165';
 import {
   Action,
   Dao,
   Plugin,
-  PluginMember,
   PluginProposal,
   PluginProposalMember,
   TallyElement,
@@ -25,6 +26,13 @@ import {
   DataSourceContext,
   dataSource,
 } from '@graphprotocol/graph-ts';
+
+export const ERC165_INTERFACE_ID = '0x01ffc9a7';
+export const GOVERNANCE_SUPPORTED_INTERFACE_IDS: string[] = [
+  '0xe90fb3f6',
+  '0xe90fb3f6',
+  '0x0f13099a',
+];
 
 export function handlePluginSettingsUpdated(
   event: PluginSettingsUpdated
@@ -59,6 +67,39 @@ export function handlePluginSettingsUpdated(
       pluginEntity.daoTokenAddress = event.params.daoTokenAddress.toHexString();
       pluginEntity.minProposerVotingPower = event.params.minProposerVotingPower;
       pluginEntity.censusStrategyURI = event.params.censusStrategyURI;
+
+      let hasGovernanceEnabled = false;
+      // If it's not ERC20 token, is not a governance-compatible
+      let token20Contract = ERC20.bind(event.params.daoTokenAddress);
+      let balanceOf = token20Contract.try_balanceOf(pluginAddress);
+      let totalSupply = token20Contract.try_totalSupply();
+      if (balanceOf.reverted || totalSupply.reverted) {
+        hasGovernanceEnabled = false;
+      } else {
+        // It's a ERC20 token, check if it's governanceERC165 and has all the governance interfaces
+        let tokenContract = ERC165.bind(event.params.daoTokenAddress);
+        let supportsInterface = tokenContract.try_supportsInterface(
+          Bytes.fromHexString(ERC165_INTERFACE_ID)
+        );
+        if (!supportsInterface.reverted) {
+          for (
+            let index = 0;
+            index < GOVERNANCE_SUPPORTED_INTERFACE_IDS.length;
+            index++
+          ) {
+            let interfaceId = GOVERNANCE_SUPPORTED_INTERFACE_IDS[index];
+            supportsInterface = tokenContract.try_supportsInterface(
+              Bytes.fromHexString(interfaceId)
+            );
+            if (!supportsInterface.reverted && supportsInterface.value) {
+              hasGovernanceEnabled = true;
+              break;
+            }
+          }
+        }
+      }
+
+      pluginEntity.hasGovernanceEnabled = hasGovernanceEnabled;
       pluginEntity.save();
     }
 
