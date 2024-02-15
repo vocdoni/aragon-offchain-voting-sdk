@@ -27,6 +27,7 @@ import {
   toNewProposal,
   toTokenVotingMember,
   vochainResultsToSCResults,
+  vochainVoteResultsToProposal,
 } from '../utils';
 import { GovernanceWrappedERC20__factory } from '@aragon/osx-ethers';
 import {
@@ -339,7 +340,9 @@ export class GaslessVotingClientMethods
           description: '',
           resources: [],
         };
-        vochainProposal.census;
+        proposal.tally = vochainVoteResultsToProposal(
+          vochainProposal.questions
+        );
         proposal.census = vochainProposal.census;
       })
     );
