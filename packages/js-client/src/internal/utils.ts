@@ -376,7 +376,7 @@ export function toNewProposal(
       name: daoName, //string; TODO
     },
     token: {
-      address: census3Token.ID,
+      address: census3Token.ID.toLowerCase(),
       name: census3Token.name,
       symbol: census3Token.symbol,
       decimals: census3Token.decimals,
