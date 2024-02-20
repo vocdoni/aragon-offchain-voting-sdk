@@ -400,6 +400,9 @@ export class GaslessVotingClientMethods
     plugins[0].minParticipation = decodeRatio(plugins[0].minParticipation, 6);
     plugins[0].supportThreshold = decodeRatio(plugins[0].supportThreshold, 6);
     plugins[0].proposalCount = Number(plugins[0].dao?.proposalsCount) || 0;
+    plugins[0].minProposerVotingPower = BigInt(
+      plugins[0].minProposerVotingPower
+    );
     return plugins[0] as GaslessPluginVotingSettings;
   }
 
