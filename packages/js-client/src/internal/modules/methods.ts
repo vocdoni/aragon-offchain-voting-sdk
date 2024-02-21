@@ -539,7 +539,9 @@ export class GaslessVotingClientMethods
     const proposal = await this.getProposal(proposalId);
     if (!proposal) return Promise.reject(new InvalidProposalIdError());
     if (!proposal.vochain?.tally?.final)
-      Promise.reject(Error('No results yet'));
+      return Promise.reject(
+        new Error('Gasless Proposals results are not yet available')
+      );
 
     if (proposal.approvers.length == 0) {
       return this.setTally(

@@ -423,7 +423,7 @@ export function toNewProposal(
     },
     voters,
     approvers: proposal.approvers.map((x) => x.id.split('_')[1]),
-    canBeApproved: hasSucceeded,
+    canBeApproved: hasSucceeded && vochainProposal.finalResults,
   } as GaslessVotingProposal;
 }
 
