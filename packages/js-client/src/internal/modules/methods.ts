@@ -381,29 +381,33 @@ export class GaslessVotingClientMethods
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
-
-    const query = QueryPluginSettings;
-    const params = {
-      address: pluginAddress.toLowerCase(),
-      block: blockNumber ? { number: blockNumber } : null,
-    };
-    const name = 'GaslessVoting settings';
-    type T = { plugins: GaslessPluginVotingSettings[] };
-    const { plugins } = await this.graphql.request<T>({
-      query,
-      params,
-      name,
-    });
-    if (!plugins.length) {
+    try {
+      const query = QueryPluginSettings;
+      const params = {
+        address: pluginAddress.toLowerCase(),
+        block: blockNumber ? { number: blockNumber } : null,
+      };
+      const name = 'GaslessVoting settings';
+      type T = { plugins: GaslessPluginVotingSettings[] };
+      const { plugins } = await this.graphql.request<T>({
+        query,
+        params,
+        name,
+      });
+      if (!plugins.length) {
+        return null;
+      }
+      plugins[0].minParticipation = decodeRatio(plugins[0].minParticipation, 6);
+      plugins[0].supportThreshold = decodeRatio(plugins[0].supportThreshold, 6);
+      plugins[0].proposalCount = Number(plugins[0].dao?.proposalsCount) || 0;
+      plugins[0].minProposerVotingPower = BigInt(
+        plugins[0].minProposerVotingPower
+      );
+      return plugins[0] as GaslessPluginVotingSettings;
+    } catch (error) {
+      console.error(error);
       return null;
     }
-    plugins[0].minParticipation = decodeRatio(plugins[0].minParticipation, 6);
-    plugins[0].supportThreshold = decodeRatio(plugins[0].supportThreshold, 6);
-    plugins[0].proposalCount = Number(plugins[0].dao?.proposalsCount) || 0;
-    plugins[0].minProposerVotingPower = BigInt(
-      plugins[0].minProposerVotingPower
-    );
-    return plugins[0] as GaslessPluginVotingSettings;
   }
 
   /**
@@ -421,22 +425,41 @@ export class GaslessVotingClientMethods
     if (!isAddress(pluginAddress)) {
       Promise.reject(new InvalidAddressError());
     }
-    const pluginSettings = await this.getVotingSettings(pluginAddress);
-    if (!pluginSettings || !pluginSettings.daoTokenAddress) return null;
 
-    const signer = this.web3.getProvider();
+    try {
+      let tokenAddress: string;
+      const pluginSettings = await this.getVotingSettings(pluginAddress);
+      if (pluginSettings && pluginSettings.daoTokenAddress) {
+        tokenAddress = pluginSettings.daoTokenAddress;
+      } else {
+        //get token info from the plugin smart contract
+        const signer = this.web3.getProvider();
+        const gaslessVotingContract = VocdoniVoting__factory.connect(
+          pluginAddress,
+          signer
+        );
+        let pluginSettings = await gaslessVotingContract.getPluginSettings();
+        tokenAddress = pluginSettings.daoTokenAddress;
+      }
+      if (!tokenAddress) throw new Error('Token address not found');
 
-    const tokenContract = GovernanceWrappedERC20__factory.connect(
-      pluginSettings.daoTokenAddress,
-      signer
-    );
-    return {
-      address: pluginSettings.daoTokenAddress,
-      name: await tokenContract.name(),
-      symbol: await tokenContract.symbol(),
-      decimals: await tokenContract.decimals(),
-      type: TokenType.ERC20,
-    };
+      const signer = this.web3.getProvider();
+
+      const tokenContract = GovernanceWrappedERC20__factory.connect(
+        tokenAddress,
+        signer
+      );
+      return {
+        address: tokenAddress,
+        name: await tokenContract.name(),
+        symbol: await tokenContract.symbol(),
+        decimals: await tokenContract.decimals(),
+        type: TokenType.ERC20,
+      } as Erc20TokenDetails;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 
   /**
