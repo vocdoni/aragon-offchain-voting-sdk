@@ -45,5 +45,35 @@
         "releaseMetadataURI": "ipfs://QmcuUcHeFcQe4LhLyXBkLCxU61Asy6nYi1WRYZ6C4Ui42V"
       }
     }
+  },
+  "polygonMumbai": {
+    "repo": "vocdoni-gasless-voting-poc-vanilla-erc20",
+    "address": "0xfc7a07b6b22c1044a5dF4DF48B52AFAFcD370ECd",
+    "args": [],
+    "blockNumberOfDeployment": 46457348,
+    "releases": {
+      "1": {
+        "builds": {
+          "1": {
+            "setup": {
+              "name": "VocdoniVotingSetup",
+              "address": "0xdb0Ae82868a899c556990C3C818C5521cc13A7B0",
+              "args": [],
+              "blockNumberOfDeployment": 46457426
+            },
+            "implementation": {
+              "name": "VocdoniVoting",
+              "address": "0x485112889C9Ef9a860423844A7dF752D4A227aF5",
+              "args": [],
+              "blockNumberOfDeployment": 46457426
+            },
+            "helpers": [],
+            "buildMetadataURI": "ipfs://QmSH3MLwaKV4SH4r4RdrqFQUoSjk97H2Z4VjMewXvu7yLT",
+            "blockNumberOfPublication": 46457551
+          }
+        },
+        "releaseMetadataURI": "ipfs://QmcuUcHeFcQe4LhLyXBkLCxU61Asy6nYi1WRYZ6C4Ui42V"
+      }
+    }
   }
 }

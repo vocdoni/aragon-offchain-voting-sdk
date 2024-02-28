@@ -1,4 +1,4 @@
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000';
 
 export const PLUGIN_INTERFACE = '0x11223344';
-export const PLUGIN_REPO_ADDRESS = '0xb663C36d6fd959beeF2b82Bb40823660FEAaa55f'; // make sure address are lowercased
+export const PLUGIN_REPO_ADDRESS = '0xfc7a07b6b22c1044a5dF4DF48B52AFAFcD370ECd'; // make sure address are lowercased

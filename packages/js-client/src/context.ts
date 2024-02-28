@@ -1,4 +1,5 @@
 import {
+  DEFAULT_ADDRESSES,
   DEFAULT_GASLESS_VOTING_BACKEND_URL,
   DEFAULT_GASLESS_VOTING_REPO_ADDRESS,
   DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL,
@@ -32,8 +33,17 @@ export class GaslessVotingContext extends ContextCore {
     if (contextParams) {
       // overide the aragonContext and default values with the ones from the contextParams
       this.set(contextParams);
+      const graphqlNodes = Object.values(DEFAULT_ADDRESSES)
+        .filter(
+          (network) => network.subgraphUrl && network.subgraphUrl?.length > 0
+        )
+        .map((network) => {
+          return {
+            url: network.subgraphUrl || DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL,
+          };
+        });
       this.set({
-        graphqlNodes: [{ url: DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL }],
+        graphqlNodes,
       });
       this.overriden.graphqlNodes = true;
       this.overriden.graphql = true;

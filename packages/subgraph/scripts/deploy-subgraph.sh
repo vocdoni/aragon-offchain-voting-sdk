@@ -30,7 +30,7 @@ then
 fi
 
 # Prepare subgraph name
-FULLNAME=$SUBGRAPH_NAME-$NETWORK_NAME
+FULLNAME=$SUBGRAPH_NAME-$SUBGRAPH_NETWORK_NAME
 if [ "$STAGING" ]; then
   FULLNAME=$FULLNAME-staging
 fi

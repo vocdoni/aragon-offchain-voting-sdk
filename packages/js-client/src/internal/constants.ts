@@ -20,7 +20,11 @@ export const DEFAULT_GASLESS_VOTING_REPO_ADDRESS =
 export const DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL =
   'https://api.studio.thegraph.com/query/56701/vocdoni-gasless-voting-plugin/version/latest';
 export const DEFAULT_ADDRESSES: {
-  [K in SupportedNetwork]: { repoAddress: string; setupAddress: string };
+  [K in SupportedNetwork]: {
+    repoAddress: string;
+    setupAddress: string;
+    subgraphUrl?: string;
+  };
 } = {
   homestead: {
     setupAddress: '',
@@ -35,8 +39,10 @@ export const DEFAULT_ADDRESSES: {
     repoAddress: '',
   },
   maticmum: {
-    setupAddress: '0x5A6E29875cCa6eb7a9c39938720e6096468a8917',
-    repoAddress: '0x5BD8F8Dc73476d24F37c4d885c4528d5abB8cBe6',
+    setupAddress: '0xdb0Ae82868a899c556990C3C818C5521cc13A7B0',
+    repoAddress: '0xfc7a07b6b22c1044a5dF4DF48B52AFAFcD370ECd',
+    subgraphUrl:
+      'https://api.studio.thegraph.com/query/56701/vocdoni-gasless-voting-mumbai/version/latest',
   },
   base: {
     setupAddress: '',
@@ -57,6 +63,8 @@ export const DEFAULT_ADDRESSES: {
   sepolia: {
     setupAddress: '0x5A6E29875cCa6eb7a9c39938720e6096468a8917',
     repoAddress: '0xb663C36d6fd959beeF2b82Bb40823660FEAaa55f',
+    subgraphUrl:
+      'https://api.studio.thegraph.com/query/56701/vocdoni-gasless-voting-plugin/version/latest',
   },
   arbitrum: {
     setupAddress: '',

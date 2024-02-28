@@ -60,7 +60,7 @@ export function getPluginRepoFactoryAddress(networkName: string) {
       `Using the "${hardhatForkNetwork}" PluginRepoFactory address (${pluginRepoFactoryAddr}) for deployment testing on network "${networkName}"`
     );
   } else {
-    const network = getNetworkByNameOrAlias(networkName);
+    const network = getNetworkByNameOrAlias(networkNameMapping[networkName]);
     if (!network) {
       throw new Error(`Network "${networkName}" not found`);
     }
@@ -95,7 +95,7 @@ export function getTokensAddresses(networkName: string) {
     ];
     // pluginRepoFactoryAddr = osxContracts[hardhatForkNetwork].PluginRepoFactory;
   } else {
-    const network = getNetworkByNameOrAlias(networkName);
+    const network = getNetworkByNameOrAlias(networkNameMapping[networkName]);
     if (!network) {
       throw new Error(`Network "${networkName}" not found`);
     }
@@ -112,7 +112,11 @@ export function getPluginInfo(networkName: string): any {
   let pluginInfoFilePath: string;
   let pluginInfo: any = {};
 
-  if (['localhost', 'hardhat', 'coverage', 'sepolia'].includes(networkName)) {
+  if (
+    ['localhost', 'hardhat', 'coverage', 'sepolia', 'polygoMumbai'].includes(
+      networkName
+    )
+  ) {
     pluginInfoFilePath = 'plugin-info-testing.json';
   } else {
     pluginInfoFilePath = 'plugin-info.json';
