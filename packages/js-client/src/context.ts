@@ -9,8 +9,22 @@ import {
   GaslessVotingOverriddenState,
 } from './types';
 import { GaslessVotingContextParams } from './types';
-import { Context, ContextCore } from '@aragon/sdk-client-common';
+import {
+  getNetworkNameByAlias,
+  SupportedNetworks,
+} from '@aragon/osx-commons-configs';
+import {
+  Context,
+  ContextCore,
+  UnsupportedProtocolError,
+  UnsupportedNetworkError,
+} from '@aragon/sdk-client-common';
+import { GraphQLClient } from 'graphql-request';
 
+const supportedProtocols = ['https:'];
+if (typeof process !== 'undefined' && process?.env?.TESTING) {
+  supportedProtocols.push('http:');
+}
 export class GaslessVotingContext extends ContextCore {
   // This variable keeps track of the state of the context and is an extension of the Base Context State
   protected state: GaslessVotingContextState = this.state;
@@ -54,6 +68,17 @@ export class GaslessVotingContext extends ContextCore {
     // so we need to call the parent set first
     super.set(contextParams);
 
+    const networkName = getNetworkNameByAlias(this.network.name);
+    if (!networkName) {
+      throw new UnsupportedNetworkError(this.network.name);
+    }
+
+    this.state.graphql = GaslessVotingContext.resolveGraphQL(
+      GaslessVotingContext.getDefaultGraphqlNodes(networkName)
+    );
+    this.overriden.graphql = true;
+    this.overriden.graphqlNodes = true;
+
     // set the default values for the new params
     this.setDefaults();
 
@@ -93,5 +118,33 @@ export class GaslessVotingContext extends ContextCore {
   // This can be used to specify a contract addres or and endpoint to a service
   get gaslessVotingBackendUrl(): string {
     return this.state.gaslessVotingBackendUrl;
+  }
+
+  private static resolveGraphQL(endpoints: { url: string }[]): GraphQLClient[] {
+    let clients: GraphQLClient[] = [];
+    endpoints.forEach((endpoint) => {
+      const url = new URL(endpoint.url);
+      if (!supportedProtocols.includes(url.protocol)) {
+        throw new UnsupportedProtocolError(url.protocol);
+      }
+      clients.push(new GraphQLClient(url.href));
+    });
+    return clients;
+  }
+
+  private static getDefaultGraphqlNodes(network: SupportedNetworks) {
+    if (
+      !(network in DEFAULT_ADDRESSES) ||
+      !('subgraphUrl' in DEFAULT_ADDRESSES[network])
+    ) {
+      throw new UnsupportedNetworkError(network);
+    }
+    return [
+      {
+        url:
+          DEFAULT_ADDRESSES[network].subgraphUrl ||
+          DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL,
+      },
+    ];
   }
 }

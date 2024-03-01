@@ -1,13 +1,10 @@
 // import { MetadataAbiInput } from './types';
+import { SupportedNetworks } from '@aragon/osx-commons-configs';
 import {
   IERC20MintableUpgradeable__factory,
   IGovernanceWrappedERC20__factory,
 } from '@aragon/osx-ethers';
-import {
-  MetadataAbiInput,
-  SupportedNetwork,
-  getInterfaceId,
-} from '@aragon/sdk-client-common';
+import { MetadataAbiInput, getInterfaceId } from '@aragon/sdk-client-common';
 import { Interface } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { abi as IVOTES_UPGRADEABLE_ABI } from '@openzeppelin/contracts-upgradeable/build/contracts/IVotesUpgradeable.json';
@@ -20,31 +17,32 @@ export const DEFAULT_GASLESS_VOTING_REPO_ADDRESS =
 export const DEFAULT_GASLESS_VOTING_SUBHGRAPH_URL =
   'https://api.studio.thegraph.com/query/56701/vocdoni-gasless-voting-plugin/version/latest';
 export const DEFAULT_ADDRESSES: {
-  [K in SupportedNetwork]: {
+  [K in SupportedNetworks]: {
     repoAddress: string;
     setupAddress: string;
     subgraphUrl?: string;
   };
 } = {
-  homestead: {
+  mainnet: {
     setupAddress: '',
     repoAddress: '',
+    subgraphUrl: '',
   },
   goerli: {
     setupAddress: '0x6847B82F943D7a761F12878b93a25868408D6cc3',
     repoAddress: '0x98C60A356f03244f9C33C9cA224d960cD45FD2C1',
   },
-  matic: {
+  polygon: {
     setupAddress: '',
     repoAddress: '',
   },
-  maticmum: {
+  mumbai: {
     setupAddress: '0xdb0Ae82868a899c556990C3C818C5521cc13A7B0',
     repoAddress: '0xfc7a07b6b22c1044a5dF4DF48B52AFAFcD370ECd',
     subgraphUrl:
       'https://api.studio.thegraph.com/query/56701/vocdoni-gasless-voting-mumbai/version/latest',
   },
-  base: {
+  baseMainnet: {
     setupAddress: '',
     repoAddress: '',
   },
@@ -67,10 +65,6 @@ export const DEFAULT_ADDRESSES: {
       'https://api.studio.thegraph.com/query/56701/vocdoni-gasless-voting-plugin/version/latest',
   },
   arbitrum: {
-    setupAddress: '',
-    repoAddress: '',
-  },
-  arbitrumGoerli: {
     setupAddress: '',
     repoAddress: '',
   },

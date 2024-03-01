@@ -11,20 +11,20 @@ import {
   initParamsToContract,
   gaslessVotingSettingsToContract,
 } from '../utils';
+import { SupportedNetworks } from '@aragon/osx-commons-configs';
 import { IERC20MintableUpgradeable__factory } from '@aragon/osx-ethers';
-import { AddAddressesParams, MintTokenParams, RemoveAddressesParams } from '@aragon/sdk-client';
+import {
+  AddAddressesParams,
+  MintTokenParams,
+  RemoveAddressesParams,
+} from '@aragon/sdk-client';
 import {
   DaoAction,
   getNamedTypesFromMetadata,
   PluginInstallItem,
-  SupportedNetwork,
-  SupportedNetworksArray,
   hexToBytes,
   InvalidAddressError,
   UnsupportedNetworkError,
-} from '@aragon/sdk-client-common';
-import {
-
 } from '@aragon/sdk-client-common';
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
@@ -55,8 +55,8 @@ export class GaslessVotingClientEncoding
     params: GaslessVotingPluginInstall,
     network: Networkish
   ): PluginInstallItem {
-    const networkName = getNetwork(network).name as SupportedNetwork;
-    if (!SupportedNetworksArray.includes(networkName)) {
+    const networkName = getNetwork(network).name as SupportedNetworks;
+    if (!Object.keys(DEFAULT_ADDRESSES).includes(networkName)) {
       throw new UnsupportedNetworkError(networkName);
     }
     const args = initParamsToContract(params);
@@ -92,16 +92,14 @@ export class GaslessVotingClientEncoding
     };
   }
 
-   /**
+  /**
    * Computes the parameters to be given when creating a proposal that updates the governance configuration
    *
    * @param {AddAddressesParams} params
    * @return {*}  {DaoAction[]}
    * @memberof GaslessVotingClientEncoding
    */
-   public addAddressesAction(
-    params: AddAddressesParams,
-  ): DaoAction {
+  public addAddressesAction(params: AddAddressesParams): DaoAction {
     if (!isAddress(params.pluginAddress)) {
       throw new InvalidAddressError();
     }
@@ -114,8 +112,8 @@ export class GaslessVotingClientEncoding
     const votingInterface = VocdoniVoting__factory.createInterface();
     // get hex bytes
     const hexBytes = votingInterface.encodeFunctionData(
-      "addExecutionMultisigMembers",
-      [params.members],
+      'addExecutionMultisigMembers',
+      [params.members]
     );
     return {
       to: params.pluginAddress,
@@ -130,9 +128,7 @@ export class GaslessVotingClientEncoding
    * @return {*}  {DaoAction[]}
    * @memberof GaslessVotingClientEncoding
    */
-  public removeAddressesAction(
-    params: RemoveAddressesParams,
-  ): DaoAction {
+  public removeAddressesAction(params: RemoveAddressesParams): DaoAction {
     if (!isAddress(params.pluginAddress)) {
       throw new InvalidAddressError();
     }
@@ -145,8 +141,8 @@ export class GaslessVotingClientEncoding
     const votingInterface = VocdoniVoting__factory.createInterface();
     // get hex bytes
     const hexBytes = votingInterface.encodeFunctionData(
-      "removeExecutionMultisigMembers",
-      [params.members],
+      'removeExecutionMultisigMembers',
+      [params.members]
     );
     return {
       to: params.pluginAddress,
@@ -165,7 +161,7 @@ export class GaslessVotingClientEncoding
     //   'updatePluginSettings((bool,uint16,uint32,uint32,uint64,uint64,address,uint256,string))'
     // );
     const hexBytes = votingInterface.encodeFunctionData(
-      "updatePluginSettings",
+      'updatePluginSettings',
       [
         {
           onlyExecutionMultisigProposalCreation: args[0],
