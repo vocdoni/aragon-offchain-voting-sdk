@@ -63,6 +63,7 @@ export class GaslessVotingClientEncoding
     const hexBytes = defaultAbiCoder.encode(prepareInstallationDataTypes, args);
     console.log(`network ${networkName}`);
     console.log(`repoaddress ${DEFAULT_ADDRESSES[networkName].repoAddress}`);
+    console.log(`repoaddress ${DEFAULT_ADDRESSES[networkName].repoAddress}`);
     return {
       id: DEFAULT_ADDRESSES[networkName].repoAddress,
       data: hexToBytes(hexBytes),
