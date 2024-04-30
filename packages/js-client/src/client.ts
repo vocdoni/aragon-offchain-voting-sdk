@@ -25,16 +25,33 @@ export class GaslessVotingClient
   public encoding: IGaslessVotingClientEncoding;
   public decoding: IGaslessVotingClientDecoding;
 
-  constructor(pluginContext: GaslessVotingContext, vocdoniEnv: EnvOptions) {
+  constructor(
+    pluginContext: GaslessVotingContext,
+    vocdoniEnv: EnvOptions,
+    census3_url = 'https://census3-stg.vocdoni.net/api'
+  ) {
     if (!vocdoniEnv) throw 'Invalid Vocdoni environment';
-    super(pluginContext, vocdoniEnv);
-    this.methods = new GaslessVotingClientMethods(pluginContext, vocdoniEnv);
+    super(pluginContext, vocdoniEnv, census3_url);
+    this.methods = new GaslessVotingClientMethods(
+      pluginContext,
+      vocdoniEnv,
+      census3_url
+    );
     this.estimation = new GaslessVotingClientEstimation(
       pluginContext,
-      vocdoniEnv
+      vocdoniEnv,
+      census3_url
     );
-    this.encoding = new GaslessVotingClientEncoding(pluginContext, vocdoniEnv);
-    this.decoding = new GaslessVotingClientDecoding(pluginContext, vocdoniEnv);
+    this.encoding = new GaslessVotingClientEncoding(
+      pluginContext,
+      vocdoniEnv,
+      census3_url
+    );
+    this.decoding = new GaslessVotingClientDecoding(
+      pluginContext,
+      vocdoniEnv,
+      census3_url
+    );
   }
 
   static encoding = {
