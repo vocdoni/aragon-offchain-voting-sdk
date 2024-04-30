@@ -199,7 +199,7 @@ contract VocdoniVoting is IVocdoniVoting, VocdoniProposalUpgradeable, ExecutionM
             });
         }
 
-        if (_pluginSettings.minVoteDuration < 5 minutes) {
+        if (_pluginSettings.minVoteDuration < 60 minutes) {
             revert VoteDurationOutOfBounds({
                 limit: 60 minutes,
                 actual: _pluginSettings.minVoteDuration
@@ -213,7 +213,7 @@ contract VocdoniVoting is IVocdoniVoting, VocdoniProposalUpgradeable, ExecutionM
             });
         }
 
-        if (_pluginSettings.minTallyDuration < 5 minutes) {
+        if (_pluginSettings.minTallyDuration < 60 minutes) {
             revert TallyDurationOutOfBounds({
                 limit: 60 minutes,
                 actual: _pluginSettings.minTallyDuration
