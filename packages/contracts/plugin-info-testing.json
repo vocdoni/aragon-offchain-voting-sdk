@@ -30,33 +30,9 @@
     }
   },
   "sepolia": {
-    "repo": "vocdoni-gasless-voting-poc-vanilla-erc20",
-    "address": "0xb663C36d6fd959beeF2b82Bb40823660FEAaa55f",
+    "repo": "vocdoni-gasless-voting",
+    "address": "0x6eE8f07D9F49d073834563A775326C37B4444943",
     "args": [],
-    "blockNumberOfDeployment": 5288754,
-    "releases": {
-      "1": {
-        "builds": {
-          "1": {
-            "setup": {
-              "name": "VocdoniVotingSetup",
-              "address": "0x5A6E29875cCa6eb7a9c39938720e6096468a8917",
-              "args": [],
-              "blockNumberOfDeployment": 5288947
-            },
-            "implementation": {
-              "name": "VocdoniVoting",
-              "address": "0xa28A89Dcf2A94a751FE094C794624cB101EB460a",
-              "args": [],
-              "blockNumberOfDeployment": 5288947
-            },
-            "helpers": [],
-            "buildMetadataURI": "ipfs://QmSH3MLwaKV4SH4r4RdrqFQUoSjk97H2Z4VjMewXvu7yLT",
-            "blockNumberOfPublication": 5288969
-          }
-        },
-        "releaseMetadataURI": "ipfs://QmcuUcHeFcQe4LhLyXBkLCxU61Asy6nYi1WRYZ6C4Ui42V"
-      }
-    }
+    "blockNumberOfDeployment": 5810344
   }
 }

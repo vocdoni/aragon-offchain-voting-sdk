@@ -23,16 +23,28 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     network.name
   );
 
+  console.log(1);
+
   const pluginRepoFactory = PluginRepoFactory__factory.connect(
     pluginRepoFactoryAddr,
     deployer
   );
 
+  console.log(2);
+
+  const feeData = await hre.ethers.provider.getFeeData();
+
   // Create the PluginRepo
   const tx = await pluginRepoFactory.createPluginRepo(
     PLUGIN_REPO_ENS_NAME,
-    deployer.address
+    deployer.address,
+    {
+      maxFeePerGas: feeData.maxFeePerGas ?? 0,
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? 0,
+    }
   );
+
+  console.log(3);
 
   const eventLog = await findEventTopicLog(
     tx,
@@ -48,7 +60,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     deployer
   );
 
+  console.log(4);
+
   const blockNumberOfDeployment = (await tx.wait()).blockNumber;
+
+  console.log(5);
 
   console.log(
     `"${PLUGIN_REPO_ENS_NAME}" PluginRepo deployed at: ${pluginRepo.address} at block ${blockNumberOfDeployment}.`

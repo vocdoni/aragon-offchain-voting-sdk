@@ -19,6 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       addresses[1], // GovernanceWrappedERC20
     ],
     log: true,
+    skipIfAlreadyDeployed: false,
   });
 };
 

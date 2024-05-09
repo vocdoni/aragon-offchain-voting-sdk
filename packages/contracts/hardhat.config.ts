@@ -61,7 +61,8 @@ export const networks: {[index: string]: NetworkUserConfig} = {
   },
   sepolia: {
     chainId: 11155111,
-    gasPrice: 100000000,
+    // gasPrice: 800000000,
+    // gasPrice: 8628806601
     // blockGasLimit: 30000000,
     url: `${apiUrls.sepolia}${process.env.INFURA_API_KEY}`,
   },

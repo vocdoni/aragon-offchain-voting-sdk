@@ -14,6 +14,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, network} = hre;
 
   const setupDeployment = await deployments.get(PLUGIN_SETUP_CONTRACT_NAME);
+  console.log(setupDeployment.address);
+
   const setup = VocdoniVotingSetup__factory.connect(
     setupDeployment.address,
     deployer

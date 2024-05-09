@@ -27,3 +27,12 @@ packages/subgraph/deploy-output.txt
 packages/subgraph/subgraph.yaml
 packages/subgraph/tests/.latest.json
 packages/subgraph/tests/helpers/extended-schema.ts
+packages/contracts/deployments/goerli/solcInputs/af52a48cb67cbd24248d16b22497e373.json
+packages/contracts/deployments/goerli/solcInputs/b2279dada67c121f2d874fd99ecb76db.json
+packages/contracts/deployments/goerli/solcInputs/e0ca05a4dfd1a72d0c554e34354d2f35.json
+packages/contracts/deployments/polygonMumbai/solcInputs/b2279dada67c121f2d874fd99ecb76db.json
+packages/contracts/deployments/polygonMumbai/VocdoniVotingSetup.json
+packages/contracts/deployments/sepolia/VocdoniVotingSetup.json
+packages/contracts/deployments/sepolia/solcInputs/b2279dada67c121f2d874fd99ecb76db.json
+.vscode/settings.json
+.vscode/settings.json

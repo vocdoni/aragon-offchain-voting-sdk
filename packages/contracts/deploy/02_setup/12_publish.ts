@@ -43,6 +43,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Check release number
   const latestRelease = await pluginRepo.latestRelease();
+  console.log(`latestRelease: ${latestRelease}`);
+
   if (VERSION.release > latestRelease + 1) {
     throw Error(
       `Publishing with release number ${VERSION.release} is not possible.
@@ -54,6 +56,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Check build number
   const latestBuild = (await pluginRepo.buildCount(VERSION.release)).toNumber();
+  console.log(`latestBuild: ${latestBuild}`);
+  console.log(`setup address: ${setup.address}`);
+
   if (VERSION.build <= latestBuild) {
     throw Error(
       `Publishing with build number ${VERSION.build} is not possible.
@@ -69,12 +74,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
 
+  const feeData = await hre.ethers.provider.getFeeData();
   // Create Version
   const tx = await pluginRepo.createVersion(
     VERSION.release,
     setup.address,
     toHex(buildMetadataURI),
-    toHex(releaseMetadataURI)
+    toHex(releaseMetadataURI),
+    {
+      maxFeePerGas: feeData.maxFeePerGas ?? 0,
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas ?? 0,
+    }
   );
 
   const blockNumberOfPublication = (await tx.wait()).blockNumber;
