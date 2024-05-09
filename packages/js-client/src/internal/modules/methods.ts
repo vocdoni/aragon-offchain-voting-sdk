@@ -9,6 +9,8 @@ import {
   SubgraphVotingMember,
   GaslessVotingProposalSubgraph,
   GaslessVotingProposalListItem,
+  VoteType,
+  VotePackage,
 } from '../../types';
 import { INSTALLATION_ABI } from '../constants';
 import { GaslessVotingClientCore } from '../core';
@@ -41,6 +43,7 @@ import {
   ProposalQueryParams,
   ProposalSortBy,
   TokenVotingMember,
+  VoteValues,
 } from '@aragon/sdk-client';
 import {
   findLog,
@@ -69,7 +72,7 @@ import { isAddress } from '@ethersproject/address';
 import { getNetwork } from '@ethersproject/providers';
 // import { Wallet } from '@ethersproject/wallet';
 import { VocdoniVoting__factory } from '@vocdoni/gasless-voting-ethers';
-import { ErrElectionNotFound, ElectionAPI } from '@vocdoni/sdk';
+import { ErrElectionNotFound, ElectionAPI, VoteAPI } from '@vocdoni/sdk';
 
 // import axios from 'axios';
 
@@ -237,6 +240,20 @@ export class GaslessVotingClientMethods
         pluginProposal.vochainProposalId
       );
       const voters = votesList.votes.map((vote) => '0x' + vote.voterID);
+      const votesInfo = await Promise.all(
+        votesList.votes.map((vote) =>
+          VoteAPI.info(this.vocdoniSDK.url, vote.voteID)
+        )
+      );
+      const votes = votesInfo.map((vote, index): VoteType => {
+        return {
+          src: '0x' + votesList.votes[index].voterID,
+          weight: BigInt(vote.weight.replace(/['"]+/g, '')),
+          option: VoteValues[
+            (vote.package as unknown as VotePackage).votes[0] + 1
+          ] as any,
+        };
+      });
 
       const census3token = await this.vocdoniCensus3.getToken(
         pluginSettings.daoTokenAddress as string,
@@ -249,6 +266,7 @@ export class GaslessVotingClientMethods
         vochainProposal,
         census3token,
         voters,
+        votes,
         daoName,
         daoAddress
       );

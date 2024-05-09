@@ -239,6 +239,7 @@ export type GaslessVotingProposal = Omit<
     type: string;
   };
   voters?: string[];
+  votes?: VoteType[];
   canBeApproved?: boolean;
 };
 
@@ -370,3 +371,17 @@ export enum TokenVotingTokenCompatibility {
   NEEDS_WRAPPING = 'needsWrapping',
   INCOMPATIBLE = 'incompatible',
 }
+
+export type VoteType = {
+  /** The address of the voter */
+  src: string;
+  /** The option of the vote */
+  option: 'yes' | 'abstain' | 'no' | 'approved' | 'none';
+  /** The weight of the vote */
+  weight: bigint;
+};
+
+export type VotePackage = {
+  nonce: string;
+  votes: number[];
+};

@@ -12,6 +12,7 @@ import {
   GaslessVotingProposalSubgraph,
   GaslessVotingProposalListItem,
   ProposalParametersStructOutput,
+  VoteType,
 } from '../types';
 import {
   MintTokenParams,
@@ -343,6 +344,7 @@ export function toNewProposal(
   vochainProposal: PublishedElection,
   census3Token: Token,
   voters: string[],
+  votes?: VoteType[],
   daoName = '',
   daoAddress = ''
 ): GaslessVotingProposal {
@@ -422,6 +424,7 @@ export function toNewProposal(
       missingParticipation: participation.missingPart,
     },
     voters,
+    votes,
     approvers: proposal.approvers.map((x) => x.id.split('_')[1]),
     canBeApproved: hasSucceeded && vochainProposal.finalResults,
   } as GaslessVotingProposal;
